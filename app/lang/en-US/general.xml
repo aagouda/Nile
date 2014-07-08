@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<site_name>Site Name</site_name>
+<home>Home</home>
+<register>Register</register>
+<contact>Contact</contact>
+<about>About</about>
+<copyright>Copyright</copyright>
+<privacy>Privacy</privacy>
+
+<page_title>Create New Account</page_title>
+<first_name>First name:</first_name>
+<middle_name>Middle name:</middle_name>
+<last_name>Last name:</last_name>
+<full_name>Full name:</full_name>
+<email>Email:</email>
+<job>Job title:</job>
+<website>Website:</website>
+<agree>Agree:</agree>
+<company>Company</company>

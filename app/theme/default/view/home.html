@@ -1,0 +1,67 @@
+<vars type="widget" name="header" charset_name="UTF-8" lang_name="en" />
+  
+{first_name} <vars name="fname"/>
+{last_name} <vars name="lname" />
+{email} <vars type="var" name='email' />
+{website} <vars type="var" name="website" />
+
+{date_now} <vars type="plugin" name="Date::Date->date" format="%Y %M %D" />
+{time_now} <vars type="plugin" name="Date->now" format="%M %Y  %D" />
+{date_time} <vars type="plugin" name="date" format="%M %Y  %D" />
+
+Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars>
+
+<vars type="perl">system ('dir c:\\*.bat');</vars>
+
+<vars type="var" name="singleline" width="400px" height="300px" content="ahmed<b>class/subclass">cdata start here is may have html tags and 'single' and "double" qoutes</vars>
+
+<vars type="var" name="multiline" width="400px" height="300px"><![CDATA[ 
+	cdata start here is may have html tags <b>hello</b> and 'single' and "double" qoutes
+	another cdata line
+]]></vars>
+
+<!--block:first-->
+	<table border="1" style="color:red;">
+	<tr class="lines">
+		<td align="left" valign="<--valign-->">
+			<b>bold</b><a href="http://www.mewsoft.com">mewsoft</a>
+			<!--hello--> <--again--><!--world-->
+			some html content here 1 top
+			<!--block:second-->
+				some html content here 2 top
+				<!--block:third-->
+					some html content here 3 top
+					<!--block:fourth-->
+					some html content here 4 top
+						<!--block:fifth-->
+							some html content here 5a
+							some html content here 5b
+						<!--endblock-->
+					<!--endblock-->
+					some html content here 3a
+				some html content here 3b
+			<!--endblock-->
+        some html content here 2 bottom
+		</tr>
+    <!--endblock-->
+    some html content here 1 bottom
+</table>
+<!--endblock-->
+some html content here1-5 bottom base
+
+some html content here 6-8 top base
+<!--block:six-->
+    some html content here 6 top
+    <!--block:seven-->
+        some html content here 7 top
+        <!--block:eight-->
+            some html content here 8a
+            some html content here 8b
+        <!--endblock-->
+        some html content here 7 bottom
+    <!--endblock-->
+    some html content here 6 bottom
+<!--endblock-->
+some html content here 6-8 bottom base
+
+ <vars type="widget" name="footer" title="cairo" lang="ar" />

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<admin>
+    <user>admin_user</user>
+    <password>admin_pass</password>
+</admin>
+<database>
+	<driver>mysql</driver>
+	<host>localhost</host>
+	<dsn></dsn>
+	<port>3306</port>
+	<name>auctions</name>
+	<user>auctions</user>
+	<pass>auctions</pass>
+	<attribute>
+	</attribute>
+	<encoding>utf8</encoding>
+</database>
