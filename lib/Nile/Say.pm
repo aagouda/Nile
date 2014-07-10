@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Say;
 
-our $VERSION = '0.11';
+our $VERSION = '0.13';
 
 =pod
 
@@ -41,8 +41,6 @@ use warnings;
 use IO::Handle;
 use Scalar::Util 'openhandle';
 use Carp;
-
-our $VERSION = '1.0';
 
 # modified code from Say::Compat
 sub import {

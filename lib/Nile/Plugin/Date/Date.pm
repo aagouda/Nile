@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Plugin::Date::Date;
 
-our $VERSION = '0.11';
+our $VERSION = '0.13';
 
 use Nile::Base;
 use DateTime qw();
@@ -35,6 +35,8 @@ sub now {
 
 
 =pod
+
+=encoding utf8
 
 =head1 Bugs
 

@@ -8,7 +8,11 @@
 #=========================================================#
 package Nile::Autouse;
 
-our $VERSION = '0.11';
+our $VERSION = '0.13';
+
+=pod
+
+=encoding utf8
 
 =head1 NAME
 

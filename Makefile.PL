@@ -33,6 +33,7 @@ WriteMakefile(
 			DBI => 0,
 			Hash::AsObject => 0,
 			DateTime => 0,
+			Router::Generic => 0,
 			
 	}, # e.g., Module::Name => 1.1
 

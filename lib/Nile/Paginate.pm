@@ -8,13 +8,17 @@
 #=========================================================#
 package Nile::Paginate;
 
-# pagination - pag·i·na·tion
+our $VERSION = '0.63';
+
+# pagination - pagÂ·iÂ·naÂ·tion
 #1. the process of numbering the pages of a book.
-#2. the number and arrangement of pages, as might be noted in a bookseller’s catalogue.
+#2. the number and arrangement of pages, as might be noted in a booksellerâ€™s catalogue.
 
 use Nile::Base;
 
-our $VERSION = '0.61';
+=pod
+
+=encoding utf8
 
 =head1 NAME
 
@@ -829,8 +833,6 @@ sub showing_list {
 }
 #=========================================================#
 
-=pod
-
 =head1 Bugs
 
 This project is available on github at L<https://github.com/mewsoft/Nile>.
@@ -845,12 +847,12 @@ Source repository is at L<https://github.com/mewsoft/Nile>.
 
 =head1 AUTHOR
 
-Ahmed Amin Elsheshtawy,  ÇÍãÏ Çãíä ÇáÔÔÊÇæì <mewsoft@cpan.org>
+Ahmed Amin Elsheshtawy,  Ø§Ø­Ù…Ø¯ Ø§Ù…ÙŠÙ† Ø§Ù„Ø´Ø´ØªØ§ÙˆÙ‰ <mewsoft@cpan.org>
 Website: http://www.mewsoft.com
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy ÇÍãÏ Çãíä ÇáÔÔÊÇæì mewsoft@cpan.org, support@mewsoft.com,
+Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy Ø§Ø­Ù…Ø¯ Ø§Ù…ÙŠÙ† Ø§Ù„Ø´Ø´ØªØ§ÙˆÙ‰ mewsoft@cpan.org, support@mewsoft.com,
 L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
 
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
