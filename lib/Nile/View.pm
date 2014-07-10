@@ -8,12 +8,65 @@
 #=========================================================#
 package Nile::View;
 
+our $VERSION = '0.12';
+
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Nile::View - The template processing system.
+
+=head1 SYNOPSIS
+		
+		# get view home.html in current theme
+		my $view = $self->me->view("home");
+		# get view home.html in specific arabic
+		my $view = $app->view("home", "arabic");
+		
+		# set view variables
+		$view->var(
+				fname			=>	'Ahmed',
+				lname			=>	'Elsheshtawy',
+				email			=>	'sales@mewsoft.com',
+				website		=>	'http://www.mewsoft.com',
+				singleline		=>	'Single line variable <b>Good</b>',
+				multiline		=>	'Multi line variable <b>Nice</b>',
+			);
+		
+		# set variable
+		$view->set('email', 'sales@mewsoft.com');
+
+		# get variable
+		$email = $view->get('email');
+
+		# automatic getter/setter for variables
+		$view->email('sales@mewsoft.com');
+		$view->website('http://www.mewsoft.com');
+		$email = $view->email;
+		$website = $view->website;
+
+		# replace marked blocks or iterators
+		$view->block("first", "1st Block New Content ");
+		$view->block("six", "6th Block New Content ");
+		
+		# process variables and blocks and text language variables
+		$view->process;
+
+		# send the output to the browser
+		$view->render;
+
+=head1 DESCRIPTION
+
+Nile::View - The template processing system.
+
+=cut
+
 use Nile::Base;
 use Capture::Tiny ();
 use Time::HiRes qw(gettimeofday);
 use IO::Compress::Gzip qw(gzip $GzipError);
-
-our $VERSION = '0.10';
 #=========================================================#
 sub AUTOLOAD {
 	my ($self) = shift or return undef; # ignore functions call like Nile::View::xxx();
@@ -37,6 +90,15 @@ sub main { # called automatically after the constructor new
 	$self->view($view) if ($view);
 }
 #=========================================================#
+=head2 view()
+
+	my $view =  $self->me->view([$view, $theme]);
+
+Creates new view object or returns the current view name. The first option is the view name with or without file extension $view, the default 
+view extension is B<html>. The second optional argument is the theme name, if not supplied the current default theme will be used.
+
+=cut
+
 sub view {
 	my ($self, $view, $theme) = @_;	
 
@@ -49,14 +111,22 @@ sub view {
 		$self->{view} = $view;
 		$self->{lang} ||= $self->me->var->get("lang");
 		$self->{theme} = $theme;
+		$self->parse;
 		return $self;
 	}
-	
-	$self->parse;
 
 	$self->{view};
 }
 #=========================================================#
+=head2 lang()
+	
+	$view->lang('en-US');
+	my $lang = $view->lang();
+
+Sets or returns the language for processing the template text. Language must be already installed in the lang folder.
+
+=cut
+
 sub lang {
 	my ($self, $lang) = @_;
 	if ($lang) {
@@ -66,6 +136,15 @@ sub lang {
 	$self->{lang};
 }
 #=========================================================#
+=head2 theme()
+	
+	$view->theme('arabic');
+	my $theme = $view->theme();
+
+Sets or returns the theme for loading template file. Theme must be already installed in the theme folder.
+
+=cut
+
 sub theme {
 	my ($self, $theme) = @_;
 	if ($theme) {
@@ -75,24 +154,71 @@ sub theme {
 	$self->{theme};
 }
 #=========================================================#
+=head2 var() and set()
+	
+	$view->var(email=>'nile@cpan.org');
+	$view->var(%vars);
+
+	$view->var(
+			fname			=>	'Ahmed',
+			lname			=>	'Elsheshtawy',
+			email			=>	'sales@domain.com',
+			website		=>	'http://www.mewsoft.com',
+			htmlnode		=>	'html code variable <b>Nile</b>',
+		);
+
+Sets one of more template variables. This method can be chained.
+
+=cut
+
 sub var {
 	my ($self, %vars) = @_;
 	map {$self->{vars}->{$_} = $vars{$_}} keys %vars;
 	$self;
 }
 #=========================================================#
+=head2 set()
+
+	$view->set(email=>'nile@cpan.org');
+	$view->set(%vars);
+
+Same as method var() above.
+
+=cut
+
 sub set {
 	my ($self, %vars) = @_;
 	map {$self->{vars}->{$_} = $vars{$_}} keys %vars;
 	$self;
 }
 #=========================================================#
+=head2 get()
+
+	$email = $view->get("email");
+	@user = $view->get(qw(fname lname email website));
+
+Returns one or more template variables values.
+
+=cut
+
 sub get {
 my ($self, @name) = @_;
 	#@{ $h{'a'} }{ @keys }
 	@{ $self->{vars} }{@name};
 }
 #=========================================================#
+=head2 content()
+	
+	# get current template content
+	$content = $view->content;
+
+	# set current template content direct
+	$view->content($content);
+
+Get or set current template content.
+
+=cut
+
 sub content {
 my ($self) = shift;
 	if (@_) {
@@ -100,13 +226,6 @@ my ($self) = shift;
 		return $self;
 	}
 	$self->{content};
-}
-#=========================================================#
-sub parse {
-	my ($self) = @_;
-	$self->parse_vars;
-	$self->parse_blocks;
-	$self;
 }
 #=========================================================#
 sub parse_vars {
@@ -119,7 +238,7 @@ sub parse_vars {
 	$self->{tag} = {};
 	my $counter = 0;
 
-        #(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>])*)/>([^<]*)(<\!\[CDATA\[(.*?)\]\]>)?(</$tag>)?)
+	#(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>])*)/>([^<]*)(<\!\[CDATA\[(.*?)\]\]>)?(</$tag>)?)
     while ( $self->{content} =~ m{
 		(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>])*)/>)|(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>\/])*)>(.*?)<\/$tag>)
     }sxgi ) {
@@ -211,11 +330,83 @@ sub parse_nest_blocks {
 	return $k;
 }
 #=========================================================#
+=head2 block()
+	
+	# get all blocks as a hashref
+	$blocks = $view->block;
+
+	# get one block as a hashref
+	$block = $view->block("first");
+	
+	# set a block new content
+	$view->block("first", "1st Block New Content ");
+
+Get and set blocks. Blocks or iterators are a block of the template code marked or processing and replacing with
+dynamic content. For example you can use blocks to  show or hide a part of the template based on conditions. Another
+example is using nested blocks as iterators for displaying lists or tables of repeated rows.
+
+=cut
+
 sub block {
 	my ($self) = shift;
-	$self->{block};
+	if (@_ == 1) {
+		# return one block by its complete path like first/second/third/fourth
+		my $path = shift;
+		#---------------------------------------
+		if ($path !~ /\//) {
+			return $self->{block}->{$path};
+		}
+		#---------------------------------------
+		$path =~ s/^\/+|\/+$//g;
+		my @path = split /\//, $path;
+		my $v = $self->{block};
+		
+		while (my $k = shift @path) {
+			if (!exists $v->{$k}) {
+				return;
+			}
+			 $v = $v->{$k};
+		}
+
+		return $v;
+	}
+	elsif (@_ > 1) {
+		#set blocks
+		my %blocks = @_;
+		while (my($k, $v) = each %blocks) {
+			#say "[($k, $v)] " .$self->block($k);
+			$self->block($k)->{content} = $v;
+		}
+		#return all blocks hash object
+		$self->{block};
+	}
+	else {
+		#return all blocks hash object
+		$self->{block};
+	}
 }
 #=========================================================#
+sub process_blocks {
+	my ($self) = $_[0];
+	my ($name, $var, $match);
+	#say "Pass...";
+	# process root blocks
+	while (($name, $var) = each %{$self->{block}}) {
+		#say "block: $name";
+		#$self->{block}->{first} = {match=>, content=>, #next=>};
+		$match = $var->{match};
+		$self->{content} =~ s/\Q$match\E/$var->{content}/gex;
+	}
+}
+#=========================================================#
+=head2 replace()
+	
+	$view->replace('find text' => 'replaced text');
+	$view->replace(%vars);
+
+Replace some template text or code with another one. This method will replace all instances of the found text. This method can be chained.
+
+=cut
 sub replace {
 	my ($self, %vars) = @_;
 	while (my ($k, $v) = each %vars) {
@@ -224,6 +415,15 @@ sub replace {
 	$self;
 }
 #=========================================================#
+=head2 replace()
+	
+	$view->replace('find text' => 'replaced text');
+	$view->replace(%vars);
+
+Replace some template text or code with another one. This method will replace only one instance of the found text. This method can be chained.
+
+=cut
+
 sub replace_once {
 	my ($self, %vars) = @_;
 	while (my ($k, $v) = each %vars) {
@@ -232,11 +432,25 @@ sub replace_once {
 	$self;
 }
 #=========================================================#
+=head2 translate()
+	
+	# scan and replace the template language variables for the default 2 times
+	$view->translate;
+
+	# scan and replace the template language variables for 3 times
+	$view->translate(3);
+
+This method normally used internally when processing the template. It scans the tempalte for the langauge variables
+surrounded by the curly braces B<{var_name}> and replaces them with their values from the loaded language files. 
+This method can be chained.
+
+=cut
+
 sub translate {
 	my ($self, $passes) = @_;
 	
 	$passes += 0;
-	$passes = 2;
+	$passes ||= 2;
 	
 	my $vars = $self->me->lang->vars($self->{lang});
 
@@ -247,6 +461,14 @@ sub translate {
 	$self;
 }
 #=========================================================#
+=head2 process_vars()
+	
+	$view->process_vars;
+
+This method normally used internally when processing the template. This method can be chained.
+
+=cut
+
 sub process_vars {
 	my ($self) = $_[0];
 	my ($name, $var, $match);
@@ -259,8 +481,17 @@ sub process_vars {
 			$self->{content} =~ s/\Q$match\E/$self->{vars}->{$name}/gex;
 		}
 	}
+	$self;
 }
 #=========================================================#
+=head2 process_perl()
+	
+	$view->process_perl;
+
+This method normally used internally when processing the template. This method can be chained.
+
+=cut
+
 sub process_perl {
 	my ($self) = $_[0];
 	my ($name, $var, $match);
@@ -270,8 +501,17 @@ sub process_perl {
 		$match = $var->{match};
 		$self->{content} =~ s/\Q$match\E/$self->capture($var->{content})/gex;
 	}
+	$self;
 }
 #=========================================================#
+=head2 capture()
+	
+	$view->capture($perl_code);
+
+This method normally used internally when processing the template.
+
+=cut
+
 sub capture {
 	my ($self, $code) = @_;
 	
@@ -283,6 +523,14 @@ sub capture {
 	return $merged;
 }
 #=========================================================#
+=head2 get_widget()
+	
+	$view->get_widget($widget, $theme);
+
+This method normally used internally when processing the template. Returns the widget file content.
+
+=cut
+
 sub get_widget {
 	
 	my ($self, $view, $theme) = @_;
@@ -300,6 +548,14 @@ sub get_widget {
 	return $content;
 }
 #=========================================================#
+=head2 process_widgets()
+	
+	$view->process_widgets;
+
+This method normally used internally when processing the template. This method can be chained.
+
+=cut
+
 sub process_widgets {
 
 	my ($self) = $_[0];
@@ -315,9 +571,17 @@ sub process_widgets {
 		}
 		$self->{content} =~ s/\Q$match\E/$content/gex;
 	}
-
+	$self;
 }
 #=========================================================#
+=head2 process_plugins()
+	
+	$view->process_plugins ;
+
+This method normally used internally when processing the template. This method can be chained.
+
+=cut
+
 sub process_plugins {
 
 	my ($self) = $_[0];
@@ -396,14 +660,48 @@ sub process_plugins {
 
 		$self->{content} =~ s/\Q$match\E/$content/gex;
 	}
-
+	$self;
 }
 #=========================================================#
-sub process_once {
+=head2 parse()
+	
+	$view->parse;
+
+This method normally used internally when processing the template. This method can be chained.
+
+=cut
+
+sub parse {
+	my ($self) = @_;
+	$self->parse_vars;
+	$self->parse_blocks;
+	$self;
+}
+#=========================================================#
+=head2 process_pass()
+	
+	$view->process_pass;
+
+This method normally used internally when processing the template. This method can be chained.
+
+=cut
+
+sub process_pass {
 	my ($self) = @_;
 	$self->process(1);
+	$self->parse;
+	$self;
 }
 #=========================================================#
+=head2 process()
+	
+	$view->process;
+	$view->process($passes);
+
+Process the template. This method can be chained.
+
+=cut
+
 sub process {
 	
 	my ($self, $passes) = @_;
@@ -411,15 +709,17 @@ sub process {
 	$passes += 0;
 	$passes ||= 3;
 	
-	for (1..$passes) {
-		$self->translate();
-		
-		$self->parse;
-
-		$self->process_widgets();
-		$self->process_plugins();
+	for my $pass(1..$passes) {
+		$self->translate;
+		$self->process_widgets;
+		$self->process_blocks;
+		$self->process_plugins;
 		$self->process_perl;
 		$self->process_vars;
+		if ($pass < $passes) {
+			#say "parsing...";
+			$self->parse;
+		}
 	}
 	#------------------------------------------------------
 	#$ProgramEndTime = Time::HiRes::gettimeofday();
@@ -427,8 +727,17 @@ sub process {
 	#------------------------------------------------------
 	#for (1..1) {$self->process_vars();}
 	#------------------------------------------------------
+	$self;
 }
 #=========================================================#
+=head2 render()
+	
+	$view->render;
+
+Send the template content to the browser. This method can be chained.
+
+=cut
+
 sub render {
 
 	my ($self) = $_[0];
@@ -446,28 +755,87 @@ sub render {
 	print "Content-Encoding: gzip\n\n";
 	gzip $self->{content}, \$gziped or die "gzip failed: $GzipError\n";
 	print $gziped;
+	$self;
 }
 #=========================================================#
+=head2 out()
+	
+	$view->out;
+
+Process the template and return the content.
+
+=cut
+
 sub out {
 	my ($self) = $_[0];
 	$self->process();
 	return $self->{content};
 }
 #=========================================================#
+=head2 show()
+	
+	$view->show;
+	
+	# is the same as doing
+	$view->process();
+	$view->render();
+
+Process the template and send the content to the browser.
+
+=cut
+
 sub show {
 	my ($self) = $_[0];
 	$self->process();
 	$self->render();
+	$self;
 }
 #=========================================================#
+=head2 header()
+	
+	$view->header;
+
+Prints the header tot he browser.
+
+=cut
+
 sub header {
 	my ($self, $type) = @_;
 	$type ||= "text/html;charset=utf-8";
 	print "Content-type: $type\n\n";
+	$self;
 }
 #=========================================================#
 sub DESTROY {
 }
 #=========================================================#
+
+=pod
+
+=head1 Bugs
+
+This project is available on github at L<https://github.com/mewsoft/Nile>.
+
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 AUTHOR
+
+Ahmed Amin Elsheshtawy,  احمد امين الششتاوى <mewsoft@cpan.org>
+Website: http://www.mewsoft.com
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy احمد امين الششتاوى mewsoft@cpan.org, support@mewsoft.com,
+L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
+
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut
 
 1;

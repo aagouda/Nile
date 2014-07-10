@@ -6,6 +6,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #=========================================================#
+package Nile;
+
+our $VERSION = '0.12';
 
 =pod
 
@@ -37,7 +40,7 @@ Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Mu
 
 B<Alpha> version, do not use it for production. The project's homepage L<https://github.com/mewsoft/Nile>.
 
-The main indea in this framework is to separate all the html design and layout from programming. 
+The main idea in this framework is to separate all the html design and layout from programming. 
 The framework uses html templates for the design with special xml tags for inserting the dynamic output into the templates.
 All the application text is separated in langauge files in xml format supporting multi lingual applications with easy traslating and modifying all the text.
 
@@ -73,7 +76,7 @@ The following urls formats are all the same and all are mapped to the route Home
 
 Applications built with this framework must have basic folder structure. Applications may have any additional directories.
 
-The follwing is the basic application folder tree that must be created manually before runing:
+The following is the basic application folder tree that must be created manually before runing:
 
 		├───config
 		├───lang
@@ -93,12 +96,12 @@ The follwing is the basic application folder tree that must be created manually 
 =head1 CREATING YOUR FIRST PLUGIN 'HOME' 
 
 To create your first plugin called Home for your site home page, create a folder called B<Home> in your application path
-/path/lib/Nile/Plugin/Home, then create the plugin Controller file say Home.pm and put the following code:
+C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home.pm> and put the following code:
 
 	package Nile::Plugin::Home::Home;
 
 	use Nile::Base;
-	#=========================================================#
+
 	sub home  : GET Action {
 		
 		my ($self) = @_;
@@ -117,13 +120,12 @@ To create your first plugin called Home for your site home page, create a folder
 		$view->process;
 		$view->render;
 	}
-	#=========================================================#
 
 	1;
 
 =head1 YOUR FIRST VIEW 'home'
 
-Create an html file name it as "home.html", put it in the default theme folder /path/theme/default/views
+Create an html file name it as B<home.html>, put it in the default theme folder B</path/theme/default/views>
 and put in this file the following code:
 
 	<vars type="widget" name="header" charset_name="UTF-8" lang_name="en" />
@@ -242,7 +244,7 @@ Example langauge file B<'general.xml'>:
 
 The framework supports url routing, route specific short name actions like 'register' to specific plugins like Accounts/Register/create.
 
-Below is route.xml file example should be created under the path/route folder.
+Below is B<route.xml> file example should be created under the path/route folder.
 
 	<?xml version="1.0" encoding="UTF-8" ?>
 
@@ -363,13 +365,17 @@ To abort the application at anytime with optional message and stacktrace, call t
 	
 	$self->me->abort("application error, can not find file required");
 
-For 	fatal errors with custom error message
+For fatal errors with custom error message
 	
 	$self->me->error("error message");
 
-For 	fatal errors with custom error message and  full starcktrace
+For fatal errors with custom error message and  full starcktrace
 	
 	$self->me->errors("error message");
+
+For displaying warning message
+
+	$self->me->warning("warning message");
 
 =head1 LOGS
 
@@ -469,8 +475,6 @@ This library is free software; you can redistribute it and/or modify it under th
 
 =cut
 
-package Nile;
-
 #$|=1;
 
 use Moose;
@@ -534,8 +538,6 @@ our @EXPORT_MODULES = (
 		'Nile::Say' => [],
 		'MooseX::MethodAttributes' => [],
 	);
-
-our $VERSION = '0.10';
 
 use base 'Exporter';
 our @EXPORT = qw();
@@ -907,6 +909,7 @@ sub detect_user_language {
 sub dump {
 	my $self = shift;
 	print Dumper (@_);
+	return "";
 }
 #=========================================================#
 sub trim {

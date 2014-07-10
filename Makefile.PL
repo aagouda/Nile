@@ -7,6 +7,7 @@ WriteMakefile(
     VERSION_FROM      => 'lib/Nile.pm', # finds $VERSION
     PREREQ_PM         => {
 			Moose => 0,
+			MooseX::NonMoose => 0,
 			MooseX::MethodAttributes => 0,
 			namespace::autoclean => 0,
 			CGI::Carp => 0,
@@ -27,9 +28,15 @@ WriteMakefile(
 			Import::Into => 0,
 			Module::Load => 0,
 			Module::Runtime => 0,
+			XML::TreePP => 0,
+			IO::Compress::Gzip => 0,
+			DBI => 0,
+			Hash::AsObject => 0,
+			DateTime => 0,
+			
 	}, # e.g., Module::Name => 1.1
 
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM  => 'lib/Nile.pm', # retrieve abstract from module
-       AUTHOR         => 'Ahmed Amin ELsheshtawy <mewsoft@cpan.org>') : ()),
+       AUTHOR         => 'Ahmed Amin ELsheshtawy احمد امين الششتاوى <mewsoft@cpan.org>') : ()),
 );

@@ -8,11 +8,50 @@
 #=========================================================#
 package Nile::Dispatcher;
 
+our $VERSION = '0.11';
+
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Nile::Dispatcher - Application action dispatcher.
+
+=head1 SYNOPSIS
+		
+	package Nile::Plugin::Home::Home;
+
+	use Nile::Base;
+
+	sub home  : GET Action {
+		my ($self) = @_;
+	}
+	
+	1;
+
+=head1 DESCRIPTION
+
+Nile::Dispatcher - Application action dispatcher.
+
+=cut
+
 use Nile::Base;
 
-our $VERSION = '0.10';
 #=========================================================#
+
+=head2 dispatch()
+	
+	# dispatch the default route or detect route from request
+	$self->dispatcher->dispatch;
+
+	# dispatch specific route and request method
+	$self->me->dispatcher->dispatch($route, $request_method);
+
+=cut
+
 sub dispatch {
+
 	my ($self, $route, $request_method) = @_;
 	
 	$request_method ||= $self->me->request->request_method;
@@ -74,9 +113,6 @@ sub dispatch {
 	}
 	
 	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH
-	#  if (exists $ENV{HTTP_X_REQUESTED_WITH} && lc $ENV{HTTP_X_REQUESTED_WITH} eq 'xmlhttprequest') {
-	#   _do_some_ajaxian_stuff();
-	#  }
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
 			$self->me->abort("Plugin '$class' action '$action' request method '$request_method' is not allowed.");
@@ -97,6 +133,18 @@ sub dispatch {
 	$object->$action();
 }
 #=========================================================#
+
+=head2 action()
+	
+	my ($plugin, $controller, $action) = $self->me->dispatcher->action($route);
+	#route /plugin/controller/action returns (Plugin, Controller, action)
+	#route /plugin/action returns (Plugin, Plugin, action)
+	#route /plugin returns (Plugin, Plugin, index)
+
+Find the action plugin, controller and method name from the provided route.
+
+=cut
+
 sub action {
 
 	my ($self, $route) = @_;
@@ -124,6 +172,27 @@ sub action {
 	return (ucfirst($plugin), ucfirst($controller), $action);
 }
 #=========================================================#
+
+=head2 route()
+	
+	my $route = $self->me->dispatcher->route($route);
+	
+Detects the current request path if not provided from the request params named as
+'action', 'route', or 'cmd' in the post or get methods:
+	
+	# uri route
+	/blog/?action=register
+	
+	# form route
+	<input type="hidden" name="action" value="register" />
+
+If not found, it will try to detect the route from the request uri after the path part
+	
+	# assuming application path is /blog, so /register will be the route
+	/blog/register
+
+=cut
+
 sub route {
 	my ($self, $route) = @_;
 	
@@ -160,5 +229,33 @@ sub route {
 	return $route;
 }
 #=========================================================#
+
+=pod
+
+=head1 Bugs
+
+This project is available on github at L<https://github.com/mewsoft/Nile>.
+
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 AUTHOR
+
+Ahmed Amin Elsheshtawy,  احمد امين الششتاوى <mewsoft@cpan.org>
+Website: http://www.mewsoft.com
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy احمد امين الششتاوى mewsoft@cpan.org, support@mewsoft.com,
+L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
+
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut
 
 1;

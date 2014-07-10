@@ -14,23 +14,21 @@ package Nile::Paginate;
 
 use Nile::Base;
 
-our $VERSION = '0.60';
+our $VERSION = '0.61';
 
 =head1 NAME
 
-Nile::Paginate - Standalone Object-Oriented Efficient Data Pagination
+Nile::Paginate - Efficient Data Pagination
 
 =head1 SYNOPSIS
 
-	use Nile::Paginate;
-	
 	#Example data
 	my $total_entries = 100;
 	my $entries_per_page = 10;
 	my $pages_per_set = 7;
 	my $current_page = 4;
 
-	my $paginate = Nile::Paginate->new(
+	my $paginate = $self->me->paginate(
 		total_entries       => $total_entries, 
 		entries_per_page    => $entries_per_page, 
 		current_page        => $current_page,
@@ -58,11 +56,7 @@ Nile::Paginate - Standalone Object-Oriented Efficient Data Pagination
   
 	# Print the page numbers of the current set (visible pages)
 	foreach my $page (@{$paginate->pages_in_set()}) {
-		if($page == $paginate->current_page()) {
-			print "<b>$page</b> ";
-		} else {
-			print "$page ";
-		}
+		($page == $paginate->current_page())? print "[$page] " : print "$page ";
 	}
 	
 	#This will print out these results:
@@ -76,26 +70,16 @@ Nile::Paginate - Standalone Object-Oriented Efficient Data Pagination
 	#Entries on the current page: 10 
 	#First page of previous page set: 
 	#First page of next page set: 11
-	#     1 2 3 <b>4</b> 5 6 7 
+	#     1 2 3 [4] 5 6 7 
 
 
 =head1 DESCRIPTION
 
-The standalone object-orinated module produced by Nile::Paginate which 
-does not depend on any other modules can be used to create page
-navigation for any type of applications specially good for web applications. For example
-I use it in our Forums software, Auctions, Classifieds, and also our Directory
-Software andmany others. It makes live easier better than repeating the same code in your applications.
+The module can be used to create page navigation for any type of applications specially good for web applications.
 
 In addition it also provides methods for dealing with set of pages,
 so that if there are too many pages you can easily break them
-into chunks for the user to browse through. This part taken direct
-from the similar module B<Data::Pageset>. Basically this module
-is a duplicate of the module B<Data::Pageset>. The reason I created
-this module is that all other pagination modules depends on other
-modules which is also dependes on others modules. So it is not good
-if you are building a large web application to ask your customers to
-install such a small module to support your product.
+into chunks for the user to browse through. 
 
 This module is very friendly where you can change any single
 input parameter at anytime and it will automatically recalculate
@@ -104,24 +88,13 @@ all internal methods data without the need to recreate the object again.
 All the main object input options can be set direct and the module
 will redo the calculations including the mode method.
 
-You can include this module with your applications by extracting the
-module package and copying the module file Pagination.pm to your
-application folder and just replace this line in the above code:
-
-B<use Nile::Paginate;>
-
-by this line:
-
-B<use Pagination;>
-
 You can even choose to view page numbers in your set in a 'sliding' fassion.
 
 =head1 METHODS
 
-=head2 new()
+=head2 paginate()
 
-	use Nile::Paginate;
-	my $paginate = Nile::Paginate->new(
+	my $paginate = $self->me->paginate(
 		total_entries       => $total_entries, 
 		entries_per_page    => $entries_per_page, 
 		current_page        => $current_page,
@@ -856,27 +829,31 @@ sub showing_list {
 }
 #=========================================================#
 
-=head1 EXPORT
+=pod
 
-None by default.
+=head1 Bugs
+
+This project is available on github at L<https://github.com/mewsoft/Nile>.
+
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/mewsoft/Nile>.
 
 =head1 AUTHOR
 
-Ahmed Amin Elsheshtawy,  <support@mewsoft.com>
-Website: L<http://www.mewsoft.com>
-
-=head1 SEE ALSO
-
-L<Data::Page|Data::Page>.
-L<Data::Pageset|Data::Pageset>.
+Ahmed Amin Elsheshtawy,  «Õ„œ «„Ì‰ «·‘‘ «ÊÏ <mewsoft@cpan.org>
+Website: http://www.mewsoft.com
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2010-2015 by Ahmed Amin Elsheshtawy <support@mewsoft.com>,
-L<http://www.mewsoft.com>
+Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy «Õ„œ «„Ì‰ «·‘‘ «ÊÏ mewsoft@cpan.org, support@mewsoft.com,
+L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
 
-This module is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =cut
 

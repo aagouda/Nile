@@ -9,7 +9,7 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #=========================================================#
-	#print "Content-type: text/html;charset=utf-8\n\n";
+	print "Content-type: text/html;charset=utf-8\n\n";
 
 	use Data::Dumper;
 	use Benchmark qw(:all);
@@ -87,11 +87,12 @@
 	#say "config cdata: ". $config->get("perl");
 	#say Dumper $config->var->{perl};
 	
-	#say Dumper $view->{block}->{first}->{second}->{third}->{content};
-	#say Dumper $view->{block}->{first}->{second}->{third}->{match};
-	#say Dumper $view->{block}->{first}->{second}->{third}->{fourth};
-	#say Dumper $view->{block}->{first}->{second}->{third}->{fourth}->{fifth};
-	#say Dumper $view->{block}->{six}->{seven}->{eight};
+	#say "block: " . $app->dump($view->block("first/second/third")->{match});
+	#say Dumper $view->block->{first}->{second}->{third}->{content};
+	#say Dumper $view->block->{first}->{second}->{third}->{match};
+	#say Dumper $view->block->{first}->{second}->{third}->{fourth};
+	#say Dumper $view->block->{first}->{second}->{third}->{fourth}->{fifth};
+	#say Dumper $view->block->{six}->{seven}->{eight};
 	
 	#my $router = $app->router;
 	#$router->load("route.xml");
