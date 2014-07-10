@@ -1,5 +1,6 @@
-Nile version 0.10
-=================================
+Nile version 0.13
+
+Module home page: https://metacpan.org/release/Nile
 
 INSTALLATION
 
@@ -17,6 +18,6 @@ None
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy mewsoft@cpan.org ,  support@mewsoft.com
-https://github.com/mewsoft/Nile , http://www.mewsoft.com
+https://github.com/mewsoft/Nile , https://metacpan.org/release/Nile, http://www.mewsoft.com
 
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
