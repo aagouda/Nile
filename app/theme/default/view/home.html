@@ -13,11 +13,21 @@ Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars>
 
 <vars type="perl">system ('dir c:\\*.bat');</vars>
 
-<vars type="var" name="singleline" width="400px" height="300px" content="ahmed<b>class/subclass">cdata start here is may have html tags and 'single' and "double" qoutes</vars>
+<vars type="var" name="singleline" width="400px" height="300px" content="ahmed<b>class/subclass">
+cdata start here is may have html tags and 'single' and "double" qoutes
+</vars>
 
 <vars type="var" name="multiline" width="400px" height="300px"><![CDATA[ 
 	cdata start here is may have html tags <b>hello</b> and 'single' and "double" qoutes
 	another cdata line
+]]></vars>
+
+<vars type="perl"><![CDATA[ 
+	say "";
+	say "<br>active language: " . $self->me->var->get("lang");
+	say "<br>active theme: " . $self->me->var->get("theme");
+	say "<br>app path: " . $self->me->var->get("path");
+	say "<br>";
 ]]></vars>
 
 html content 1-5 top

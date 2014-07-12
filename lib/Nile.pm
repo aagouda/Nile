@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =pod
 
@@ -44,6 +44,51 @@ The main idea in this framework is to separate all the html design and layout fr
 The framework uses html templates for the design with special xml tags for inserting the dynamic output into the templates.
 All the application text is separated in langauge files in xml format supporting multi lingual applications with easy traslating and modifying all the text.
 
+	#!/usr/bin/perl
+	use Nile;
+	my $app = Nile->new;
+
+	$app->init(
+		#base application path, auto detected if not set
+		#path		=>	dirname(File::Spec->rel2abs(__FILE__)),
+		#site language for user, auto detected if not set
+		#lang		=>	"en-US"
+		#theme used
+		#theme		=>	"default"
+		);
+	
+	#handle request and send response
+	#$app->run;
+	
+	# control everything manually
+	my $request = $app->request;
+
+	# load  global shared application configuration file
+	$app->config->load($app->file->catfile($app->var->get("config_dir"), "config"));
+	say $app->config->get("database/user");
+	
+	# connect to the database. pass the connection params or try to load it from the config object.
+	#$app->connect();
+	#$app->connect(%params);
+	
+	# set or get some global shared application variables
+	#my $var = $app->var;
+	#$var->Body("Body variable"); # use auto getter and setter methods
+	#say "Title: ". $var->set("Title", "Hello world Title")->get("Title");
+	
+	# load langauge file general.xml
+	$app->lang->load("general");
+	
+	# load routes file route.xml
+	$self->router->load("route");
+	
+	# run the application and show the content.
+	$self->dispatcher->dispatch;
+
+	# you can run any plugin or route
+	#$self->dispatcher->dispatch('/accounts/register/create');
+	#$self->dispatcher->dispatch('/accounts/register/create', 'POST');
+	
 =head1 EXAMPLE APPLICATION
 
 Download and uncompress the module file. You will find an example application folder named B<app>.
@@ -480,6 +525,7 @@ This library is free software; you can redistribute it and/or modify it under th
 use Moose;
 use MooseX::MethodAttributes;
 use namespace::autoclean;
+use MooseX::ClassAttribute;
 
 use CGI::Carp qw(fatalsToBrowser);
 
@@ -504,6 +550,8 @@ use HTTP::Tiny;
 use Log::Tiny;
 use CGI::Simple;
 use HTTP::AcceptLanguage;
+
+#no warnings qw(void once uninitialized numeric);
 
 #use Nile::Autouse;
 
@@ -697,6 +745,7 @@ has 'ua' => (
       is      => 'rw',
       isa    => 'HTTP::Tiny',
 	  lazy	=> 1,
+	  #trigger => sub {shift->clearer},
 	  default => sub{HTTP::Tiny->new}
   );
 
@@ -856,7 +905,9 @@ sub me_object {
 	my $meta = $obj->meta;
 
 	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
-	
+	#$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
+	#$meta->add_class_attribute( 'cash', ());
+
 	# add method "me" to module, if module has method "me" then add "nile" instead.
 	if (!$obj->can("me")) {
 		$meta->add_attribute('me' => (is => 'rw', default => sub{$self}));

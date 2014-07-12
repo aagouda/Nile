@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =pod
 
@@ -20,15 +20,11 @@ Nile::Dispatcher - Application action dispatcher.
 
 =head1 SYNOPSIS
 		
-	package Nile::Plugin::Home::Home;
+	# dispatch the default route or detect route from request
+	$self->dispatcher->dispatch;
 
-	use Nile::Base;
-
-	sub home  : GET Action {
-		my ($self) = @_;
-	}
-	
-	1;
+	# dispatch specific route and request method
+	$self->me->dispatcher->dispatch($route, $request_method);
 
 =head1 DESCRIPTION
 
@@ -37,7 +33,6 @@ Nile::Dispatcher - Application action dispatcher.
 =cut
 
 use Nile::Base;
-
 #=========================================================#
 
 =head2 dispatch()
@@ -77,11 +72,12 @@ sub dispatch {
 	#say "(plugin=$plugin, controller=$controller, action=$action)";
 
 	my $class = "Nile::Plugin:\:$plugin:\:$controller";
+	#say "class: $class";
 	
 	eval "use $class;";
 
 	if ($@) {
-		$self->me->abort("Plugin '$class' does not exist.");
+		$self->me->abort("Plugin '$class' Error. $@");
 	}
 	
 	my $object = $class->new();
@@ -105,14 +101,14 @@ sub dispatch {
 	
 	my $meta = $object->meta;
 
-	# sub foo : Bar Baz('corge') { ... } => ["Bar", "Baz('corge')"]
 	my $attrs = $meta->get_method($action)->attributes;
-	
+	#say "attr: [$action], ". $self->me->dump($attrs);
+
 	if (!grep(/^(action|public)$/i, @$attrs)) {
 		$self->me->abort("Plugin '$class' method '$action' is not marked as 'action'.");
 	}
 	
-	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH
+	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH, [ajax]
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
 			$self->me->abort("Plugin '$class' action '$action' request method '$request_method' is not allowed.");

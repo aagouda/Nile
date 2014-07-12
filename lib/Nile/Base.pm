@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Base;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =pod
 
@@ -36,25 +36,30 @@ Nile::Base - Base class for the Nile framework.
 
 =cut
 
+use utf8;
 use Moose;
 #use MooseX::Declare;
 use MooseX::MethodAttributes;
-use utf8;
 use Import::Into;
 use Module::Runtime qw(use_module);
+#use true; # both load and import it
+#use Nile::Declare;
 
 use Nile::Say;
-use Nile::Declare ('method' => 'method', 'function' => 'function', 'invocant'=>'$this', 'inject'=>'my ($me) = $this->me;');
+#use Nile::Declare ('method' => 'method', 'function' => 'function', 'invocant'=>'$this', 'inject'=>'my ($me) = $this->me;');
 
 our @EXPORT_MODULES = (
 		#strict => [],
 		#warnings => [],
 		Moose => [],
 		utf8 => [],
+		#true => [],
 		'Nile::Say' => [],
-		'Nile::Declare' => ['method' => 'method', 'function' => 'function', 'invocant'=>'$self', 'inject'=>'my ($me) = $self->me;'],
+		#'Nile::Declare' => ['method' => 'method', 'function' => 'function', 'invocant'=>'$self', 'inject'=>'my ($me) = $self->me;'],
 		#'MooseX::Declare' => [],
+		#'Nile::Declare' => [],
 		'MooseX::MethodAttributes' => [],
+		'MooseX::ClassAttribute' => [],
 	);
 
 sub import {

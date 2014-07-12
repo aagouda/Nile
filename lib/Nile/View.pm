@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::View;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =pod
 
@@ -20,46 +20,268 @@ Nile::View - The template processing system.
 
 =head1 SYNOPSIS
 		
-		# get view home.html in current theme
-		my $view = $self->me->view("home");
-		# get view home.html in specific arabic
-		my $view = $app->view("home", "arabic");
-		
-		# set view variables
-		$view->var(
-				fname			=>	'Ahmed',
-				lname			=>	'Elsheshtawy',
-				email			=>	'sales@mewsoft.com',
-				website		=>	'http://www.mewsoft.com',
-				singleline		=>	'Single line variable <b>Good</b>',
-				multiline		=>	'Multi line variable <b>Nice</b>',
-			);
-		
-		# set variable
-		$view->set('email', 'sales@mewsoft.com');
+	# get view home.html in current theme
+	my $view = $self->me->view("home");
+	# get view home.html in specific arabic
+	my $view = $app->view("home", "arabic");
+	
+	# set view variables
+	$view->var(
+		fname		=>	'Ahmed',
+		lname		=>	'Elsheshtawy',
+		email		=>	'sales@mewsoft.com',
+		website		=>	'http://www.mewsoft.com',
+		singleline	=>	'Single line variable <b>Good</b>',
+		multiline	=>	'Multi line variable <b>Nice</b>',
+	   );
+	
+	# set variable
+	$view->set('email', 'sales@mewsoft.com');
 
-		# get variable
-		$email = $view->get('email');
+	# get variable
+	$email = $view->get('email');
 
-		# automatic getter/setter for variables
-		$view->email('sales@mewsoft.com');
-		$view->website('http://www.mewsoft.com');
-		$email = $view->email;
-		$website = $view->website;
+	# automatic getter/setter for variables
+	$view->email('sales@mewsoft.com');
+	$view->website('http://www.mewsoft.com');
+	$email = $view->email;
+	$website = $view->website;
 
-		# replace marked blocks or iterators
-		$view->block("first", "1st Block New Content ");
-		$view->block("six", "6th Block New Content ");
-		
-		# process variables and blocks and text language variables
-		$view->process;
+	# replace marked blocks or iterators
+	$view->block("first", "1st Block New Content ");
+	$view->block("six", "6th Block New Content ");
+	
+	# process variables and blocks and text language variables
+	$view->process;
 
-		# send the output to the browser
-		$view->render;
+	# send the output to the browser
+	$view->render;
 
 =head1 DESCRIPTION
 
 Nile::View - The template processing system.
+
+Templates or views are pure html files with special xml tags which can be used to insert
+the application dynamic output. These xml sepcial tags also can be used to pass
+parameters to the plugins.
+
+Templates also has special comment tags to mark blocks and iterators.
+
+Since the framework supports multi lingual, the template can contain the language
+variables names instead of the actual text surrounded by the Curly braces C<{> and C<}>.
+Templates also allow embedded Perl code.
+
+=head1 TEMPLATE LANGUAGE VARIABLES
+
+The template can contain the language variables names instead of the actual text 
+surrounded by the Curly braces C<{> and C<}>.
+
+	{first_name} <input type="text" name="fname" id="fname" value="" />
+	{last_name} <input type="text" name="lname" id="lname" value="" />
+	{phone} <input type="text" name="phone" id="phone" value="" />
+
+The language variables {first_name}, {last_name}, and {phone} will be replaced
+by their actual text from the loaded langauge file. So after processing the template,
+this code will look like this:
+
+	Your first name: <input type="text" name="fname" id="fname" value="" />
+	Your second name: <input type="text" name="lname" id="lname" value="" />
+	Your phone numger: <input type="text" name="phone" id="phone" value="" />
+
+If the language variables is not found in the loaded language files, it will not be processed so
+you can add it to the correct language file.
+
+=head1 TEMPLATE VARS TAGS
+
+The template xml tag used to insert dynamic output and to pass parameters to the plugin has
+the following format:
+
+	<vars type="plugin" name="plugin_name" arg1="value_1" arg2="value_2" argxx="value_xx" />
+
+The xml tag name is fixed `vars`. The attribute C<type> defines the type of the action to be called to handle
+this tag. The attribute C<name> specifies the name of the action, route, or variable to be called or used.
+
+The rest of the attributes is optional parameters which will be passed to the action called.
+
+The first type or the C<vars> tags is the B<var> in the form C<type="var">.
+These var tags are used to insert dynamic variables when processing the view:
+
+	<vars name="website"/>
+	<vars type="var" name='email' />
+
+If the vars tag type attribute is empty or omitted, it means this tag is a type C<var>, type="var", so the 
+following are the same:
+
+	<vars name="email"/>
+	<vars type="var" name='email' />
+
+To replace these variables when working with the view, just do it like this:
+	
+	$view = $self->me->view("home");
+	$view->set("email", 'sales@mewsoft.com');
+	$view->set("website", 'http://mewsoft.com');
+
+Then when processing the template, these variables will replace the vars xml tags.
+
+The second type or the C<vars> tags is the B<plugin> in the form C<type="plugin">.
+Use these tags to call plugins methods and insert their output to the template. You can also
+pass any number of optional parameters to the plugin method through these tags
+
+Example to insert dynamic plugins output when processing the view:
+
+	<vars type="plugin" name="Date::Date->date" format="%Y %M %D" />
+	<vars type="plugin" name="Date->now" format="%M %Y  %D" />
+	<vars type="plugin" name="date" format="%M %Y  %D" />
+
+these vars tags of type C<plugin> is used to call the plugins in the C<name> attribute and will pass the
+parameter C<format> to the plugin method.
+
+The first vars tag will call the plugin C<Date>, controller C<Date>, method C<date>.
+The second vars tag will call the plugin C<Date>, controller C<Date>, method C<now>.
+The second vars tag will call the plugin C<Date>, controller C<Date>, method C<index> or C<date>.
+
+The third type or the C<vars> tags is the C<Perl> tags which is used to execute Perl code and capture
+the output and insert it in the template.
+
+Example to insert embedded Perl code output when processing the view:
+
+	<vars type="perl">print $self->me->VERSION; return;</vars>
+
+You can run any Perl code in this tag, here is example to call a system function and display its results:
+
+	<vars type="perl">system ('dir c:\\*.bat');</vars>
+
+You can also include your Perl code in an CDATA like this:
+
+	<vars type="perl"><![CDATA[ 
+		say "";
+		say "<br>active language: " . $self->me->var->get("lang");
+		say "<br>active theme: " . $self->me->var->get("theme");
+		say "<br>app path: " . $self->me->var->get("path");
+		say "<br>";
+	]]></vars>
+
+The fourth type or the C<vars> tags is the C<widget> tags which is used to include small templates
+or widgets in the template. Widgets are small templates and have the same structure as the templates.
+Widgets are used for the repeated template blocks like dividing your template to sections say header,
+footer, top_navigation, bottom_navigation, left, right, top_banner, etc. Then you just insert
+the widget tag inside the templates you want to use these widgets instead of repeating the same code
+in every template.
+
+Widgets templates files should be located in the theme C<widget> folder with the default C<.html> extension.
+
+You can pass any number of parameters to the widgets and it will be replaced when processed.
+
+Example to insert the widget header in your templates:
+
+	<vars type="widget" name="header" charset_name="UTF-8" lang_name="en" />
+
+If you insert the above tag in your template, it will load the contents of the widget file "header.html" and 
+insert it to the template and will replace the variables passed C<charset_name> and C<lang_name> by their
+values. Variables can be of different values from call to call based on your need.
+
+=head1 TEMPLATE BLOCKS AND ITERATORS
+
+Sometimes you need to replace a block of code in your templates by some other contents. For example
+you may want to show a block of template code if user if logged in and another block of template code
+if the user is not logged in.
+
+In this case use the block comment tag in the following form to handle this:
+
+	<!--block:user_login-->
+		<span style="color: green;">
+			{user_login_message}
+		</span>
+	<!--endblock-->
+
+	<!--block:user_logout-->
+		<span style="color: red;">
+			{user_logout_message}
+		</span>
+	<!--endblock-->
+
+Inside the plugin code, you can access these blocks simply like this
+	
+	# get the block user_login hash ref
+	$login_block = $view->block("user_login");
+	say $login_block->{content};
+	say $login_block->{match};
+	
+	# set the block user_login new content
+	$view->block("user_login", "Login Block New Content ");
+	
+	# set the block user_logout new content
+	$view->block("user_logout", "Logout Block New Content ");
+
+	# or 
+	if (user_is_loggedin()) {
+		# hide or clear the logout block
+		$view->block("user_logout", "");
+	}
+	else {
+		# hide or clear the login block
+		$view->block("user_login", "");
+	}
+
+Calling $view->block() method without any block name will return the entire hash tree of all the template
+blocks.
+
+Blocks can be nested to any levels, for example:
+
+	html content 1-5 top
+	<!--block:first-->
+		<table border="1" style="color:red;">
+		<tr class="lines">
+			<td align="left" valign="<--valign-->">
+				<b>bold</b><a href="http://www.mewsoft.com">mewsoft</a>
+				<!--hello--> <--again--><!--world-->
+				some html content here 1 top
+				<!--block:second-->
+					some html content here 2 top
+					<!--block:third-->
+						some html content here 3 top
+						<!--block:fourth-->
+						some html content here 4 top
+							<!--block:fifth-->
+								some html content here 5a
+								some html content here 5b
+							<!--endblock-->
+						<!--endblock-->
+						some html content here 3a
+					some html content here 3b
+				<!--endblock-->
+			some html content here 2 bottom
+			</tr>
+		<!--endblock-->
+		some html content here 1 bottom
+	</table>
+	<!--endblock-->
+	html content 1-5 bottom
+
+	html content 6-8 top
+	<!--block:six-->
+		some html content here 6 top
+		<!--block:seven-->
+			some html content here 7 top
+			<!--block:eight-->
+				some html content here 8a
+				some html content here 8b
+			<!--endblock-->
+			some html content here 7 bottom
+		<!--endblock-->
+		some html content here 6 bottom
+	<!--endblock-->
+	html content 6-8 bottom
+
+You can get and access these nested blocks in many ways:
+
+	$fifth = $view->block("first/second/third/fourth/fifth");
+	$fifth = $view->block->{first}->{second}->{third}->{fourth}->{fifth};
+	$all = $view->block;
+	$fifth = $all->{first}->{second}->{third}->{fourth}->{fifth};
+
+Blocks also used for iterators, if you want to build a table or data for example, then you get the bock of the
+repeated table row and process it then replace the entire data with the block in the view.
 
 =cut
 
@@ -415,10 +637,10 @@ sub replace {
 	$self;
 }
 #=========================================================#
-=head2 replace()
+=head2 replace_once()
 	
-	$view->replace('find text' => 'replaced text');
-	$view->replace(%vars);
+	$view->replace_once('find text' => 'replaced text');
+	$view->replace_once(%vars);
 
 Replace some template text or code with another one. This method will replace only one instance of the found text. This method can be chained.
 

@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Paginate;
 
-our $VERSION = '0.63';
+our $VERSION = '0.64';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -26,57 +26,90 @@ Nile::Paginate - Efficient Data Pagination
 
 =head1 SYNOPSIS
 
-	#Example data
+	# example data
 	my $total_entries = 100;
 	my $entries_per_page = 10;
 	my $pages_per_set = 7;
 	my $current_page = 4;
 
 	my $paginate = $self->me->paginate(
+
 		total_entries       => $total_entries, 
 		entries_per_page    => $entries_per_page, 
 		current_page        => $current_page,
 		pages_per_set       => $pages_per_set,
 		mode => "slide", #modes are 'slide', 'fixed', default is 'slide'
+
+		css_class        => "pagination",
+		layout => 0, # next&prev position, both right, 2: both left, 0: left and right
+		page_link	=> "action=browse&page=%page%&id=10",
+		prev_page_text => "Prev",
+		next_page_text => "Next",
+		last_page_text => "Last",
+		first_page_text => "First",
+		showing_text => "Page %page% of  %pages% (listing %first% to %last% of %entries%)",
+		showing_list_text => "Page %page% of  %pages%",
+		more_text => "...",
 	);
 
-	# General page information
+	# general page information
 	print "         First page: ", $paginate->first_page, "\n";
 	print "          Last page: ", $paginate->last_page, "\n";
 	print "          Next page: ", $paginate->next_page, "\n";
-	print "      Previous page: ", $paginate->previous_page, "\n";
+	print "      Previous page: ", $paginate->prev_page, "\n";
 	print "       Current page: ", $paginate->current_page, "\n";
 
-	# Entries on current page
+	# entries on current page
 	print "First entry on current page: ", $paginate->first, "\n";
 	print " Last entry on current page: ", $paginate->last, "\n";
 
-	# Returns the number of entries on the current page
+	# returns the number of entries on the current page
 	print "Entries on the current page: ", $paginate->entries_on_current_page, " \n";
 
-	# Page set information
+	# page set information
 	print "First page of previous page set: ",  $paginate->previous_set, "\n";
 	print "    First page of next page set: ",  $paginate->next_set, "\n";
   
-	# Print the page numbers of the current set (visible pages)
+	# print the page numbers of the current set (visible pages)
 	foreach my $page (@{$paginate->pages_in_set()}) {
 		($page == $paginate->current_page())? print "[$page] " : print "$page ";
 	}
 	
-	#This will print out these results:
-	#First page: 1
-	#Last page: 10
-	#Next page: 5
-	#Previous page: 3
-	#Current page: 4
-	#First entry on current page: 31
-	#Last entry on current page: 40
-	#Entries on the current page: 10 
-	#First page of previous page set: 
-	#First page of next page set: 11
+	# this will print out these results:
+	# First page: 1
+	# Last page: 10
+	# Next page: 5
+	# Previous page: 3
+	# Current page: 4
+	# First entry on current page: 31
+	# Last entry on current page: 40
+	# Entries on the current page: 10 
+	# First page of previous page set: 
+	# First page of next page set: 11
 	#     1 2 3 [4] 5 6 7 
 
+	# rendering
+	print $paginate->out, "\n";
+	# prints: 
+	<ul class="pagination">
+	   <li class="ui-state-default"><a href="page=3">Prev</a></li>
+	   <li class="ui-state-default"><a href="page=1">1</a></li>
+	   <li class="ui-state-default"><a href="page=2">2</a></li>
+	   <li class="ui-state-default"><a href="page=3">3</a></li>
+	   <li class="ui-state-active active"><a href="javascript:void(0);">4</a></li>
+	   <li class="ui-state-default"><a href="page=5">5</a></li>
+	   <li class="ui-state-default"><a href="page=6">6</a></li>
+	   <li class="ui-state-default"><a href="page=7">7</a></li>
+	   <li class="ellipsis">...</li><li class=" ui-state-default"><a href="page=10">10</a></li>
+	   <li class="ui-state-default"><a href="page=5">Next</a></li>
+	</ul>
 
+	print $paginate->showing, "\n";
+	# prints: Page 4 of  10 (listing 31 to 40 of 100)
+
+	print $paginate->showing_list, "\n";
+	# prints: Page 4 of  10
+	
 =head1 DESCRIPTION
 
 The module can be used to create page navigation for any type of applications specially good for web applications.
@@ -155,9 +188,9 @@ sub BUILD {
 	$self->{layout} = $args->{layout}; # layout styles, 0: default, prev on left and next of right, 1: prev, next of left, and 2: prev, next on right.
 
 	$self->{css_class} = exists $args->{css_class} ? $args->{css_class} : "pagination";
-	$self->{page_link} = exists $args->{page_link} ? $args->{page_link} : "page=%page%"; #example: http://www.mewsoft.com/app/action=browse&page=%page%&id=10
+	$self->{page_link} = exists $args->{page_link} ? $args->{page_link} : "page=%page%"; # /action=browse&page=%page%&id=10
 	$self->{showing_text} = exists $args->{showing_text} ? $args->{showing_text} : "Page %page% of  %pages% (listing %first% to %last% of %entries%)";
-	$self->{showing_list} = exists $args->{showing_list} ? $args->{showing_list} : "Page %page% of  %pages%";
+	$self->{showing_list_text} = exists $args->{showing_list_text} ? $args->{showing_list_text} : "Page %page% of  %pages%";
 	$self->{first_page_text} = exists $args->{first_page_text} ? $args->{first_page_text} : "First";
 	$self->{prev_page_text} = exists $args->{prev_page_text} ? $args->{prev_page_text} : "Prev";
 	$self->{next_page_text} = exists $args->{next_page_text} ? $args->{next_page_text} : "Next";
@@ -241,7 +274,7 @@ sub render {
 		$self->{showing} =~ s/%last%/$self->{last}/g;
 		$self->{showing} =~ s/%entries%/$self->{total_entries}/g;
 
-		$self->{showing_list} = $self->{showing_list};
+		$self->{showing_list} = $self->{showing_list_text};
 		$self->{showing_list} =~ s/%page%/$self->{current_page}/g;
 		$self->{showing_list} =~ s/%pages%/$self->{last_page}/g;
 		$self->{showing_list} =~ s/%first%/$self->{first}/g;
@@ -622,15 +655,15 @@ sub last {
 }
 #=========================================================#
 
-=head2 previous_page()
+=head2 prev_page()
 
-  $paginate->previous_page();
+  $paginate->prev_page();
 
 Returns the previous page number, if one exists. Otherwise it returns undefined.
 
 =cut
 
-sub previous_page {
+sub prev_page {
 	my ($self) = shift;
 	return $self->{previous_page};
 }

@@ -8,11 +8,10 @@
 #=========================================================#
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.13';
-
+our $VERSION = '0.14';
 use Nile::Base;
 #=========================================================#
-sub home  : GET Action {
+sub home : GET Action {
 	
 	my ($self) = @_;
 	
@@ -29,13 +28,7 @@ sub home  : GET Action {
 			multiline		=>	'Multi line variable <b>Nice</b>',
 		);
 	
-	#$view->block;
-	
 	#my $var = $view->block();
-	#say "keys: ". keys %$var;
-	#$view->parse;
-	#say "blocks dump: " . $me->dump($view->block());
-
 	#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
 	#$view->block("first/second/third/fourth/fifth", "Block Modified ");
 	#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
@@ -48,7 +41,6 @@ sub home  : GET Action {
 	$view->show;
 	#$view->process;
 	#$view->render;
-
 }
 #=========================================================#
 
@@ -82,4 +74,5 @@ This library is free software; you can redistribute it and/or modify it under th
 
 =cut
 
+#__PACKAGE__->meta->make_immutable(0);#(inline_constructor => 0)
 1;

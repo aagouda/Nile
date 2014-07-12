@@ -12,7 +12,6 @@ our $VERSION = '0.13';
 
 use Nile::Base;
 use DateTime qw();
-
 #=========================================================#
 sub index {
 my ($self, %args) = @_;
@@ -32,7 +31,6 @@ sub now {
 	print $dt->strftime($args{format});
 }
 #=========================================================#
-
 
 =pod
 
