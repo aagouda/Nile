@@ -1,6 +1,6 @@
 #	Copyright Infomation
 #=========================================================#
-#	Module	:	Nile::Vars
+#	Module	:	Nile::Var
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Var;
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 =pod
 
@@ -16,7 +16,7 @@ our $VERSION = '0.15';
 
 =head1 NAME
 
-Nile::Vars - Application Shared variables.
+Nile::Var - Application Shared variables.
 
 =head1 SYNOPSIS
 	
@@ -71,7 +71,7 @@ Nile::Vars - Application Shared variables.
 
 =head1 DESCRIPTION
 
-Nile::Vars - Application Shared variables.
+Nile::Var - Application Shared variables.
 
 =cut
 

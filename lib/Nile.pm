@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.15';
+our $VERSION = '0.17';
 
 =pod
 
@@ -492,7 +492,7 @@ Database L<Nile::Database|Nile::Database>.
 
 XML L<Nile::XML|Nile::XML>.
 
-Settings	L<Nile::SettingNile::Setting>.
+Settings	L<Nile::Setting|Nile::Setting>.
 
 Abort L<Nile::Abort|Nile::Abort>.
 
