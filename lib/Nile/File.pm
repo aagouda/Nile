@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::File;
 
-our $VERSION = '0.13';
+our $VERSION = '0.15';
 
 =pod
 
@@ -97,7 +97,6 @@ BEGIN {
 }
 
 #=========================================================#
-
 =head2 get()
 	
 	# file($file, $options)
@@ -214,7 +213,6 @@ sub files {
 	return $self->scan_dir($dir, $match, 1, 0, $relative);
 }
 #=========================================================#
-
 =head2 files_tree()
 	
 	# files_tree($dir, $match, $relative, $depth)
@@ -231,7 +229,6 @@ sub files_tree {
 	return $self->scan_dir($dir, $match, $depth, 0, $relative);
 }
 #=========================================================#
-
 =head2 folders()
 	
 	# get list of sub folders in a folder
@@ -251,7 +248,6 @@ sub folders {
 	return $self->scan_dir($dir, $match, 1, 1, $relative);
 }
 #=========================================================#
-
 =head2 folders_tree()
 	
 	# get list of sub folders in a folder recursively
@@ -320,7 +316,6 @@ Returns the name of the operating system.
 sub os {$OS}
 
 #=========================================================#
-
 =head2 ds()
 	
 	my $ds = $self->me->file->ds;
@@ -331,7 +326,6 @@ Returns the directory separator of the operating system.
 
 sub ds {$DS}
 #=========================================================#
-
 =head2 fileparse()
 	
 	my ($filename, $dirs, $suffix) = $self->me->file->fileparse($path);
@@ -347,7 +341,6 @@ sub fileparse {
 	return File::Basename::fileparse(@_);
 }
 #=========================================================#
-
 =head2 basename()
 	
 	my $filename  = $self->me->file->basename($path);
@@ -362,7 +355,6 @@ sub basename {
 	return File::Basename::basename(@_);
 }
 #=========================================================#
-
 =head2 dirname()
 	
 	my $ds = $self->me->file->dirname();

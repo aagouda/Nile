@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =pod
 
@@ -188,7 +188,9 @@ and put in this file the following code:
 
 	<vars type="perl">system ('dir c:\\*.bat');</vars>
 
-	<vars type="var" name="singleline" width="400px" height="300px" content="ahmed<b>class/subclass">cdata start here is may have html tags and 'single' and "double" qoutes</vars>
+	<vars type="var" name="singleline" width="400px" height="300px" content="ahmed<b>class/subclass">
+		cdata start here is may have html tags and 'single' and "double" qoutes
+	</vars>
 
 	<vars type="var" name="multiline" width="400px" height="300px"><![CDATA[ 
 		cdata start here is may have html tags <b>hello</b> and 'single' and "double" qoutes
@@ -472,7 +474,7 @@ The database class provides methods for connecting to the sql database and easy 
 
 Views	L<Nile::View|Nile::View>.
 
-Shared Varts	L<Nile::Vars|Nile::Vars>.
+Shared Vars	L<Nile::Var|Nile::Var>.
 
 Langauge	L<Nile::Lang|Nile::Lang>.
 
@@ -490,7 +492,7 @@ Database L<Nile::Database|Nile::Database>.
 
 XML L<Nile::XML|Nile::XML>.
 
-Registry L<Nile::Registry|Nile::Registry>.
+Settings	L<Nile::SettingNile::Setting>.
 
 Abort L<Nile::Abort|Nile::Abort>.
 
@@ -560,14 +562,14 @@ use Nile::Abort;
 use Nile::Say;
 use Nile::View;
 use Nile::XML;
-use Nile::Vars;
+use Nile::Var;
 use Nile::File;
 use Nile::Lang;
 use Nile::Router;
 use Nile::Dispatcher;
 use Nile::Paginate;
 use Nile::Database;
-use Nile::Registry;
+use Nile::Setting;
 use Nile::Request;
 
 #use base 'Import::Base';
@@ -792,11 +794,21 @@ has 'config' => (
 
 has 'var' => (
       is      => 'rw',
-	  isa    => 'Nile::Vars',
+	  isa    => 'Nile::Var',
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object ("Nile::Vars", @_);
+			$self->me_object ("Nile::Var", @_);
+		}
+  );
+
+has 'setting' => (
+      is      => 'rw',
+	  isa    => 'Nile::Setting',
+	  lazy	=> 1,
+	  default => sub {
+			my $self = shift;
+			$self->me_object("Nile::Setting", @_);
 		}
   );
 
@@ -959,7 +971,7 @@ sub detect_user_language {
 #=========================================================#
 sub dump {
 	my $self = shift;
-	print Dumper (@_);
+	say Dumper (@_);
 	return "";
 }
 #=========================================================#
@@ -1035,9 +1047,7 @@ my ($self, $code) = @_;
 }
 #=========================================================#
 sub abort {
-my ($self) = shift;
-	#my ($package, $filename, $line, $subroutine, $hasargs, $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller();
-	#load 'Nile::Abort';
+	my ($self) = shift;
 	Nile::Abort->abort(@_);
 }
 #=========================================================#

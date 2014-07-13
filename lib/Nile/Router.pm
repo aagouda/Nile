@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Router;
 
-our $VERSION = '0.13';
+our $VERSION = '0.15';
 
 =pod
 
@@ -68,7 +68,6 @@ use Router::Generic;
 use Tie::IxHash;
 
 #=========================================================#
-
 =head2 router()
 	
 	$self->me->router->router;
@@ -84,7 +83,6 @@ has 'router' => (
 	  default => sub {Router::Generic->new}
   );
 #=========================================================#
-
 =head2 load()
 	
 	# load routes file. default file extension is xml. load route.xml file.
@@ -111,7 +109,7 @@ sub load {
 	my $xml = $self->me->xml->get_file($filename);
 	
 	if (!$self->{route}) {
-		$self->{route} = {};
+		$self->{route} = +{};
 		tie(%{$self->{route}}, 'Tie::IxHash');
 	}
 
@@ -124,7 +122,7 @@ sub load {
 		# <register route="register" action="Accounts/Register/register" method="get" defaults="year=1900|month=1|day=23" />
 		
 		$v->{-defaults} ||= "";
-		$defaults = {};
+		$defaults = +{};
 		foreach (split (/\|/, $v->{-defaults})) {
 			($key, $val) = split (/\=/, $_);
 			$defaults->{$key} = $val;
@@ -142,7 +140,6 @@ sub load {
 	$self;
 }
 #=========================================================#
-
 =head2 match()
 	
 	# find route action and information if exist in the routes file.
@@ -177,7 +174,6 @@ sub match {
 	return wantarray? ($action, $args, $uri, $query) : {action=>$action, args=>$args, query=>$query, uri=>$uri};
 }
 #=========================================================#
-
 =head2 add_route()
 	
 	# add new route information to the router object
@@ -206,7 +202,6 @@ sub replace_route {
 	return $self->router->replace_route(@_);
 }
 #=========================================================#
-
 =head2 uri_for()
 
 	my $route = $self->me->router->uri_for($route_name, \%params);
@@ -219,7 +214,6 @@ sub uri_for {
 	return $self->router->uri_for(@_);
 }
 #=========================================================#
-
 =head2 route_for()
 	
 	my $route = $self->me->router->route_for($path, [$method]);
@@ -233,7 +227,6 @@ sub route_for {
 	return $self->router->route_for(@_);
 }
 #=========================================================#
-
 =head2 url_decode()
 	
 	my $decode_url = $self->me->router->url_decode($url);
@@ -248,7 +241,6 @@ sub url_decode {
     return $decode;
 }
 #=========================================================#
-
 =head2 url_encode()
 	
 	my $encoded_url = $self->me->router->url_encode($url);

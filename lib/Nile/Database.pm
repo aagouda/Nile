@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Database;
 
-our $VERSION = '0.13';
+our $VERSION = '0.15';
 
 =pod
 
@@ -39,7 +39,6 @@ use Hash::AsObject;
 #my $hash = Hash::AsObject->new(\%hash); $hash->foo(27); print $hash->foo; print $hash->baz->quux;
 
 #=========================================================#
-
 =head2 dbh()
 	
 	$self->me->db->dbh;
@@ -52,7 +51,6 @@ has 'dbh' => (
       is      => 'rw',
   );
 #=========================================================#
-
 =head2 connect()
 	
 	$self->me->db->connect(%args);
@@ -82,7 +80,7 @@ sub connect {
 	$args{dsn} ||= "";
 	$args{host} ||= "localhost";
 	$args{port} ||= 3306;
-	$args{attr} ||= {};
+	$args{attr} ||= +{};
 
 	if (!$args{name}) {
 		$self->me->abort("Database error: Empty database name.");
@@ -107,7 +105,6 @@ sub connect {
 	#$dbh->do('SET NAMES utf8');
 }
 #=========================================================#
-
 =head2 disconnect()
 	
 	$self->me->db->disconnect;
@@ -121,7 +118,6 @@ sub disconnect {
 	$self->dbh->disconnect if ($self->dbh);
 }
 #=========================================================#
-
 =head2 run()
 	
 	$self->me->db->run($qry);
@@ -135,7 +131,6 @@ sub run {
 	$self->dbh->do($qry) or $self->db_error($qry);
 }
 #=========================================================#
-
 =head2 do()
 	
 	$self->me->db->do($qry);
@@ -149,7 +144,6 @@ sub do {
 	$self->dbh->do($qry);
 }
 #=========================================================#
-
 =head2 exec()
 	
 	$sth = $self->me->db->exec($qry);
@@ -165,7 +159,6 @@ sub exec {
 	return $sth;
 }
 #=========================================================#
-
 =head2 begin_work()
 	
 	$self->me->db->begin_work;
@@ -179,7 +172,6 @@ sub begin_work {
 	return $self->dbh->begin_work or $self->db_error();
 }
 #=========================================================#
-
 =head2 commit()
 	
 	$self->me->db->commit;
@@ -193,7 +185,6 @@ sub commit {
 	$self->dbh->commit or $self->db_error();
 }
 #=========================================================#
-
 =head2 rollback()
 	
 	$self->me->db->rollback;
@@ -207,7 +198,6 @@ sub rollback {
 	$self->dbh->rollback or $self->db_error();
 }
 #=========================================================#
-
 =head2 quote()
 	
 	$self->me->db->quote($value);
@@ -240,7 +230,6 @@ sub col {
 	return wantarray? @{$ret} : $ret;
 }
 #=========================================================#
-
 =head2 row()
 	
 	# select id, email, fname, lname from users
@@ -258,7 +247,6 @@ sub row {
 	return @ret;
 }
 #=========================================================#
-
 =head2 rows()
 	
 	# select id, fname, lname, email from users
@@ -277,7 +265,6 @@ sub rows {
 	return wantarray? @$ret : $ret;
 }
 #=========================================================#
-
 =head2 hash()
 	
 	# select * from users where id=$id limit 1
@@ -296,7 +283,6 @@ sub hash {
 	return wantarray? %{$ret} : $ret;
 }
 #=========================================================#
-
 =head2 row_object()
 	
 	# select * from users where id=$id limit 1
@@ -317,7 +303,6 @@ sub row_object {
 	return Hash::AsObject->new($ret);
 }
 #=========================================================#
-
 =head2 hashes()
 	
 	%hashes = $self->me->db->hashes($qry, $col);
@@ -333,7 +318,6 @@ sub hashes {
 	return wantarray? %{$ret} : $ret;
 }
 #=========================================================#
-
 =head2 colhash()
 	
 	# select id, user from users
@@ -350,7 +334,6 @@ sub colhash {
 	return %list;
 }
 #=========================================================#
-
 =head2 value()
 	
 	# select email from users where id=123. return one column value
@@ -369,7 +352,6 @@ sub value {
 	return $ret;
 }
 #=========================================================#
-
 =head2 insertid()
 	
 	$id = $self->me->db->insertid;
@@ -383,7 +365,6 @@ sub insertid {
 	return $self->dbh->{mysql_insertid};
 }
 #=========================================================#
-
 =head2 db_error()
 	
 	$self->me->db->db_error;

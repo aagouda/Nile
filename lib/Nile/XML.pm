@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::XML;
 
-our $VERSION = '0.13';
+our $VERSION = '0.15';
 
 =pod
 
@@ -99,7 +99,6 @@ use Nile::Base;
 use XML::TreePP;
 
 #=========================================================#
-
 =head2 xml()
 	
 	# get a new XML::TreePP object.
@@ -185,7 +184,6 @@ sub AUTOLOAD {
 	}
 }
 #=========================================================#
-
 =head2 load()
 	
 	$xml = $self->me->xml;
@@ -205,13 +203,12 @@ sub load {
 	$self->file($file);
 	
 	my $xml = $self->xml->parsefile($file);
-	#$self->{vars} ||= {};
+	#$self->{vars} ||= +{};
 	#$self->{vars} = {%{$self->{vars}}, %$xml};
 	$self->{vars} = $xml;
 	$self;
 }
 #=========================================================#
-
 =head2 keep_order()
 	
 	# keep sort order when loading and saving the file. default is off.
@@ -234,7 +231,6 @@ sub keep_order {
 	return $self;
 }
 #=========================================================#
-
 =head2 set()
 	
 	# set tag value
@@ -253,7 +249,6 @@ sub set {
 	$self;
 }
 #=========================================================#
-
 =head2 list()
 	
 	# get a list of tags values.
@@ -342,7 +337,6 @@ sub delete {
 	$self;
 }
 #=========================================================#
-
 =head2 clear()
 	
 	# delete entire xml object data.
@@ -355,11 +349,10 @@ updated or saved.
 
 sub clear {
 	my ($self) = @_;
-	$self->{vars} = {};
+	$self->{vars} = +{};
 	$self;
 }
 #=========================================================#
-
 =head2 update()
 	
 	# get a list of tags values.
@@ -376,7 +369,6 @@ sub update {
 	$self;
 }
 #=========================================================#
-
 =head2 save()
 	
 	# write the output file.
@@ -393,7 +385,6 @@ sub save {
 	$self;
 }
 #=========================================================#
-
 =head2 get_file()
 	
 	# load xml file content and return it as a hash, not added to the object
@@ -415,7 +406,6 @@ sub get_file {
 	return wantarray? %{$xml} : $xml;
 }
 #=========================================================#
-
 =head2 add_file()
 	
 	# load and append another xml file to the object

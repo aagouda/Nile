@@ -7,10 +7,10 @@ perldoc -o html lib/Nile/Dispatcher.pm > Dispatcher.html
 perldoc -o html lib/Nile/File.pm > File.html
 perldoc -o html lib/Nile/Lang.pm > Lang.html
 perldoc -o html lib/Nile/Paginate.pm > Paginate.html
-perldoc -o html lib/Nile/Registry.pm > Registry.html
+perldoc -o html lib/Nile/Setting.pm > Setting.html
 perldoc -o html lib/Nile/Request.pm > Request.html
 perldoc -o html lib/Nile/Router.pm > Router.html
 perldoc -o html lib/Nile/Say.pm > Say.html
-perldoc -o html lib/Nile/Vars.pm > Vars.html
+perldoc -o html lib/Nile/Var.pm > Var.html
 perldoc -o html lib/Nile/View.pm > View.html
 perldoc -o html lib/Nile/XML.pm > XML.html

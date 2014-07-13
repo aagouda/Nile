@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Paginate;
 
-our $VERSION = '0.64';
+our $VERSION = '0.65';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -487,7 +487,6 @@ sub total_entries {
 	return $self->{total_entries};
 }
 #=========================================================#
-
 =head2 entries_per_page()
 
   $paginate->entries_per_page($entries_per_page);
@@ -506,7 +505,6 @@ sub entries_per_page {
 	return $self->{entries_per_page};
 }
 #=========================================================#
-
 =head2 current_page()
 
   $paginate->current_page($page_num);
@@ -525,7 +523,6 @@ sub current_page {
 	return $self->{current_page};
 }
 #=========================================================#
-
 =head2 mode()
 	
 	$paginate->mode('slide');
@@ -545,7 +542,6 @@ sub mode {
 	return $self->{mode};
 }
 #=========================================================#
-
 =head2 pages_per_set()
 
   $paginate->pages_per_set($number_of_pages_per_set);
@@ -565,7 +561,6 @@ sub pages_per_set {
 	return $self->{pages_per_set};
 }
 #=========================================================#
-
 =head2 entries_on_current_page()
 
   $paginate->entries_on_current_page();
@@ -584,7 +579,6 @@ sub entries_on_current_page {
 	}
 }
 #=========================================================#
-
 =head2 first_page()
 
   $paginate->first_page();
@@ -598,7 +592,6 @@ sub first_page {
 	return 1;
 }
 #=========================================================#
-
 =head2 last_page()
 
   $paginate->last_page();
@@ -612,7 +605,6 @@ sub last_page {
 	return $self->{last_page};
 }
 #=========================================================#
-
 =head2 total_pages()
 
   $paginate->total_pages();
@@ -626,7 +618,6 @@ sub total_pages {
 	return $self->{last_page};
 }
 #=========================================================#
-
 =head2 first()
 
   $paginate->first();
@@ -640,7 +631,6 @@ sub first {
 	return $self->{first};
 }
 #=========================================================#
-
 =head2 last()
 
   $paginate->last();
@@ -654,7 +644,6 @@ sub last {
 	return $self->{last};
 }
 #=========================================================#
-
 =head2 prev_page()
 
   $paginate->prev_page();
@@ -668,7 +657,6 @@ sub prev_page {
 	return $self->{previous_page};
 }
 #=========================================================#
-
 =head2 next_page()
 
   $paginate->next_page();
@@ -682,7 +670,6 @@ sub next_page {
 	return $self->{next_page};
 }
 #=========================================================#
-
 =head2 first_page_in_set()
 
   $paginate->first_page_in_set();
@@ -696,7 +683,6 @@ sub first_page_in_set {
 	return $self->{first_page_in_set};
 }
 #=========================================================#
-
 =head2 last_page_in_set()
 
   $paginate->last_page_in_set();
@@ -801,7 +787,6 @@ sub calc_start_page {
     return ( $current_page_set * $self->{pages_per_set} ) + 1;
 }
 #=========================================================#
-
 =head2 previous_set()
 
   print "Previous set starts at ", $paginate->previous_set(), "\n";
@@ -817,7 +802,6 @@ sub previous_set {
     return undef;
 }
 #=========================================================#
-
 =head2 next_set()
 
   print "Next set starts at ", $paginate->next_set(), "\n";
@@ -833,7 +817,6 @@ sub next_set {
     return undef;
 }
 #=========================================================#
-
 =head2 pages_in_set()
 
   foreach my $page_num (@{$paginate->pages_in_set()}) {
@@ -850,16 +833,34 @@ sub pages_in_set {
     return $self->{page_set_pages};
 }
 #=========================================================#
+=head2 out()
+
+  print "out: ", $paginate->out(), "\n";
+
+=cut  
+
 sub out {
 	my ($self) = shift;
     return $self->{out};
 }
 #=========================================================#
+=head2 showing()
+
+  print "showing: ", $paginate->showing(), "\n";
+
+=cut  
+
 sub showing {
 	my ($self) = shift;
     return $self->{showing};
 }
 #=========================================================#
+=head2 showing_list()
+
+  print "showing list: ", $paginate->showing_list(), "\n";
+
+=cut  
+
 sub showing_list {
 	my ($self) = shift;
     return $self->{showing_list};

@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::View;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =pod
 
@@ -20,9 +20,9 @@ Nile::View - The template processing system.
 
 =head1 SYNOPSIS
 		
-	# get view home.html in current theme
+	# get view home.html in current active theme
 	my $view = $self->me->view("home");
-	# get view home.html in specific arabic
+	# get view home.html in specific arabic theme
 	my $view = $app->view("home", "arabic");
 	
 	# set view variables
@@ -424,7 +424,7 @@ Returns one or more template variables values.
 =cut
 
 sub get {
-my ($self, @name) = @_;
+	my ($self, @name) = @_;
 	#@{ $h{'a'} }{ @keys }
 	@{ $self->{vars} }{@name};
 }
@@ -442,7 +442,7 @@ Get or set current template content.
 =cut
 
 sub content {
-my ($self) = shift;
+	my ($self) = shift;
 	if (@_) {
 		$self->{content} = $_[0];
 		return $self;
@@ -457,7 +457,7 @@ sub parse_vars {
 	my ($match, $attrs, $content, $cdata, $cdata_content, $closing, %attr, $type, $k, $v);
 	my $tag = "vars";
 	
-	$self->{tag} = {};
+	$self->{tag} = +{};
 	my $counter = 0;
 
 	#(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>])*)/>([^<]*)(<\!\[CDATA\[(.*?)\]\]>)?(</$tag>)?)
@@ -507,7 +507,7 @@ sub parse_vars {
 #=========================================================#
 sub parse_blocks {
 	my ($self) = @_;
-	$self->{block} = {};
+	$self->{block} = +{};
 	$self->parse_nest_blocks($self->{block}, $self->{content});
 	return $self; 
 }
@@ -525,7 +525,7 @@ sub parse_nest_blocks {
         if (defined $2) {
 			# CORE
 		   $k = $2; $v = $3;
-		   $aref->{$k} = {};
+		   $aref->{$k} = +{};
 		   $aref->{$k}->{content} = $v;
 		   $aref->{$k}->{match} = $&;
 		  # print "1:{{$1}}\n2:[[$2]]\n";
@@ -629,6 +629,7 @@ sub process_blocks {
 Replace some template text or code with another one. This method will replace all instances of the found text. This method can be chained.
 
 =cut
+
 sub replace {
 	my ($self, %vars) = @_;
 	while (my ($k, $v) = each %vars) {
@@ -1017,7 +1018,7 @@ sub show {
 	
 	$view->header;
 
-Prints the header tot he browser.
+Prints the header to the browser.
 
 =cut
 

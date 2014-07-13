@@ -24,11 +24,11 @@ lib/Nile/Dispatcher.pm
 lib/Nile/File.pm
 lib/Nile/Lang.pm
 lib/Nile/Paginate.pm
-lib/Nile/Registry.pm
+lib/Nile/Setting.pm
 lib/Nile/Request.pm
 lib/Nile/Router.pm
 lib/Nile/Say.pm
-lib/Nile/Vars.pm
+lib/Nile/Var.pm
 lib/Nile/View.pm
 lib/Nile/XML.pm
 lib/Nile/Plugin/Date/Date.pm

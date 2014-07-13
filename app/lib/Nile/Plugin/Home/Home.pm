@@ -74,5 +74,5 @@ This library is free software; you can redistribute it and/or modify it under th
 
 =cut
 
-#__PACKAGE__->meta->make_immutable(0);#(inline_constructor => 0)
+#__PACKAGE__->meta->make_immutable();#(inline_constructor => 0)
 1;

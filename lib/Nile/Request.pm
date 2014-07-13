@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Request;
 
-our $VERSION = '0.13';
+our $VERSION = '0.15';
 
 =pod
 
@@ -19,20 +19,30 @@ our $VERSION = '0.13';
 Nile::Request -  The HTTP request manager.
 
 =head1 SYNOPSIS
-		
-	package Nile::Plugin::Home::Home;
-
-	use Nile::Base;
-
-	sub home  : GET Action {
-		my ($self) = @_;
-	}
 	
-	1;
+		# get request instance which extends CGI::Simple
+		$request = $self->me->request;
+
+		$email = $request->param("email");
+
+		$value = $request->cookie("username");
 
 =head1 DESCRIPTION
 
 Nile::Request -  The HTTP request manager.
+
+The http request is available as a shared object extending the L<CGI::Simple> module. This means that all methods supported
+by L<CGI::Simple> is available with the additions to these few methods:
+
+	is_ajax
+	is_post
+	is_get
+	is_head
+	is_put
+	is_delete
+	is_patch
+
+You access the request object by $self->me->request.
 
 =cut
 

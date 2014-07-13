@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Lang;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =pod
 
@@ -112,7 +112,6 @@ sub AUTOLOAD {
 	}
 }
 #=========================================================#
-
 =head2 load()
 	
 	# load language file from the current active or default language, file extension is xml.
@@ -139,13 +138,12 @@ sub load {
 	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $lang, $file);
 
 	my $xml = $self->me->xml->get_file($filename);
-	$self->{vars}->{$lang} ||= {};
+	$self->{vars}->{$lang} ||= +{};
 	$self->{vars}->{$lang} = {%{$self->{vars}->{$lang}}, %$xml};
 	$self->file($file);
 	$self;
 }
 #=========================================================#
-
 =head2 lang()
 	
 	# get active language for the language object.
@@ -165,7 +163,6 @@ sub lang {
 	return $self->{lang};
 }
 #=========================================================#
-
 =head2 clear()
 	
 	# clear all loaded language data.
@@ -180,12 +177,11 @@ Clear all loaded language data or sepcific language or all languages. This does 
 
 sub clear {
 	my ($self, $lang) = @_;
-	($lang)? $self->{vars}->{$lang} = {} : $self->{vars} = {};
+	($lang)? $self->{vars}->{$lang} = +{} : $self->{vars} = +{};
 	$self;
 }
 #=========================================================#
- 
-=head2 vars()
+ =head2 vars()
 	
 	# get all loaded language data as hash or hash ref.
 	%data = $lang->vars();
@@ -209,7 +205,6 @@ sub vars {
 	}
 }
 #=========================================================#
-
 =head2 get()
 	
 	# get language variables from the active langauge
@@ -233,7 +228,6 @@ sub get {
 	$self->{vars}->{$lang}->{$name};
 }
 #=========================================================#
-
 =head2 set()
 	
 	# set language variables.
@@ -253,7 +247,6 @@ sub set {
 	$self;
 }
 #=========================================================#
-
 =head2 list()
 	
 	# get a list of language variables.
@@ -268,7 +261,6 @@ sub list {
 	@{$self->{vars}->{$self->{lang}}}{@n};
 }
 #=========================================================#
-
 =head2 keys()
 	
 	# returns all language variables names.
@@ -283,7 +275,6 @@ sub keys {
 	(keys %{$self->{vars}->{$self->{lang}}});
 }
 #=========================================================#
-
 =head2 exists()
 	
 	# check if a langugage variable exist or not.
@@ -298,7 +289,6 @@ sub exists {
 	exists $self->{vars}->{$self->{lang}}->{$name};
 }
 #=========================================================#
-
 =head2 delete()
 	
 	# delete langugage variables.
@@ -313,7 +303,6 @@ sub delete {
 	delete $self->{vars}->{$self->{lang}}->{$_} for @n;
 }
 #=========================================================#
-
 =head2 get_file()
 	
 	# returns language file data from the active or default language, default file extension is xml.
@@ -342,7 +331,6 @@ sub get_file {
 	return wantarray? %{$xml} : $xml;
 }
 #=========================================================#
-
 =head2 save()
 	
 	# write the output file.

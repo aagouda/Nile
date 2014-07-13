@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =pod
 
@@ -34,7 +34,6 @@ Nile::Dispatcher - Application action dispatcher.
 
 use Nile::Base;
 #=========================================================#
-
 =head2 dispatch()
 	
 	# dispatch the default route or detect route from request
@@ -129,7 +128,6 @@ sub dispatch {
 	$object->$action();
 }
 #=========================================================#
-
 =head2 action()
 	
 	my ($plugin, $controller, $action) = $self->me->dispatcher->action($route);
@@ -168,7 +166,6 @@ sub action {
 	return (ucfirst($plugin), ucfirst($controller), $action);
 }
 #=========================================================#
-
 =head2 route()
 	
 	my $route = $self->me->dispatcher->route($route);
