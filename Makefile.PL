@@ -9,6 +9,7 @@ WriteMakefile(
 			Moose => 0,
 			MooseX::NonMoose => 0,
 			MooseX::MethodAttributes => 0,
+			MooseX::Declare => 0,
 			namespace::autoclean => 0,
 			CGI::Carp => 0,
 			URI => 0,
@@ -34,6 +35,7 @@ WriteMakefile(
 			Hash::AsObject => 0,
 			DateTime => 0,
 			Router::Generic => 0,
+			Tie::IxHash => 0,
 			
 	}, # e.g., Module::Name => 1.1
 

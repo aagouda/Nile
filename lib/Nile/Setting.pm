@@ -38,7 +38,7 @@ Nile::Setting - Application global settings database table manager.
 	$setting->set(%vars);
 
 	# automatic setter support
-	$setting->email('sales@mewsoft.com'); # same as $setting->set('email', 'sales@mewsoft.com');
+	$setting->email('ahmed@mewsoft.com'); # same as $setting->set('email', 'ahmed@mewsoft.com');
 
 	# delete settings from memory and database table.
 	$setting->delete(@names);
@@ -79,7 +79,7 @@ Now you can get, set and delete the settings anywhere in your application.
 	$setting->set(%vars);
 
 	# automatic setter support
-	$setting->email('sales@mewsoft.com'); # same as $setting->set('email', 'sales@mewsoft.com');
+	$setting->email('ahmed@mewsoft.com'); # same as $setting->set('email', 'ahmed@mewsoft.com');
 
 	# delete settings from memory and database table.
 	$setting->delete(@names);
@@ -213,7 +213,7 @@ sub vars {
 	$setting->set(%vars);
 
 	# automatic setter support
-	$setting->email('sales@mewsoft.com'); # same as $setting->set('email', 'sales@mewsoft.com');
+	$setting->email('ahmed@mewsoft.com'); # same as $setting->set('email', 'ahmed@mewsoft.com');
 
 Set settings variables.
 

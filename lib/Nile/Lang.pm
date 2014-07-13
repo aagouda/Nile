@@ -50,7 +50,7 @@ Nile::Lang - Language file manager.
 	$lang->set(%vars);
 
 	# automatic setter support
-	$lang->email('sales@mewsoft.com'); # same as $lang->set('email', 'sales@mewsoft.com');
+	$lang->email('ahmed@mewsoft.com'); # same as $lang->set('email', 'ahmed@mewsoft.com');
 
 =head1 DESCRIPTION
 
@@ -181,7 +181,7 @@ sub clear {
 	$self;
 }
 #=========================================================#
- =head2 vars()
+=head2 vars()
 	
 	# get all loaded language data as hash or hash ref.
 	%data = $lang->vars();
@@ -235,7 +235,7 @@ sub get {
 	$lang->set(%vars);
 
 	# automatic setter support
-	$lang->email('sales@mewsoft.com'); # same as $lang->set('email', 'sales@mewsoft.com');
+	$lang->email('ahmed@mewsoft.com'); # same as $lang->set('email', 'ahmed@mewsoft.com');
 
 Set language variables of the active language.
 

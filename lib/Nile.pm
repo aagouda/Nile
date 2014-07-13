@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 =pod
 
@@ -156,7 +156,7 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 		$view->var(
 				fname			=>	'Ahmed',
 				lname			=>	'Elsheshtawy',
-				email			=>	'sales@mewsoft.com',
+				email			=>	'ahmed@mewsoft.com',
 				website		=>	'http://www.mewsoft.com',
 				singleline		=>	'Single line variable <b>Good</b>',
 				multiline		=>	'Multi line variable <b>Nice</b>',
@@ -527,7 +527,7 @@ This library is free software; you can redistribute it and/or modify it under th
 use Moose;
 use MooseX::MethodAttributes;
 use namespace::autoclean;
-use MooseX::ClassAttribute;
+#use MooseX::ClassAttribute;
 
 use CGI::Carp qw(fatalsToBrowser);
 

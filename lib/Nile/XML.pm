@@ -29,13 +29,13 @@ Nile::XML - XML file manager.
 	# load xml file and return object to it
 	$xml = $xml->load("path/to/xml/file.xml");
 
-	# get value of email tag <email>sales@mewsoft.com</email>
+	# get value of email tag <email>ahmed@mewsoft.com</email>
 	say $xml->get('email');
 
 	# get tag value, if not found return the provided default value.
 	$var = $xml->get($name, $default);
 
-	# get tag attribute of email tag <email status='expired'>sales@mewsoft.com</email>
+	# get tag attribute of email tag <email status='expired'>ahmed@mewsoft.com</email>
 	# The prefix '-' is added on every attribute's name.
 	say $xml->get('email')->{'-status'};
 
@@ -44,21 +44,21 @@ Nile::XML - XML file manager.
 	say $xml->get('email')->{'#text'};
 
 	# get value of email tag inside other tags
-	# <users><user><contact><email>sales@mewsoft.com</email></contact></user></users>
+	# <users><user><contact><email>ahmed@mewsoft.com</email></contact></user></users>
 	say $xml->get('users/user/contact/email');
 
 	# automatic getter support
 	$email = $xml->email; # same as $xml->get('email');
 
 	# automatic setter support
-	$xml->email('sales@mewsoft.com'); # $xml->set('email', 'sales@mewsoft.com');
+	$xml->email('ahmed@mewsoft.com'); # $xml->set('email', 'ahmed@mewsoft.com');
 
 	# set value of email tag <email></email>
-	$xml->set('email', 'sales@mewsoft.com');
+	$xml->set('email', 'ahmed@mewsoft.com');
 
 	# set value of email tag inside other tags
 	# <users><user><contact><email></email></contact></user></users>
-	$xml->set('users/user/contact/email', 'sales@mewsoft.com');
+	$xml->set('users/user/contact/email', 'ahmed@mewsoft.com');
 
 	# get a list of tags values.
 	($users, $views, $items) = $xml->list( qw( users views items ) );
@@ -234,7 +234,7 @@ sub keep_order {
 =head2 set()
 	
 	# set tag value
-	$xml->set('email', 'sales@mewsoft.com');
+	$xml->set('email', 'ahmed@mewsoft.com');
 
 	# set a group of tags
 	$xml->set(%tags);
@@ -268,15 +268,15 @@ sub list {
 #=========================================================#
 =head2 get()
 	
-	# get value of email tag <email>sales@mewsoft.com</email>
-	say $xml->get('email'); # returns sales@mewsoft.com
+	# get value of email tag <email>ahmed@mewsoft.com</email>
+	say $xml->get('email'); # returns ahmed@mewsoft.com
 
 	# get tag value, if not found return the optional provided default value.
 	$var = $xml->get($name, $default);
 
 	# get value of email tag inside other tags
-	# <users><user><contact><email>sales@mewsoft.com</email></contact></user></users>
-	say $xml->get('users/user/contact/email'); # returns sales@mewsoft.com
+	# <users><user><contact><email>ahmed@mewsoft.com</email></contact></user></users>
+	say $xml->get('users/user/contact/email'); # returns ahmed@mewsoft.com
 	
 	# automatic getter support
 	$email = $xml->email; # same as $xml->get('email');

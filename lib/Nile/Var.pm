@@ -24,12 +24,12 @@ Nile::Var - Application Shared variables.
 	$var = $self->me->var;
 
 	# set some variables
-	$var->set('email', 'sales@mewsoft.com');
+	$var->set('email', 'ahmed@mewsoft.com');
 	$var->set('path', '/var/home/public_html/app');
 	$var->set('lang', 'en-US');
 	
 	# auto setters
-	$var->email('sales@mewsoft.com');
+	$var->email('ahmed@mewsoft.com');
 	$var->lang('en-US');
 
 	# get some variables
@@ -47,7 +47,7 @@ Nile::Var - Application Shared variables.
 
 	# set a list of variables 
 	$var->set(%vars);
-	$var->set(fname=>'Ahmed', lname=>'Elsheshtawy', email=>'sales@mewsoft.com');
+	$var->set(fname=>'Ahmed', lname=>'Elsheshtawy', email=>'ahmed@mewsoft.com');
 
 	# get a list of variables 
 	@values = $var->list(@vars);
@@ -132,7 +132,7 @@ sub vars {
 	$var->set(%vars);
 
 	# automatic setter support
-	$var->email('sales@mewsoft.com'); # same as $var->set('email', 'sales@mewsoft.com');
+	$var->email('ahmed@mewsoft.com'); # same as $var->set('email', 'ahmed@mewsoft.com');
 
 Set shared variables.
 

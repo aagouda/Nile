@@ -29,7 +29,7 @@ Nile::View - The template processing system.
 	$view->var(
 		fname		=>	'Ahmed',
 		lname		=>	'Elsheshtawy',
-		email		=>	'sales@mewsoft.com',
+		email		=>	'ahmed@mewsoft.com',
 		website		=>	'http://www.mewsoft.com',
 		singleline	=>	'Single line variable <b>Good</b>',
 		multiline	=>	'Multi line variable <b>Nice</b>',
