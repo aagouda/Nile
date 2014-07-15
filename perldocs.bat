@@ -2,6 +2,7 @@ perldoc -o html lib/Nile.pm > docs.html
 perldoc -o html lib/Nile/Abort.pm > Abort.html
 perldoc -o html lib/Nile/Autouse.pm > Autouse.html
 perldoc -o html lib/Nile/Base.pm > Base.html
+perldoc -o html lib/Nile/Config.pm > Config.html
 perldoc -o html lib/Nile/Database.pm > Database.html
 perldoc -o html lib/Nile/Dispatcher.pm > Dispatcher.html
 perldoc -o html lib/Nile/File.pm > File.html

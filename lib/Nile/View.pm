@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::View;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -1027,6 +1027,20 @@ sub header {
 	$type ||= "text/html;charset=utf-8";
 	print "Content-type: $type\n\n";
 	$self;
+}
+#=========================================================#
+=head2 object()
+	
+	# get a new view object
+	#my $view1 = $view->object;
+	
+Returns a new view object.
+
+=cut
+
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 sub DESTROY {

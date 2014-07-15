@@ -18,6 +18,7 @@ lib/Nile.pm
 lib/Nile/Abort.pm
 lib/Nile/Autouse.pm
 lib/Nile/Base.pm
+lib/Nile/Config.pm
 lib/Nile/Database.pm
 lib/Nile/Declare.pm
 lib/Nile/Dispatcher.pm

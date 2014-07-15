@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::XML;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -27,7 +27,10 @@ Nile::XML - XML file manager.
 	#$xml->keep_order(1);
 
 	# load xml file and return object to it
-	$xml = $xml->load("path/to/xml/file.xml");
+	$xml->load("path/to/xml/file.xml");
+
+	# load and append another xml file to the same object
+	$xml->load("path/to/xml/another.xml");
 
 	# get value of email tag <email>ahmed@mewsoft.com</email>
 	say $xml->get('email');
@@ -59,6 +62,9 @@ Nile::XML - XML file manager.
 	# set value of email tag inside other tags
 	# <users><user><contact><email></email></contact></user></users>
 	$xml->set('users/user/contact/email', 'ahmed@mewsoft.com');
+	
+	# access variables as a hash tree
+	$xml->var->{accounts}->{users}->{admin}->{username} = 'admin';
 
 	# get a list of tags values.
 	($users, $views, $items) = $xml->list( qw( users views items ) );
@@ -71,7 +77,6 @@ Nile::XML - XML file manager.
 
 	# load and append another xml file to the object
 	$xml->add_file($another_file);
-
 
 	# updated the provided tags and save changes to the file
 	$xml->update(%tags);
@@ -91,7 +96,7 @@ Nile::XML - XML file manager.
 
 Nile::XML - XML file manager.
 
-Parsing and writing XML documents into a hash tree object supports sorted order and build on the module L<XML::TreePP>.
+Parsing and writing XML files into a hash tree object supports sorted order and build on the module L<XML::TreePP>.
 
 =cut
 
@@ -186,10 +191,16 @@ sub AUTOLOAD {
 #=========================================================#
 =head2 load()
 	
+	# get xml object
 	$xml = $self->me->xml;
-	$xml->load($file);
 
-Loads xml file to the object in memory. This will clear any previously loaded files. To add files, see the add_file method.
+	# load xml file
+	$xml->load($file);
+	
+	# load and append another xml file
+	$xml->load($another);
+
+Loads xml files to the object in memory. This will not clear any previously loaded files. To will add files.
 This method can be chained C<$xml->load($file)->add_file($another_file)>;
 
 =cut
@@ -200,12 +211,22 @@ sub load {
 	
 	$file .= ".xml" unless ($file =~ /\.[^.]*$/i);
 	($file && -f $file) || $self->me->abort("Error reading file $file. $!");
-	$self->file($file);
 	
 	my $xml = $self->xml->parsefile($file);
+
 	#$self->{vars} ||= +{};
 	#$self->{vars} = {%{$self->{vars}}, %$xml};
-	$self->{vars} = $xml;
+	
+	if ($self->{vars}) {
+		while (my ($k, $v) = each %{$xml}) {
+			$self->{vars}->{$k} = $v;
+		}
+	}
+	else {
+		$self->{vars} = $xml;
+		$self->file($file);
+	}
+
 	$self;
 }
 #=========================================================#
@@ -231,41 +252,6 @@ sub keep_order {
 	return $self;
 }
 #=========================================================#
-=head2 set()
-	
-	# set tag value
-	$xml->set('email', 'ahmed@mewsoft.com');
-
-	# set a group of tags
-	$xml->set(%tags);
-
-Sets tags values.
-
-=cut
-
-sub set {
-	my ($self, %vars) = @_;
-	map { $self->{vars}->{$_} = $vars{$_}; } keys %vars;
-	$self;
-}
-#=========================================================#
-=head2 list()
-	
-	# get a list of tags values.
-	@values = $xml->list(@names);
-	($users, $views, $items) = $xml->list( qw( users views items ) );
-
-Returns a list of tags values.
-
-=cut
-
-sub list {
-	my ($self, @n) = @_;
-	my @v;
-	push @v, $self->get($_) for @n;
-	return @v
-}
-#=========================================================#
 =head2 get()
 	
 	# get value of email tag <email>ahmed@mewsoft.com</email>
@@ -286,11 +272,13 @@ Returns xml tag value, if not found returns the optional provided default value.
 =cut
 
 sub get {
+	
 	my ($self, $path, $default) = @_;
+	
 	if ($path !~ /\//) {
 		return exists $self->{vars}->{$path}? $self->{vars}->{$path} : $default;
 	}
-	#---------------------------------------
+	
 	$path =~ s/^\/+|\/+$//g;
 	my @path = split /\//, $path;
 	my $v = $self->{vars};
@@ -303,6 +291,75 @@ sub get {
 	}
 
 	return $v;
+}
+#=========================================================#
+=head2 set()
+	
+	# set tag value
+	$xml->set('email', 'ahmed@mewsoft.com');
+
+	# set a group of tags
+	$xml->set(%tags);
+
+	# set value of nested tags
+	# <users><user><contact><email>ahmed@mewsoft.com</email></contact></user></users>
+	$xml->set('users/user/contact/email', 'ahmed@mewsoft.com');
+
+Sets tags values.
+
+=cut
+
+sub set {
+
+	my ($self, %vars) = @_;
+	#map { $self->{vars}->{$_} = $vars{$_}; } keys %vars;
+	
+	my ($path, $value, @path, $k, $v, $key);
+
+	while ( ($path, $value) = each %vars) {
+
+		#if ($path !~ /\//) {
+		#	$self->{vars}->{$path} = $value;
+		#	next;
+		#}
+		
+		# path /accounts/users/admin
+		$path =~ s/^\/+|\/+$//g;
+		@path = split /\//, $path;
+		$v = $self->{vars};
+		
+		# $key = admin, @path= (accounts, users)
+		$key = pop @path;
+
+		while ($k = shift @path) {
+			if (!exists $v->{$k}) {
+				$v->{$k} = +{};
+			}
+			 $v = $v->{$k};
+		}
+		
+		# $v = $self->{vars}->{accounts}->{users}, $key = admin
+		$v->{$key} = $value;
+	}
+
+	$self;
+}
+#=========================================================#
+=head2 list()
+	
+	# get a list of tags values.
+	@values = $xml->list(@names);
+	($users, $views, $items) = $xml->list( qw( users views items ) );
+
+Returns a list of tags values.
+
+=cut
+
+sub list {
+	my ($self, @n) = @_;
+	my @v;
+	push @v, $self->get($_) for @n;
+	return @v
 }
 #=========================================================#
 =head2 var()
@@ -355,10 +412,10 @@ sub clear {
 #=========================================================#
 =head2 update()
 	
-	# get a list of tags values.
-	$xml->update(%tags);
+	# save a list of variables and update the file.
+	$xml->update(%vars);
 
-Set list of tags and save to the output file immediately.
+Set list of variables and save to the output file immediately.
 
 =cut
 
@@ -422,6 +479,23 @@ sub add_file {
 		$self->{vars}->{$k} = $v;
 	}
 	$self;
+}
+#=========================================================#
+=head2 object()
+	
+	# get a new xml object
+	#my $xml_other = $xml->object;
+	
+	# load and manage xml files separately
+	#$xml_other->load("xmlfile");
+
+Returns a new xml object. This allows to load individual xml files and work with them.
+
+=cut
+
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 sub DESTROY {

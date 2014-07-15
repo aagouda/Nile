@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 
 =pod
 
@@ -21,18 +21,48 @@ Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Mu
 =head1 SYNOPSIS
 	
 	#!/usr/bin/perl
+
 	use Nile;
-	my $app = Nile->new;
+
+	my $app = Nile->new();
+
 	$app->init(
-		#base application path, auto detected if not set
-		#path		=>	dirname(File::Spec->rel2abs(__FILE__)),
-		#site language for user, auto detected if not set
-		#lang		=>	"en-US"
-		#theme used
-		#theme		=>	"default"
-		);
-	#handle request and send response
-	$app->run;
+		# base application path, auto detected if not set
+		path	=>    dirname(File::Spec->rel2abs(__FILE__)),
+
+		# site language for user, auto detected if not set
+		lang	=>    "en-US",
+
+		# theme used
+		theme	=>    "default",
+	  );
+
+	#$app->run();
+	#exit;
+	
+	my $config = $app->config;
+	$config->load("config.xml");
+	$app->dump($config);
+
+	# connect to the database. pass the connection params or try to load it from the config object.
+	#$app->connect();
+	#$app->connect(%params);
+	
+	# load langauge file general.xml
+	$app->lang->load("general");
+	
+	# load routes file route.xml
+	$app->router->load("route");
+	
+	# run the application and show the content.
+	$app->dispatcher->dispatch;
+
+	# run any plugin action or route
+	#$app->dispatcher->dispatch('/accounts/register/create');
+	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
+	
+	# disconnect from database
+	#$app->disconnect();
 
 =head1 DESCRIPTION
 
@@ -45,50 +75,49 @@ The framework uses html templates for the design with special xml tags for inser
 All the application text is separated in langauge files in xml format supporting multi lingual applications with easy traslating and modifying all the text.
 
 	#!/usr/bin/perl
+
 	use Nile;
-	my $app = Nile->new;
+
+	my $app = Nile->new();
 
 	$app->init(
-		#base application path, auto detected if not set
-		#path		=>	dirname(File::Spec->rel2abs(__FILE__)),
-		#site language for user, auto detected if not set
-		#lang		=>	"en-US"
-		#theme used
-		#theme		=>	"default"
-		);
-	
-	#handle request and send response
-	#$app->run;
-	
-	# control everything manually
-	my $request = $app->request;
+		# base application path, auto detected if not set
+		path	=>    dirname(File::Spec->rel2abs(__FILE__)),
 
-	# load  global shared application configuration file
-	$app->config->load($app->file->catfile($app->var->get("config_dir"), "config"));
-	say $app->config->get("database/user");
+		# site language for user, auto detected if not set
+		lang	=>    "en-US",
+
+		# theme used
+		theme	=>    "default",
+	  );
+
+	#$app->run();
+	#exit;
 	
+	my $config = $app->config;
+	$config->load("config.xml");
+	$app->dump($config);
+
 	# connect to the database. pass the connection params or try to load it from the config object.
 	#$app->connect();
 	#$app->connect(%params);
-	
-	# set or get some global shared application variables
-	#my $var = $app->var;
-	#$var->Body("Body variable"); # use auto getter and setter methods
-	#say "Title: ". $var->set("Title", "Hello world Title")->get("Title");
 	
 	# load langauge file general.xml
 	$app->lang->load("general");
 	
 	# load routes file route.xml
-	$self->router->load("route");
+	$app->router->load("route");
 	
 	# run the application and show the content.
-	$self->dispatcher->dispatch;
+	$app->dispatcher->dispatch;
 
-	# you can run any plugin or route
-	#$self->dispatcher->dispatch('/accounts/register/create');
-	#$self->dispatcher->dispatch('/accounts/register/create', 'POST');
+	# run any plugin action or route
+	#$app->dispatcher->dispatch('/accounts/register/create');
+	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
 	
+	# disconnect from database
+	#$app->disconnect();
+
 =head1 EXAMPLE APPLICATION
 
 Download and uncompress the module file. You will find an example application folder named B<app>.
@@ -470,7 +499,7 @@ Loads xml files into hash tree using L<XML::TreePP>
 
 The database class provides methods for connecting to the sql database and easy methods for sql operations.
 
-=head2 Sub Modules
+=head1 Sub Modules
 
 Views	L<Nile::View|Nile::View>.
 
@@ -565,6 +594,7 @@ use Nile::XML;
 use Nile::Var;
 use Nile::File;
 use Nile::Lang;
+use Nile::Config;
 use Nile::Router;
 use Nile::Dispatcher;
 use Nile::Paginate;
@@ -600,8 +630,6 @@ sub import {
 	my ($class, @args) = @_;
 	my ($package, $script) = caller;
 	
-	#my ($callpackage, $callfile, $callline, $subroutine, $hasargs, $wantarray, $evaltext, $is_require) = caller;
-
 	# import list of modules to the calling package
 	my @modules = @EXPORT_MODULES;
     while (@modules) {
@@ -707,8 +735,6 @@ sub init {
 		$self->var->set("lang_dir", $self->file->catdir($arg{path}, "lang", $arg{lang}));
 	}
 
-	#$self->var->set("lang", "en-US");
-	#$query_string = $ENV{'QUERY_STRING'} ||= $ENV{'REDIRECT_QUERY_STRING'};
 }
 #=========================================================#
 sub run {
@@ -726,18 +752,21 @@ sub run {
 	my $request = $self->request;
 
 	#$self->config->xml->keep_order(1);
-	$self->config->load($self->file->catfile($self->var->get("config_dir"), "config"));
+	$self->config->load("config");
 
 	#$self->connect();
 
 	#my $var = $app->var;
 	#$var->Body("Body variable");
 	#say "var: ". $var->set("Title", "Hello world Title")->get("Title");
-
+	
+	# load language files
 	$self->lang->load("general");
-
+	
+	# load routes files
 	$self->router->load("route");
-
+	
+	# process the request and dispatch the action
 	$self->dispatcher->dispatch;
 	
 	#$self->log->log("application run end");
@@ -770,7 +799,7 @@ has 'file' => (
 	  isa    => 'Nile::File',
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::File", @_);
+			$self->object("Nile::File", @_);
 		}
   );
 
@@ -779,16 +808,17 @@ has 'xml' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::XML", @_);
+			$self->object("Nile::XML", @_);
 		}
   );
 
 has 'config' => (
       is      => 'rw',
+	  isa    => 'Nile::Config',
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::XML", @_);
+			$self->object("Nile::Config", @_);
 		}
   );
 
@@ -798,7 +828,7 @@ has 'var' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object ("Nile::Var", @_);
+			$self->object ("Nile::Var", @_);
 		}
   );
 
@@ -808,7 +838,7 @@ has 'setting' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::Setting", @_);
+			$self->object("Nile::Setting", @_);
 		}
   );
 
@@ -825,7 +855,7 @@ has 'lang' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::Lang", @_);
+			$self->object("Nile::Lang", @_);
 		}
   );
 
@@ -835,7 +865,7 @@ has 'router' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::Router", @_);
+			$self->object("Nile::Router", @_);
 		}
   );
 
@@ -855,7 +885,7 @@ has 'dispatcher' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			$self->me_object("Nile::Dispatcher", @_);
+			$self->object("Nile::Dispatcher", @_);
 		}
   );
 
@@ -870,7 +900,7 @@ has 'db' => (
 	  lazy	=> 1,
 	  default => sub {
 				my $self = shift;
-				my $db = $self->me_object("Nile::Database");
+				my $db = $self->object("Nile::Database");
 				#my $dbh = $db->connect(@_);
 				#$self->dbh($dbh);
 				return $db;
@@ -885,20 +915,20 @@ sub connect {
 #=========================================================#
 sub paginate {
 	my ($self) = shift;
-	return $self->me_object("Nile::Paginate", @_);
+	return $self->object("Nile::Paginate", @_);
 }
 #=========================================================#
 sub view {
 	my ($self) = shift;
-	return $self->me_object("Nile::View", @_);
+	return $self->object("Nile::View", @_);
 }
 #=========================================================#
 sub database {
 	my ($self) = shift;
-	return $self->me_object("Nile::Database", @_);
+	return $self->object("Nile::Database", @_);
 }
 #=========================================================#
-sub me_object {
+sub object {
 
 	my ($self, $class, @args) = @_;
 	my %args;

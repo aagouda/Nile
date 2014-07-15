@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Setting;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -328,6 +328,23 @@ sub clear {
 	return unless ($confirm);
 	$self->me->db->run(q{delete from $self->table});
 	$self->{vars} = +{};
+}
+#=========================================================#
+=head2 object()
+	
+	# get a new setting object
+	#my $setting_obj = $setting->object;
+	
+	# load and manage settings table separately
+	#$setting_obj->load("table", "name", "value");
+
+Returns a new setting object. This allows to load individual setting table and work with them.
+
+=cut
+
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 sub DESTROY {

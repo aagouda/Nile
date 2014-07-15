@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Var;
 
-our $VERSION = '0.16';
+our $VERSION = '0.19';
 
 =pod
 
@@ -216,6 +216,11 @@ Delete a list of shared variables.
 sub delete {
 	my ($self, @n) = @_;
 	delete $self->{vars}->{$_} for @n;
+}
+#=========================================================#
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 sub DESTROY {

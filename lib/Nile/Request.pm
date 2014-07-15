@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Request;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -62,6 +62,11 @@ sub is_head {lc(shift->request_method) eq "head";}
 sub is_put {lc(shift->request_method) eq "put";}
 sub is_delete {lc(shift->request_method) eq "delete";}
 sub is_patch {lc(shift->request_method) eq "patch";}
+#=========================================================#
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
+}
 #=========================================================#
 
 

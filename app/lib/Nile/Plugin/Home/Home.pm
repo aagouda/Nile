@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.14';
+our $VERSION = '0.19';
 use Nile::Base;
 #=========================================================#
 sub home : GET Action {

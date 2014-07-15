@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Paginate;
 
-our $VERSION = '0.65';
+our $VERSION = '0.66';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -864,6 +864,11 @@ sub showing {
 sub showing_list {
 	my ($self) = shift;
     return $self->{showing_list};
+}
+#=========================================================#
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 

@@ -21,41 +21,48 @@
 	}
 
 	use Nile;
+
 	my $app = Nile->new();
+
 	$app->init(
-					#path		=>	dirname(File::Spec->rel2abs(__FILE__)),
+					
+					# base application path, auto detected if not set
+					path		=>	dirname(File::Spec->rel2abs(__FILE__)),
+
+					# site language for user, auto detected if not set
+					lang		=>	"en-US",
+
+					# theme used
+					theme		=>	"default",
 				);
 	
-	$app->run();
-
-	exit;
+	#$app->run();
+	#exit;
 	
-	#my $config = $app->config;
-	#$config->xml->keep_order(1);
-	#$config->load($app->file->catfile($app->var->get("config_dir"), "config.xml"));
+	my $config = $app->config;
+	$config->load("config.xml");
+	#$app->dump($config);
 
-	#$app->dbh($app->db->connect());
+	# connect to the database. pass the connection params or try to load it from the config object.
 	#$app->connect();
-
-	#my $var = $app->var;
-	#$var->Body("Body variable");
-	#say "var: ". $var->set("Title", "Hello world Title")->get("Title");
+	#$app->connect(%params);
 	
-	#my $request = $app->request;
-	#say "request script_name: ". $request->script_name;
-	#say "request fullname: ". $request->param("fullname");
-
-	#say "block: " . $app->dump($view->block("first/second/third")->{match});
-	#say Dumper $view->block->{first}->{second}->{third}->{fourth}->{fifth};
-	#say Dumper $view->block->{six}->{seven}->{eight}->{content};
+	# load langauge file general.xml
+	$app->lang->load("general");
 	
-	#my @langs = $app->lang_list;
-	#say "langs list: @langs";
-	#my @themes = $app->theme_list;
-	#say "themes list: @themes";
-
-	#my @text = $app->file->get("config.xml", binmode=>":utf8", chomp=>0);
+	# load routes file route.xml
+	$app->router->load("route");
 	
+	# run the application and show the content.
+	$app->dispatcher->dispatch;
+
+	# run any plugin action or route
+	#$app->dispatcher->dispatch('/accounts/register/create');
+	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
+	
+	# disconnect from database
+	#$app->disconnect();
+
 	exit;
 #=========================================================#
 sub test_paginate {

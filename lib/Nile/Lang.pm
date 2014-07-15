@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Lang;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -93,6 +93,12 @@ has 'encoding' => (
 	is			=> 'rw',
     default	=> 'UTF-8',
   );
+
+ has 'files' => (
+        is => 'rw',
+        isa => 'HashRef',
+        default => sub { +{} }
+    );
 #=========================================================#
 sub AUTOLOAD {
 	
@@ -123,7 +129,7 @@ sub AUTOLOAD {
 	# load language file of specific language.
 	$lang->load($file, $lang);
 
-Load language files from the current active or specific language The default file extension is xml.
+Load language files from the current active or specific language. The default file extension is xml.
 This method can be chained C<$lang->load($file)->load($register)>;
 
 =cut
@@ -132,15 +138,62 @@ sub load {
 	
 	my ($self, $file, $lang) = @_;
 
-	$file .= ".xml" unless ($file =~ /\.xml$/i);
 	$lang ||= $self->{lang} ||= $self->me->var->get("lang");
 
-	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $lang, $file);
+	# file already loaded
+	if ($self->files->{$lang}->{$file}) {
+		return $self;
+	}
+	
+	my $origfile = $file;
 
+	$file .= ".xml" unless ($file =~ /\.xml$/i);
+
+	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $lang, $file);
+	
 	my $xml = $self->me->xml->get_file($filename);
+
 	$self->{vars}->{$lang} ||= +{};
 	$self->{vars}->{$lang} = {%{$self->{vars}->{$lang}}, %$xml};
+
 	$self->file($file);
+	$self->files->{$lang}->{$origfile} = 1;
+
+	$self;
+}
+#=========================================================#
+=head2 add()
+	
+	# load a list of language files from the current active or default language, file extension is xml.
+	$lang->add("general", "register", "contact");
+
+Load a list of language files from the current active or specific language. The default file extension is xml.
+This method can be chained C<$lang->load($file, $lang)->add(@files)>;
+
+=cut
+
+sub add {
+	my ($self, @files) = @_;
+	$self->load($_) for @files;
+	$self;
+}
+#=========================================================#
+=head2 reload()
+	
+	# reload a list of language files from the current active or default language, file extension is xml.
+	$lang->reload("general", "register");
+
+Reload a list of language files from the current active or specific language. The default file extension is xml.
+This method can be chained.
+
+=cut
+
+sub reload {
+	my ($self, @files) = @_;
+	foreach (@files) {
+		delete $self->files->{$self->lang}->{$_};
+		$self->load($_);
+	}
 	$self;
 }
 #=========================================================#
@@ -334,7 +387,7 @@ sub get_file {
 =head2 save()
 	
 	# write the output file.
-	$xml->save($file);
+	$lang->save($file);
 
 Save changes to the output file. If no file name it will update the loaded file name.
 
@@ -347,6 +400,23 @@ sub save {
 	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $self->{lang}, $file);
 	$self->me->xml->writefile($filename, $self->{vars}->{$self->{lang}}, $self->encoding);
 	$self;
+}
+#=========================================================#
+=head2 object()
+	
+	# get a new lang object
+	#my $lang_ar = $lang->object;
+	
+	# load and manage a language files separately
+	#$lang_ar->load("general", "ar");
+
+Returns a new language object. This allows to load individual language files and work with them.
+
+=cut
+
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 sub DESTROY {

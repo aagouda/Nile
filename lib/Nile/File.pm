@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::File;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -380,6 +380,11 @@ sub path_info {
 	my ($self, $path) = @_;
 	my ($name, $dir, $ext) = File::Basename::fileparse($path,  qr/\.[^.]*/); # qr/\.[^.]*/ matched against the end of the $filename.
 	return ($name, $dir, $ext, $name.$ext);
+}
+#=========================================================#
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 

@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Abort;
 
-our $VERSION = '0.13';
+our $VERSION = '0.19';
 
 =pod
 
@@ -37,6 +37,7 @@ use utf8;
 sub abort {
 	my ($self) = shift;
 	my ($title, $msg, $trace, @trace);
+	#my ($callpackage, $callfile, $callline, $subroutine, $hasargs, $wantarray, $evaltext, $is_require) = caller;
 
 	if (@_ == 2) {
 		($title, $msg) = @_;

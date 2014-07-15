@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Database;
 
-our $VERSION = '0.15';
+our $VERSION = '0.19';
 
 =pod
 
@@ -43,7 +43,7 @@ use Hash::AsObject;
 	
 	$self->me->db->dbh;
 
-Current database connection handle.
+Get or set the current database connection handle.
 
 =cut
 
@@ -53,7 +53,7 @@ has 'dbh' => (
 #=========================================================#
 =head2 connect()
 	
-	$self->me->db->connect(%args);
+	$dbh = $self->me->db->connect(%args);
 
 Connect to the database. If %args empty, it will try to get args from the config object.
 Returns the database connection handle is success.
@@ -376,6 +376,23 @@ Aborts the application and display the last database error message.
 sub db_error {
 	my $self = shift;
 	$self->me->abort("Database Error: $DBI::errstr<br>@_");
+}
+#=========================================================#
+=head2 object()
+	
+	# get a new setting object
+	#my $db_obj = $self->me->db->object;
+	
+	# load and manage settings table separately
+	#$db_obj->load("table", "name", "value");
+
+Returns a new setting object. This allows to load individual setting table and work with them.
+
+=cut
+
+sub object {
+	my $self = shift;
+	$self->me->object(__PACKAGE__, @_);
 }
 #=========================================================#
 
