@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 =pod
 
@@ -346,15 +346,13 @@ The framework supports url routing, route specific short name actions like 'regi
 
 Below is B<route.xml> file example should be created under the path/route folder.
 
-	<?xml version="1.0" encoding="UTF-8" ?>
-
-	<register route="register" action="Accounts/Register/register" method="get" defaults="year=1900|month=1|day=23" />
-
-	<post route="blog/post/{cid:\d+}/{id:\d+}" action="Blog/Article/Post" method="post" />
-
-	<browse route="blog/{id:\d+}" action="Blog/Article/Browse" method="get" />
-	<view route="blog/view/{id:\d+}" action="Blog/Article/View" method="get" />
-	<edit route="blog/edit/{id:\d+}" action="Blog/Article/Edit" method="get" />
+<?xml version="1.0" encoding="UTF-8" ?>
+<home route="/home" action="Home/Home/home" method="get" />
+<register route="/register" action="Accounts/Register/register" method="get" nocase="1" defaults="year=1900|month=1|day=23" />
+<post route="/blog/post/{cid:\d+}/{id:\d+}" action="Blog/Article/Post" method="post" nocase="1" />
+<browse route="/blog/{id:\d+}" action="Blog/Article/Browse" method="get" />
+<view route="/blog/view/{id:\d+}" action="Blog/Article/View" method="get" />
+<edit route="/blog/edit/{id:\d+}" action="Blog/Article/Edit" method="get" />
 
 =head1 CONFIG
 
@@ -511,7 +509,7 @@ To get list of files in a specific folder:
 	@folders = $self->file->folders("c:/apache/htdocs/nile/", "", 1);
 
 	#folders_tree($dir, $match, $relative, $depth)
-	@folders = $self->file->#folders_tree("c:/apache/htdocs/nile/", "", 1);
+	@folders = $self->file->folders_tree("c:/apache/htdocs/nile/", "", 1);
 
 =head1 XML
 
@@ -783,7 +781,7 @@ has 'bm' => (
 	$response = $app->ua->head($url);
 	
 	$response = $app->ua->post_form($url, $form_data);
-    $response = $app->ua->post_form($url, $form_data, \%options);
+	$response = $app->ua->post_form($url, $form_data, \%options);
 
 Simple HTTP client. This is a L<HTTP::Tiny> object.
 

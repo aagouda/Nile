@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Router;
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 
 =pod
 
@@ -42,15 +42,15 @@ Nile::Router - URL route manager.
 Routes are stored in a special xml files in the application folder named B<route>. Below is a sample C<route.xml> file.
 
 	<?xml version="1.0" encoding="UTF-8" ?>
-	<register route="register" action="Accounts/Register/create" method="get" defaults="year=1900|month=1|day=23" />
-	<post route="blog/post/{cid:\d+}/{id:\d+}" action="Blog/Article/post" method="post" />
-	<browse route="blog/{id:\d+}" action="Blog/Article/browse" method="get" />
-	<view route="blog/view/{id:\d+}" action="Blog/Article/view" method="get" />
-	<edit route="blog/edit/{id:\d+}" action="Blog/Article/edit" method="get" />
+	<register route="/register" action="Accounts/Register/create" method="get" defaults="year=1900|month=1|day=23" />
+	<post route="/blog/post/{cid:\d+}/{id:\d+}" action="Blog/Article/post" method="post" />
+	<browse route="/blog/{id:\d+}" action="Blog/Article/browse" method="get" />
+	<view route="/blog/view/{id:\d+}" action="Blog/Article/view" method="get" />
+	<edit route="/blog/edit/{id:\d+}" action="Blog/Article/edit" method="get" />
 
 Each route entry in the routes file has the following format:
 
-	<name route="blog" action="Plugin/Controller/Action" method="get" defaults="k1=v1|k2=v2..." />
+	<name route="/blog" action="Plugin/Controller/Action" method="get" defaults="k1=v1|k2=v2..." />
 
 The following are the components of the route tag:
 The route 'name', this must be unique name for the route.
@@ -233,11 +233,11 @@ sub _prepare_target {
 
 	my $form_params = join '&', grep { $_ } map {
 		$skip{$_}++;
-		urlencode($_) . '=' . urlencode($values->{$_}) if defined($values->{$_});
+		url_encode($_) . '=' . url_encode($values->{$_}) if defined($values->{$_});
 	} grep { defined($values->{$_}) } sort {lc($a) cmp lc($b)} keys %$values;
 
 	my $default_params = join '&', map {
-		urlencode($_) . '=' . urlencode($defaults{$_}) if defined($defaults{$_});
+		url_encode($_) . '=' . url_encode($defaults{$_}) if defined($defaults{$_});
 	} grep { defined($defaults{$_}) && ! $skip{$_} } sort {lc($a) cmp lc($b)} keys %defaults;
 
 	my $params = join '&', (grep { $_ } $form_params, $default_params);
@@ -288,7 +288,7 @@ sub uri_for {
 		!egx
 	} @{$route->{captures}};
   
-	my $params = join '&', map { urlencode($_) . '=' . urlencode($args->{$_}) }
+	my $params = join '&', map { url_encode($_) . '=' . url_encode($args->{$_}) }
 		grep { defined($args->{$_}) && length($args->{$_}) && ! $used{$_} } keys %$args;
 
 	if (length($params)) {
