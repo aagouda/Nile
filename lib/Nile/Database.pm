@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Database;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =pod
 

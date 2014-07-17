@@ -53,7 +53,19 @@
 	# load routes file route.xml
 	$app->router->load("route");
 	
-	# run the application and show the content.
+	# inline actions
+	$app->action("get", "/forum/home", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		say $self->request->virtual_host;
+		say "Hello world from inline actions forum/home.";
+	});
+
+	$app->action("get", "/accounts/login", sub {
+		my ($self) = @_;
+		say "Hello world from inline actions accounts/login.";
+	});
+
 	$app->dispatcher->dispatch;
 
 	# run any plugin action or route
@@ -62,6 +74,13 @@
 	
 	# disconnect from database
 	#$app->disconnect();
+
+	#$app->bm->lap("start");
+	#sleep 1;	
+	#$app->bm->lap("end");
+	#$app->bm->stop;
+	#print $app->bm->summary;
+	#print $app->bm->total_time;
 
 	exit;
 #=========================================================#

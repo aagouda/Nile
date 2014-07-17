@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::View;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =pod
 
@@ -663,7 +663,7 @@ sub replace_once {
 	# scan and replace the template language variables for 3 times
 	$view->translate(3);
 
-This method normally used internally when processing the template. It scans the tempalte for the langauge variables
+This method normally used internally when processing the template. It scans the template for the langauge variables
 surrounded by the curly braces B<{var_name}> and replaces them with their values from the loaded language files. 
 This method can be chained.
 

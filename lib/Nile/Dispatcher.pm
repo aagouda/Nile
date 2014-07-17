@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =pod
 
@@ -21,10 +21,10 @@ Nile::Dispatcher - Application action dispatcher.
 =head1 SYNOPSIS
 		
 	# dispatch the default route or detect route from request
-	$self->dispatcher->dispatch;
+	$app->dispatcher->dispatch;
 
 	# dispatch specific route and request method
-	$self->me->dispatcher->dispatch($route, $request_method);
+	$app->dispatcher->dispatch($route, $request_method);
 
 =head1 DESCRIPTION
 
@@ -37,10 +37,10 @@ use Nile::Base;
 =head2 dispatch()
 	
 	# dispatch the default route or detect route from request
-	$self->dispatcher->dispatch;
+	$app->dispatcher->dispatch;
 
 	# dispatch specific route and request method
-	$self->me->dispatcher->dispatch($route, $request_method);
+	$app->dispatcher->dispatch($route, $request_method);
 
 =cut
 
@@ -53,16 +53,24 @@ sub dispatch {
 	$request_method ||= "*";
 
 	$route = $self->route($route);
+	
+	# beginning slash. forum/topic => /forum/topic
+	$route = "/$route" if ($route !~ /^\//);
 
 	my ($target, $args, $uri, $query) = $self->me->router->match($route, $request_method);
+	
 	if ($target) {
 		$route = $target;
 		while (my($k, $v) = each %$args) {
 			$self->me->request->add_param($k, $v);
 		}
 	}
-
-	#say "route match:  ($action, $args, $uri, $query)";
+	
+	# inline actions. $app->action("get", "/home", sub {...});
+	if (ref($route) eq "CODE") {
+		$self->me->capture($route->($self->me));
+		return;
+	}
 
 	$route ||= $self->me->var->get("default_route");
 	$route ||= $self->me->abort(qq{Application Error: No route defined.});

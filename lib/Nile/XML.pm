@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::XML;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =pod
 
@@ -91,6 +91,12 @@ Nile::XML - XML file manager.
 	# load xml file content and return it as a hash ref, not added to the object
 	$xml_hash_ref = $xml->get_file($file);
 	say $xml_hash_ref->{root}->{config}->{database}->{user};
+
+	# get a new xml object
+	#my $xml_other = $xml->object;
+	
+	# load and manage another xml files separately
+	#$xml_other->load("xmlfile");
 
 =head1 DESCRIPTION
 

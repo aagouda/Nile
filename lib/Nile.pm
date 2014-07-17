@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 
 =pod
 
@@ -42,7 +42,7 @@ Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Mu
 	
 	my $config = $app->config;
 	$config->load("config.xml");
-	$app->dump($config);
+	#$app->dump($config);
 
 	# connect to the database. pass the connection params or try to load it from the config object.
 	#$app->connect();
@@ -54,7 +54,19 @@ Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Mu
 	# load routes file route.xml
 	$app->router->load("route");
 	
-	# run the application and show the content.
+	# inline actions
+	$app->action("get", "/forum/home", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		say $self->request->virtual_host;
+		say "Hello world from inline actions forum/home.";
+	});
+
+	$app->action("get", "/accounts/login", sub {
+		my ($self) = @_;
+		say "Hello world from inline actions accounts/login.";
+	});
+
 	$app->dispatcher->dispatch;
 
 	# run any plugin action or route
@@ -72,7 +84,7 @@ B<Alpha> version, do not use it for production. The project's homepage L<https:/
 
 The main idea in this framework is to separate all the html design and layout from programming. 
 The framework uses html templates for the design with special xml tags for inserting the dynamic output into the templates.
-All the application text is separated in langauge files in xml format supporting multi lingual applications with easy traslating and modifying all the text.
+All the application text is separated in langauge files in xml format supporting multi lingual applications with easy translating and modifying all the text.
 
 	#!/usr/bin/perl
 
@@ -96,7 +108,7 @@ All the application text is separated in langauge files in xml format supporting
 	
 	my $config = $app->config;
 	$config->load("config.xml");
-	$app->dump($config);
+	#$app->dump($config);
 
 	# connect to the database. pass the connection params or try to load it from the config object.
 	#$app->connect();
@@ -108,7 +120,19 @@ All the application text is separated in langauge files in xml format supporting
 	# load routes file route.xml
 	$app->router->load("route");
 	
-	# run the application and show the content.
+	# inline actions
+	$app->action("get", "/forum/home", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		say $self->request->virtual_host;
+		say "Hello world from inline actions forum/home.";
+	});
+
+	$app->action("get", "/accounts/login", sub {
+		my ($self) = @_;
+		say "Hello world from inline actions accounts/login.";
+	});
+
 	$app->dispatcher->dispatch;
 
 	# run any plugin action or route
@@ -499,58 +523,7 @@ Loads xml files into hash tree using L<XML::TreePP>
 
 The database class provides methods for connecting to the sql database and easy methods for sql operations.
 
-=head1 Sub Modules
-
-Views	L<Nile::View|Nile::View>.
-
-Shared Vars	L<Nile::Var|Nile::Var>.
-
-Langauge	L<Nile::Lang|Nile::Lang>.
-
-Http Request	L<Nile::Request|Nile::Request>.
-
-Dispatcher L<Nile::Dispatcher|Nile::Dispatcher>.
-
-Router L<Nile::Router|Nile::Router>.
-
-File Utils L<Nile::File|Nile::File>.
-
-Paginatation L<Nile::Paginate|Nile::Paginate>.
-
-Database L<Nile::Database|Nile::Database>.
-
-XML L<Nile::XML|Nile::XML>.
-
-Settings	L<Nile::Setting|Nile::Setting>.
-
-Abort L<Nile::Abort|Nile::Abort>.
-
-=head1 Bugs
-
-This project is available on github at L<https://github.com/mewsoft/Nile>.
-
-=head1 HOMEPAGE
-
-Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
-
-=head1 SOURCE
-
-Source repository is at L<https://github.com/mewsoft/Nile>.
-
-=head1 AUTHOR
-
-Ahmed Amin Elsheshtawy,  احمد امين الششتاوى <mewsoft@cpan.org>
-Website: http://www.mewsoft.com
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy mewsoft@cpan.org, support@mewsoft.com,
-L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
-
-This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
-
 =cut
-
 #$|=1;
 
 use Moose;
@@ -572,12 +545,12 @@ use Crypt::RC4;
 use Capture::Tiny ();
 use Time::Local;
 use File::Slurp;
-use Time::HiRes qw(gettimeofday);
+use Time::HiRes qw(gettimeofday tv_interval);
 use MIME::Base64 qw(encode_base64 decode_base64 decode_base64url encode_base64url);
 
 use Data::Dumper;
+$Data::Dumper::Deparse = 1; #stringify coderefs
 #use LWP::UserAgent;
-use HTTP::Tiny;
 use Log::Tiny;
 use CGI::Simple;
 use HTTP::AcceptLanguage;
@@ -614,7 +587,6 @@ our @EXPORT_MODULES = (
 		#'File::Spec' => [],
 		#'File::Basename' => [],
 		Cwd => [],
-
 		'Nile::Say' => [],
 		'MooseX::MethodAttributes' => [],
 	);
@@ -772,19 +744,70 @@ sub run {
 	#$self->log->log("application run end");
 }
 #=========================================================#
+=head2 bm()
+	
+	$app->bm->lap("start task");
+	....
+	$app->bm->lap("end task");
+	
+	say $app->bm->stop->summary;
+
+	# NAME			TIME		CUMULATIVE		PERCENTAGE
+	# start task		0.123		0.123			34.462%
+	# end task		0.234		0.357			65.530%
+	# _stop_		0.000		0.357			0.008%
+	
+	say "Total time: " . $app->bm->total_time;
+
+Benchmark specific parts of your code. This is a L<Benchmark::Stopwatch> object.
+
+=cut
+
+has 'bm' => (
+      is      => 'rw',
+      isa    => 'Benchmark::Stopwatch',
+	  lazy	=> 1,
+	  default => sub{
+		  #autoload, load CGI, ':all';
+		  load Benchmark::Stopwatch;
+		  Benchmark::Stopwatch->new->start;
+	  }
+  );
+
+=head2 ua()
+	
+	my $response = $app->ua->get('http://example.com/');
+	say $response->{content} if length $response->{content};
+	
+	$response = $app->ua->get($url, \%options);
+	$response = $app->ua->head($url);
+	
+	$response = $app->ua->post_form($url, $form_data);
+    $response = $app->ua->post_form($url, $form_data, \%options);
+
+Simple HTTP client. This is a L<HTTP::Tiny> object.
+
+=cut
+
 has 'ua' => (
       is      => 'rw',
       isa    => 'HTTP::Tiny',
 	  lazy	=> 1,
 	  #trigger => sub {shift->clearer},
-	  default => sub{HTTP::Tiny->new}
+	  default => sub{
+		  load HTTP::Tiny;
+		  HTTP::Tiny->new;
+	  }
   );
 
 has 'uri' => (
       is      => 'rw',
       isa    => 'URI',
 	  lazy	=> 1,
-	  default => sub{URI->new}
+	  default => sub{
+		  load URI;
+		  URI->new;
+	  }
   );
 
 has 'charset' => (
@@ -846,7 +869,7 @@ has 'request' => (
       is      => 'rw',
       isa    => 'Nile::Request',
 	  lazy	=> 1,
-	  default => sub {Nile::Request->new}
+	  default => sub {Nile::Request->new;}
   );
 
 has 'lang' => (
@@ -999,6 +1022,60 @@ sub detect_user_language {
 	return $lang;
 }
 #=========================================================#
+sub action {
+	
+	my $self = shift;
+
+	#my @methods = qw(get post put patch delete options head);
+
+	my ($method, $route, $action);
+
+	if (@_ == 1) {
+		#$app->action(sub {});
+		($action) = @_;
+	}
+	elsif (@_ == 2) {
+		#$app->action("/home", sub {});
+		($route, $action) = @_;
+	}
+	elsif (@_ == 3) {
+		#$app->action("get", "/home", sub {});
+		($method, $route, $action) = @_;
+	}
+	else {
+		$self->abort("Action error. Empty action and route. Syntax \$app->action(\$method, \$route, \$coderef) ");
+	}
+
+	$method ||= "";
+	$route ||= "/";
+	
+	if (ref($action) ne "CODE") {
+		$self->abort("Action error, must be a valid code reference. Syntax \$app->action(\$method, \$route, \$coderef) ");
+	}
+
+	$self->router->add_route(
+							name  => "",
+							path  => $route,
+							target  => $action,
+							method  => $method,
+							defaults  => {
+									#id => 1
+								}
+						);
+
+}
+#=========================================================#
+sub run_action {
+	my ($self, $code) = @_;
+	$code->();
+}
+#=========================================================#
+
+sub start {
+	my $self = shift;
+	
+}
+#=========================================================#
 sub dump {
 	my $self = shift;
 	say Dumper (@_);
@@ -1083,5 +1160,59 @@ sub abort {
 #=========================================================#
 #__PACKAGE__->meta->make_immutable;#(inline_constructor => 0)
 #=========================================================#
+
+
+=head1 Sub Modules
+
+Views	L<Nile::View|Nile::View>.
+
+Shared Vars	L<Nile::Var|Nile::Var>.
+
+Langauge	L<Nile::Lang|Nile::Lang>.
+
+Http Request	L<Nile::Request|Nile::Request>.
+
+Dispatcher L<Nile::Dispatcher|Nile::Dispatcher>.
+
+Router L<Nile::Router|Nile::Router>.
+
+File Utils L<Nile::File|Nile::File>.
+
+Paginatation L<Nile::Paginate|Nile::Paginate>.
+
+Database L<Nile::Database|Nile::Database>.
+
+XML L<Nile::XML|Nile::XML>.
+
+Settings	L<Nile::Setting|Nile::Setting>.
+
+Abort L<Nile::Abort|Nile::Abort>.
+
+=head1 Bugs
+
+This project is available on github at L<https://github.com/mewsoft/Nile>.
+
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 AUTHOR
+
+Ahmed Amin Elsheshtawy,  احمد امين الششتاوى <mewsoft@cpan.org>
+Website: http://www.mewsoft.com
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014-2015 by Dr. Ahmed Amin Elsheshtawy mewsoft@cpan.org, support@mewsoft.com,
+L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
+
+This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+
+=cut
+
 
 1;
