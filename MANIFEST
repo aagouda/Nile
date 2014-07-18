@@ -14,6 +14,7 @@ app/route/route.xml
 app/theme/default/view/home.html
 app/theme/default/widget/footer.html
 app/theme/default/widget/header.html
+
 lib/Nile.pm
 lib/Nile/Abort.pm
 lib/Nile/Autouse.pm
@@ -29,6 +30,9 @@ lib/Nile/Setting.pm
 lib/Nile/Request.pm
 lib/Nile/Router.pm
 lib/Nile/Say.pm
+lib/Nile/Serializer.pm
+lib/Nile/Deserializer.pm
+lib/Nile/Serialization.pm
 lib/Nile/Var.pm
 lib/Nile/View.pm
 lib/Nile/XML.pm

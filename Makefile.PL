@@ -36,6 +36,7 @@ WriteMakefile(
 			DateTime => 0,
 			Tie::IxHash => 0,
 			Benchmark::Stopwatch => 0,
+			File::Find::Rule => 0,
 			
 	}, # e.g., Module::Name => 1.1
 

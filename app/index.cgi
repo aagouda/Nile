@@ -67,7 +67,7 @@
 	});
 
 	$app->dispatcher->dispatch;
-
+	
 	# run any plugin action or route
 	#$app->dispatcher->dispatch('/accounts/register/create');
 	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
@@ -81,6 +81,9 @@
 	#$app->bm->stop;
 	#print $app->bm->summary;
 	#print $app->bm->total_time;
+
+	#$app->debug->off;
+	#say $app->debug(1),"  ,  ", $app->debug;
 
 	exit;
 #=========================================================#

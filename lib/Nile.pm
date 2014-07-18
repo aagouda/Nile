@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.21';
+our $VERSION = '0.22';
 
 =pod
 
@@ -761,6 +761,12 @@ Benchmark specific parts of your code. This is a L<Benchmark::Stopwatch> object.
 
 =cut
 
+has 'debug' => (
+      is      => 'rw',
+      isa     => 'Bool',
+      default => 0,
+  );
+
 has 'bm' => (
       is      => 'rw',
       isa    => 'Benchmark::Stopwatch',
@@ -792,7 +798,7 @@ has 'ua' => (
       isa    => 'HTTP::Tiny',
 	  lazy	=> 1,
 	  #trigger => sub {shift->clearer},
-	  default => sub{
+	  default => sub {
 		  load HTTP::Tiny;
 		  HTTP::Tiny->new;
 	  }
@@ -802,7 +808,7 @@ has 'uri' => (
       is      => 'rw',
       isa    => 'URI',
 	  lazy	=> 1,
-	  default => sub{
+	  default => sub {
 		  load URI;
 		  URI->new;
 	  }
@@ -814,6 +820,28 @@ has 'charset' => (
 	  lazy	=> 1,
       default => 'utf8'
   );
+
+has 'freeze' => (
+      is      => 'rw',
+      isa    => 'Nile::Serializer',
+	  lazy	=> 1,
+	  default => sub {
+		  load Nile::Serializer;
+		  Nile::Serializer->new;
+	  }
+  );
+sub serialize {shift->freeze(@_);}
+
+has 'thaw' => (
+      is      => 'rw',
+      isa    => 'Nile::Deserializer',
+	  lazy	=> 1,
+	  default => sub {
+		  load Nile::Deserializer;
+		  Nile::Deserializer->new;
+	  }
+  );
+sub deserialize {shift->thaw(@_);}
 
 has 'file' => (
       is      => 'rw',
@@ -1183,6 +1211,12 @@ Database L<Nile::Database|Nile::Database>.
 XML L<Nile::XML|Nile::XML>.
 
 Settings	L<Nile::Setting|Nile::Setting>.
+
+Serializer L<Nile::Serializer|Nile::Serializer>.
+
+Deserializer L<Nile::Deserializer|Nile::Deserializer>.
+
+Serialization L<Nile::Serialization|Nile::Serialization>.
 
 Abort L<Nile::Abort|Nile::Abort>.
 
