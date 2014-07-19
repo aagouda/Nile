@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::File;
 
-our $VERSION = '0.20';
+our $VERSION = '0.23';
 
 =pod
 
@@ -74,6 +74,7 @@ use Nile::Base;
 use File::Slurp;
 use File::Find::Rule;
 use File::Basename ();
+use File::Temp qw(tempfile tempdir);
 
 our ($OS, %DS, $DS);
 
@@ -382,6 +383,77 @@ sub path_info {
 	return ($name, $dir, $ext, $name.$ext);
 }
 #=========================================================#
+=head2 open()
+	
+	$fh = $app->file->open($file);
+	$fh = $app->file->open($mode, $file);
+	$fh = $app->file->open($mode, $file, $charset);
+	$fh = $app->file->open(">", $file, "utf8");
+
+Open file and returns a filehandle.
+
+=cut
+
+sub open {
+    
+	my $self = shift;
+
+	if (@_ == 1) {
+		my ($filename) = @_;
+		$charset = "";
+	}
+	elsif (@_ == 2) {
+		my ($mode, $filename) = @_;
+		$charset = "";
+	}
+	elsif (@_ == 3) {
+		my ($mode, $filename, $charset) = @_;
+	}
+	
+	$mode ||= "<";
+    open(my $fh, $mode, $filename) or $self->me->abort("Error opening file $filename in mode $mode. $!";
+	binmode $fh, ":encoding($charset)" if ($charset);
+    return $fh;
+}
+#=========================================================#
+=head2 tempfile()
+	
+	#$template = "tmpdirXXXXXX";
+	($fh, $filename) = $app->file->tempfile($template);
+	($fh, $filename) = $app->file->tempfile($template, DIR => $dir);
+	($fh, $filename) = $app->file->tempfile($template, SUFFIX => '.dat');
+	($fh, $filename) = $app->file->tempfile($template, TMPDIR => 1 );
+
+Return name and handle of a temporary file safely. This is a wrapper for the L<File::Temp> tempfile function.
+
+=cut
+
+sub tempfile {
+	my $self = shift;
+	#(TEMPLATE => 'tempXXXXX', DIR => 'mydir', SUFFIX => '.dat', TMPDIR => 1)
+	my ($fh, $filename) = tempfile(@_);
+	#binmode $fh, ":encoding($charset)";
+	binmode($fh, ":utf8");
+	return ($fh, $filename);
+}
+#=========================================================#
+=head2 tempdir()
+	
+	$tmpdir = $app->file->tempdir($template);
+	$tmpdir = $app->file->tempdir($template, DIR => $dir);
+	$tmpdir = $app->file->tempdir($template, TMPDIR => 1 );
+
+Return name of a temporary directory safely. This is a wrapper for the L<File::Temp> tempdir function.
+
+=cut
+
+sub tempdir {
+	my $self = shift;
+	#(TEMPLATE => 'tempXXXXX', DIR => 'mydir', CLEANUP => 1, TMPDIR => 1)
+	my $tempdir = tempdir(@_);
+	return $tempdir;
+}
+#=========================================================#
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
@@ -401,6 +473,10 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 =head1 SOURCE
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 SEE ALSO
+
+See L<Nile> for details about the complete framework.
 
 =head1 AUTHOR
 

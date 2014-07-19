@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Paginate;
 
-our $VERSION = '0.67';
+our $VERSION = '0.23';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -872,6 +872,8 @@ sub object {
 }
 #=========================================================#
 
+=pod
+
 =head1 Bugs
 
 This project is available on github at L<https://github.com/mewsoft/Nile>.
@@ -883,6 +885,10 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 =head1 SOURCE
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 SEE ALSO
+
+See L<Nile> for details about the complete framework.
 
 =head1 AUTHOR
 

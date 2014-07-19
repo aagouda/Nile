@@ -8,58 +8,7 @@
 #=========================================================#
 package Nile::Autouse;
 
-our $VERSION = '0.20';
-
-=pod
-
-=encoding utf8
-
-=head1 NAME
-
-Nile::Autouse - Load classes automatically
-
-=head1 SYNOPSIS
-
-    use Nile::Autouse;
-    
-    my $obj = My::Class->new; # loads My/Class.pm
-
-=head1 DESCRIPTION
-
-Nile::Autouse Run-time load a class the first time you call a method in it.
-
-=cut
-#=========================================================#
-use strict;
-use warnings;
-use Carp qw(confess);
-use utf8;
-
-our $VERSION = 1.00;
-
-unshift @UNIVERSAL::ISA, 'Nile::Autouse';
-
-sub AUTOLOAD {
-my ($self) = shift;
-	
-    my ($class, $sub) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
-    return if $sub !~ /[^A-Z]/;
-	
-	#print "Autouse loading class: $class \n";
-
-    eval "use $class";
-    
-	if ($@) {
-		#my ($callpackage, $callfile, $callline) = caller;
-		confess($@);
-    }
-
-    unless ($self->can($sub)) {
-		confess("Method \'$class\-\>$sub\' does not exist. ");
-    }
-    return $self->$sub(@_);
-	#goto &$sub;
-}
+our $VERSION = '0.23';
 
 =pod
 
@@ -74,6 +23,10 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 =head1 SOURCE
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 SEE ALSO
+
+See L<Nile> for details about the complete framework.
 
 =head1 AUTHOR
 

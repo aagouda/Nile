@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Abort;
 
-our $VERSION = '0.20';
+our $VERSION = '0.23';
 
 =pod
 
@@ -95,6 +95,10 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 =head1 SOURCE
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 SEE ALSO
+
+See L<Nile> for details about the complete framework.
 
 =head1 AUTHOR
 

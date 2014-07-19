@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Plugin::Date::Date;
 
-our $VERSION = '0.19';
+our $VERSION = '0.23';
 
 use Nile::Base;
 use DateTime qw();
@@ -34,8 +34,6 @@ sub now {
 
 =pod
 
-=encoding utf8
-
 =head1 Bugs
 
 This project is available on github at L<https://github.com/mewsoft/Nile>.
@@ -47,6 +45,10 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 =head1 SOURCE
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
+
+=head1 SEE ALSO
+
+See L<Nile> for details about the complete framework.
 
 =head1 AUTHOR
 

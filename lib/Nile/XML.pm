@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::XML;
 
-our $VERSION = '0.20';
+our $VERSION = '0.23';
 
 =pod
 
@@ -522,6 +522,10 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
 
+=head1 SEE ALSO
+
+See L<Nile> for details about the complete framework.
+
 =head1 AUTHOR
 
 Ahmed Amin Elsheshtawy,  احمد امين الششتاوى <mewsoft@cpan.org>
@@ -537,4 +541,3 @@ This library is free software; you can redistribute it and/or modify it under th
 =cut
 
 1;
-

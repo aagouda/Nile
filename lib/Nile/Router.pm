@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Router;
 
-our $VERSION = '0.21';
+our $VERSION = '0.23';
 
 =pod
 
@@ -537,9 +537,9 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
 
-=head1 ACKNOWLEDGEMENTS
+=head1 SEE ALSO
 
-Most of the code in this module taken from module L<Router::Generic>
+See L<Nile> for details about the complete framework.
 
 =head1 AUTHOR
 
