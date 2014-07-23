@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.23';
+our $VERSION = '0.26';
 
 =pod
 
@@ -572,6 +572,7 @@ use Nile::Paginate;
 use Nile::Database;
 use Nile::Setting;
 use Nile::Request;
+use Nile::Response;
 
 #use base 'Import::Base';
 use Import::Into;
@@ -895,7 +896,28 @@ has 'request' => (
       is      => 'rw',
       isa    => 'Nile::Request',
 	  lazy	=> 1,
-	  default => sub {Nile::Request->new;}
+	  default => sub {
+			shift->object("Nile::Request", @_);
+		}
+  );
+
+has 'response' => (
+      is      => 'rw',
+      isa    => 'Nile::Response',
+	  lazy	=> 1,
+	  default => sub {
+			shift->object("Nile::Response", @_);
+		}
+  );
+
+has 'mime' => (
+      is      => 'rw',
+      isa    => 'Nile::MIME',
+	  lazy	=> 1,
+	  default => sub {
+			load Nile::MIME;
+			shift->object("Nile::MIME", only_complete => 1);
+		}
   );
 
 has 'lang' => (
@@ -903,8 +925,7 @@ has 'lang' => (
 	  isa    => 'Nile::Lang',
 	  lazy	=> 1,
 	  default => sub {
-			my $self = shift;
-			$self->object("Nile::Lang", @_);
+			shift->object("Nile::Lang", @_);
 		}
   );
 
@@ -913,8 +934,7 @@ has 'router' => (
 	  isa    => 'Nile::Router',
 	  lazy	=> 1,
 	  default => sub {
-			my $self = shift;
-			$self->object("Nile::Router", @_);
+			shift->object("Nile::Router", @_);
 		}
   );
 
@@ -933,8 +953,7 @@ has 'dispatcher' => (
 	  isa    => 'Nile::Dispatcher',
 	  lazy	=> 1,
 	  default => sub {
-			my $self = shift;
-			$self->object("Nile::Dispatcher", @_);
+			shift->object("Nile::Dispatcher", @_);
 		}
   );
 
@@ -1196,7 +1215,9 @@ Shared Vars	L<Nile::Var|Nile::Var>.
 
 Langauge	L<Nile::Lang|Nile::Lang>.
 
-Http Request	L<Nile::Request|Nile::Request>.
+Request	L<Nile::Request|Nile::Request>.
+
+Response	L<Nile::Response|Nile::Response>.
 
 Dispatcher L<Nile::Dispatcher|Nile::Dispatcher>.
 
@@ -1217,6 +1238,8 @@ Serializer L<Nile::Serializer|Nile::Serializer>.
 Deserializer L<Nile::Deserializer|Nile::Deserializer>.
 
 Serialization L<Nile::Serialization|Nile::Serialization>.
+
+MIME L<Nile::MIME|Nile::MIME>.
 
 Abort L<Nile::Abort|Nile::Abort>.
 

@@ -1,2 +1,2 @@
-/usr/bin/perl Makefile.PL
-make tardist
+/usr/bin/perl Makefile.PL;
+make tardist;

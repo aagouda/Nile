@@ -1,17 +1,19 @@
-perldoc -o html lib/Nile.pm > docs.html
-perldoc -o html lib/Nile/Abort.pm > Abort.html
-perldoc -o html lib/Nile/Autouse.pm > Autouse.html
-perldoc -o html lib/Nile/Base.pm > Base.html
-perldoc -o html lib/Nile/Config.pm > Config.html
-perldoc -o html lib/Nile/Database.pm > Database.html
-perldoc -o html lib/Nile/Dispatcher.pm > Dispatcher.html
-perldoc -o html lib/Nile/File.pm > File.html
-perldoc -o html lib/Nile/Lang.pm > Lang.html
-perldoc -o html lib/Nile/Paginate.pm > Paginate.html
-perldoc -o html lib/Nile/Setting.pm > Setting.html
-perldoc -o html lib/Nile/Request.pm > Request.html
-perldoc -o html lib/Nile/Router.pm > Router.html
-perldoc -o html lib/Nile/Say.pm > Say.html
-perldoc -o html lib/Nile/Var.pm > Var.html
-perldoc -o html lib/Nile/View.pm > View.html
-perldoc -o html lib/Nile/XML.pm > XML.html
+call perldoc -o html lib/Nile.pm > docs.html
+call perldoc -o html lib/Nile/Abort.pm > Abort.html
+call perldoc -o html lib/Nile/Autouse.pm > Autouse.html
+call perldoc -o html lib/Nile/Base.pm > Base.html
+call perldoc -o html lib/Nile/Config.pm > Config.html
+call perldoc -o html lib/Nile/Database.pm > Database.html
+call perldoc -o html lib/Nile/Dispatcher.pm > Dispatcher.html
+call perldoc -o html lib/Nile/File.pm > File.html
+call perldoc -o html lib/Nile/Lang.pm > Lang.html
+call perldoc -o html lib/Nile/Paginate.pm > Paginate.html
+call perldoc -o html lib/Nile/Setting.pm > Setting.html
+call perldoc -o html lib/Nile/Request.pm > Request.html
+call perldoc -o html lib/Nile/Response.pm > Response.html
+call perldoc -o html lib/Nile/Router.pm > Router.html
+call perldoc -o html lib/Nile/MIME.pm > MIME.html
+call perldoc -o html lib/Nile/Say.pm > Say.html
+call perldoc -o html lib/Nile/Var.pm > Var.html
+call perldoc -o html lib/Nile/View.pm > View.html
+call perldoc -o html lib/Nile/XML.pm > XML.html

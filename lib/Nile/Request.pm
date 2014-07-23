@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Request;
 
-our $VERSION = '0.23';
+our $VERSION = '0.26';
 
 =pod
 
@@ -46,7 +46,7 @@ You access the request object by $self->me->request.
 
 =cut
 
-use Moose;
+use Nile::Base;
 use MooseX::NonMoose;
 extends 'CGI::Simple';
 

@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Serialization;
 
-our $VERSION = '0.23';
+our $VERSION = '0.26';
 
 =pod
 

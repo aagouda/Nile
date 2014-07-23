@@ -28,6 +28,7 @@ lib/Nile/Lang.pm
 lib/Nile/Paginate.pm
 lib/Nile/Setting.pm
 lib/Nile/Request.pm
+lib/Nile/Response.pm
 lib/Nile/Router.pm
 lib/Nile/Say.pm
 lib/Nile/Serializer.pm
@@ -36,5 +37,6 @@ lib/Nile/Serialization.pm
 lib/Nile/Var.pm
 lib/Nile/View.pm
 lib/Nile/XML.pm
+lib/Nile/MIME.pm
 lib/Nile/Plugin/Date/Date.pm
 t/Nile.t

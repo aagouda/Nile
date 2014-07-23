@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::File;
 
-our $VERSION = '0.23';
+our $VERSION = '0.26';
 
 =pod
 
@@ -74,7 +74,7 @@ use Nile::Base;
 use File::Slurp;
 use File::Find::Rule;
 use File::Basename ();
-use File::Temp qw(tempfile tempdir);
+use File::Temp ();
 
 our ($OS, %DS, $DS);
 
@@ -397,21 +397,22 @@ Open file and returns a filehandle.
 sub open {
     
 	my $self = shift;
+	my ($mode, $filename, $charset);
 
 	if (@_ == 1) {
-		my ($filename) = @_;
+		($filename) = @_;
 		$charset = "";
 	}
 	elsif (@_ == 2) {
-		my ($mode, $filename) = @_;
+		($mode, $filename) = @_;
 		$charset = "";
 	}
 	elsif (@_ == 3) {
-		my ($mode, $filename, $charset) = @_;
+		($mode, $filename, $charset) = @_;
 	}
 	
 	$mode ||= "<";
-    open(my $fh, $mode, $filename) or $self->me->abort("Error opening file $filename in mode $mode. $!";
+    CORE::open(my $fh, $mode, $filename) or $self->me->abort("Error opening file $filename in mode $mode. $!");
 	binmode $fh, ":encoding($charset)" if ($charset);
     return $fh;
 }
@@ -431,7 +432,7 @@ Return name and handle of a temporary file safely. This is a wrapper for the L<F
 sub tempfile {
 	my $self = shift;
 	#(TEMPLATE => 'tempXXXXX', DIR => 'mydir', SUFFIX => '.dat', TMPDIR => 1)
-	my ($fh, $filename) = tempfile(@_);
+	my ($fh, $filename) = File::Temp::tempfile(@_);
 	#binmode $fh, ":encoding($charset)";
 	binmode($fh, ":utf8");
 	return ($fh, $filename);
@@ -450,8 +451,12 @@ Return name of a temporary directory safely. This is a wrapper for the L<File::T
 sub tempdir {
 	my $self = shift;
 	#(TEMPLATE => 'tempXXXXX', DIR => 'mydir', CLEANUP => 1, TMPDIR => 1)
-	my $tempdir = tempdir(@_);
-	return $tempdir;
+	if (@_ == 1) {
+		return File::Temp::tempdir(shift, TMPDIR => 1, CLEANUP => 1);
+	}
+	else {
+		return File::Temp::tempdir(@_);
+	}
 }
 #=========================================================#
 sub object {

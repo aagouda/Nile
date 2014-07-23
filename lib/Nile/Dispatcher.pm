@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.23';
+our $VERSION = '0.26';
 
 =pod
 
@@ -33,6 +33,7 @@ Nile::Dispatcher - Application action dispatcher.
 =cut
 
 use Nile::Base;
+use Capture::Tiny ();
 #=========================================================#
 =head2 dispatch()
 	
@@ -42,9 +43,33 @@ use Nile::Base;
 	# dispatch specific route and request method
 	$app->dispatcher->dispatch($route, $request_method);
 
+Process the action and send output to client.
+
 =cut
 
 sub dispatch {
+
+	my $self = shift;
+	
+	my $content = $self->dispatch_action(@_);
+
+	print $content;
+
+}
+#=========================================================#
+=head2 dispatch_action()
+	
+	# dispatch the default route or detect route from request
+	$content = $app->dispatcher->dispatch_action;
+
+	# dispatch specific route and request method
+	$content = $app->dispatcher->dispatch_action($route, $request_method);
+
+Process the action and return output.
+
+=cut
+
+sub dispatch_action {
 
 	my ($self, $route, $request_method) = @_;
 	
@@ -65,13 +90,17 @@ sub dispatch {
 			$self->me->request->add_param($k, $v);
 		}
 	}
-	
+	#------------------------------------------------------
 	# inline actions. $app->action("get", "/home", sub {...});
 	if (ref($route) eq "CODE") {
-		$self->me->capture($route->($self->me));
-		return;
+		my ($merged, @result) = Capture::Tiny::capture_merged {eval {$route->($self->me)}};
+		#$merged .= join "", @result;
+		if ($@) {
+			$merged  = "Application inline action error: $@\n$merged\n";
+		}
+		return $merged;
 	}
-
+	#------------------------------------------------------
 	$route ||= $self->me->var->get("default_route");
 	$route ||= $self->me->abort(qq{Application Error: No route defined.});
 
@@ -79,7 +108,6 @@ sub dispatch {
 	#say "(plugin=$plugin, controller=$controller, action=$action)";
 
 	my $class = "Nile::Plugin:\:$plugin:\:$controller";
-	#say "class: $class";
 	
 	eval "use $class;";
 
@@ -133,7 +161,13 @@ sub dispatch {
 		$object->nile($self->me);
 	}
 
-	$object->$action();
+	my ($merged, @result) = Capture::Tiny::capture_merged {eval {$object->$action()}};
+	#$merged .= join "", @result;
+	if ($@) {
+		$merged = "Plugin error: $@\n$merged\n";
+	}
+
+	return $merged;
 }
 #=========================================================#
 =head2 action()
