@@ -1,4 +1,4 @@
-call perldoc -o html lib/Nile.pm > docs.html
+call perldoc -o html lib/Nile.pm > Nile.html
 call perldoc -o html lib/Nile/Abort.pm > Abort.html
 call perldoc -o html lib/Nile/Autouse.pm > Autouse.html
 call perldoc -o html lib/Nile/Base.pm > Base.html

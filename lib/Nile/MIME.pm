@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::MIME;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 =pod
 
@@ -24,11 +24,11 @@ Nile::MIME - Handle MIME Types
 	$mime = $app->mime;
 
 	# get mime type for a file from its extension
-	$mime_type = $mime->file("filename.zip");
+	$mime_type = $mime->for_file("filename.zip");
 	# application/zip
 
 	# get mime type by name
-	$mime_type = $mime->name('xml');
+	$mime_type = $mime->for_name('xml');
 	# application/xml
 
 	# add custom mime type
@@ -62,30 +62,30 @@ has 'custom_types' => (
 	);
 
 #=========================================================#
-=head2 file
+=head2 for_file
 
-	$mime_type = $mime->file('filename.pdf');
+	$mime_type = $mime->for_file('filename.pdf');
 
 Returns the mime type for a file, based on a file extension.
 
 =cut
 
-sub file {
+sub for_file {
     my ($self, $file) = @_;
     my ($ext) = $file =~ /\.([^.]+)$/;
     return $self->default unless $ext;
-    return $self->name($ext);
+    return $self->for_name($ext);
 }
 #=========================================================#
-=head2 name
+=head2 for_name
 
-	$mime_type = $mime->name( 'pdf' );
+	$mime_type = $mime->for_name('pdf');
 
 Returns the mime type for a standard or a custom mime type.
 
 =cut
 
-sub name {
+sub for_name {
     my ($self, $name) = @_;
     return $self->custom_types->{lc $name} || $self->mimeTypeOf(lc $name) || $self->default;
 }
@@ -138,7 +138,7 @@ Source repository is at L<https://github.com/mewsoft/Nile>.
 
 =head1 ACKNOWLEDGMENT
 
-This module is based on L<Dancer::MIME> and L<MIME::Types>
+This module is based on L<MIME::Types> and L<Dancer::MIME>
 
 =head1 SEE ALSO
 

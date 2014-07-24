@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Response;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 =pod
 
@@ -24,11 +24,42 @@ Nile::Response -  The HTTP response manager.
 	$res = $app->response;
 
 	$res->code(200);
-	$res->content_type('text/html');
-	$res->body("Hello World");
+	#$res->status(200);
+	
+	$res->header('Content-Type' => 'text/plain');
+	#$res->content_type('text/html');
+	$res->header(Content_Base => 'http://www.mewsoft.com/');
+	$res->header(Accept => "text/html, text/plain, image/*");
+	$res->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.27');
+	$res->cookies->{username} = {
+			value => 'mewsoft',
+			path  => "/",
+			domain => '.mewsoft.com',
+			expires => time + 24 * 60 * 60,
+		};
+	#$res->body("Hello world content");
+	$res->content("Hello world content");
 
-	 $response = $res->response;
+	# PSGI response
+	 $response = $res->finalize;
 	 # [$code, $headers, $body]
+	 ($code, $headers, $body) = @$response;
+	
+	# headers as string
+	$headers_str = $res->headers_as_string($eol)
+	
+	# message as string
+	print $res->as_string($eol);
+
+	# HTTP/1.1 200 OK
+	# Accept: text/html, text/plain, image/*
+	# User-Agent: Nile Web Client/0.27
+	# Content-Type: text/plain
+	# Content-Base: http://www.mewsoft.com/
+	# MIME-Version: 1.0
+	# Set-Cookie: username=mewsoft; domain=.mewsoft.com; path=/; expires=Fri, 25-Jul-2014 19:10:45 GMT
+	#
+	# Hello world content
 
 =head1 DESCRIPTION
 
@@ -49,7 +80,7 @@ sub BUILD {
     $self->body($content) if defined $content;
 }
 #=========================================================#
-=item headers
+=head2 headers
 
   $headers = $res->headers;
   $res->headers([ 'Content-Type' => 'text/html' ]);
@@ -59,6 +90,12 @@ sub BUILD {
 Sets and gets HTTP headers of the response. Setter can take either an
 array ref, a hash ref or L<HTTP::Headers> object containing a list of
 headers.
+
+This is L<HTTP::Headers> object and all its methods available:
+	
+	say $res->headers->header_field_names();
+	say $res->headers->remove_content_headers();
+	$res->headers->clear();
 
 =cut
 
@@ -82,7 +119,7 @@ sub headers {
 	}
 }
 #=========================================================#
-=item header
+=head2 header
 
   $res->header('X-Foo' => 'bar');
   my $val = $res->header('X-Foo');
@@ -93,7 +130,19 @@ Sets and gets HTTP header of the response.
 
 sub header { shift->headers->header(@_) }
 #=========================================================#
-=item status
+
+=head2 remove_header
+	
+	# delete
+	$res->remove_header('Content-Type');
+
+ Removes the header fields with the specified names.
+
+=cut
+
+sub remove_header { shift->headers->remove_header(@_) }
+#=========================================================#
+=head2 status
 
   $res->status(200);
   $status = $res->status;
@@ -105,7 +154,7 @@ Sets and gets HTTP status code. C<code> is an alias.
 has status => (is => 'rw');
 sub code    { shift->status(@_) }
 #=========================================================#
-=item body
+=head2 body
 
   $res->body($body_str);
   $res->body([ "Hello", "World" ]);
@@ -123,7 +172,7 @@ C<content_length> method.
 has body => (is => 'rw');
 sub content { shift->body(@_) }
 #=========================================================#
-=item cookies
+=head2 cookies
 
 	$res->cookies->{name} = 123;
 	$res->cookies->{name} = {value => '123'};
@@ -149,7 +198,7 @@ B<does not> convert string formats such as C<+3M>.
 
 has cookies => (is => 'rw', isa => 'HashRef', default => sub {+{}});
 #=========================================================#
-=item content_length
+=head2 content_length
 
   $res->content_length(123);
 
@@ -160,7 +209,7 @@ Shortcut for the equivalent get/set method in C<< $res->headers >>.
 
 sub content_length {shift->headers->content_length(@_)}
 #=========================================================#
-=item content_type
+=head2 content_type
 
   $res->content_type('text/plain');
 
@@ -171,7 +220,7 @@ Shortcut for the equivalent get/set method in C<< $res->headers >>.
 
 sub content_type {shift->headers->content_type(@_)}
 #=========================================================#
-=item content_encoding
+=head2 content_encoding
 
   $res->content_encoding('gzip');
 
@@ -181,7 +230,7 @@ Shortcut for the equivalent get/set method in C<< $res->headers >>.
 
 sub content_encoding {shift->headers->content_encoding(@_)}
 #=========================================================#
-=item location
+=head2 location
 
 Gets and sets C<Location> header.
 
@@ -192,7 +241,7 @@ setter.
 
 sub location {shift->headers->header('Location' => @_)}
 #=========================================================#
-=item redirect
+=head2 redirect
 
   $res->redirect($url);
   $res->redirect($url, 301);
@@ -219,16 +268,17 @@ sub redirect {
     return $self->location;
 }
 #=========================================================#
-=item response
+=head2 finalize
 
-	$res->response;
+	$res = $res->finalize;
 	# [$code, \@headers, $body]
+	($code, $headers, $body) = @$res;
 
 Returns the status code, headers, and body of this response as a PSGI response array reference.
 
 =cut
 
-sub response {
+sub finalize {
 
 	my $self = shift;
 	
@@ -250,15 +300,117 @@ sub response {
 	return [$self->status, \@headers, $self->build_body];
 }
 #=========================================================#
-=item to_app
+=head2 to_app
 
-  $app = $res->to_app;
+  $res_app = $res->to_app;
 
-A helper shortcut for C<< sub { $res->response } >>.
+A helper shortcut for C<< sub { $res->finalize } >>.
 
 =cut
 
-sub to_app {sub {shift->response}}
+sub to_app {sub {shift->finalize}}
+#=========================================================#
+=head2 headers_as_string
+
+	$headers = $res->headers_as_string($eol)
+
+Return the header fields as a formatted MIME header.
+
+The optional $eol parameter specifies the line ending sequence to
+use.  The default is "\n".  Embedded "\n" characters in header field
+values will be substituted with this line ending sequence.
+
+=cut
+
+sub headers_as_string {
+	
+	my ($self, $eol) = @_;
+
+	$eol = "\n" unless defined $eol;
+	
+	my $res = $self->finalize;
+	my ($code, $headers, $body) = @$res;
+
+	#$self->headers->as_string;
+
+	my @result = ();
+	
+	for (my $i = 0; $i < @$headers; $i = $i+2) {
+		my $k = $headers->[$i];
+		my $v = $headers->[$i+1];
+		if (index($v, "\n") >= 0) {
+			$v = $self->process_newline($v, $eol);
+		}
+		push @result, $k . ': ' . $v;
+	}
+
+	return join($eol, @result, '');
+}
+#=========================================================#
+sub process_newline {
+    local $_ = shift;
+    my $eol = shift;
+    # must handle header values with embedded newlines with care
+    s/\s+$//;        # trailing newlines and space must go
+    s/\n(\x0d?\n)+/\n/g;     # no empty lines
+    s/\n([^\040\t])/\n $1/g; # intial space for continuation
+    s/\n/$eol/g;    # substitute with requested line ending
+    $_;
+}
+#=========================================================#
+=head2 as_string
+
+	$message = $res->as_string($eol);
+
+Returns the message formatted as a single string.
+
+The optional $eol parameter specifies the line ending sequence to use.
+The default is "\n".  If no $eol is given then as_string will ensure
+that the returned string is newline terminated (even when the message
+content is not).  No extra newline is appended if an explicit $eol is
+passed.
+
+=cut
+
+
+sub as_string {
+
+    my($self, $eol) = @_;
+
+    $eol = "\n" unless defined $eol;
+
+    # The calculation of content might update the headers
+    # so we need to do that first.
+    my $content = $self->content;
+	
+	#push @header, "Server: " . server_software() if $nph;
+	#push @header, "Status: $status"              if $status;
+	#push @header, "Window-Target: $target"       if $target;
+	#sub server_software { $ENV{'SERVER_SOFTWARE'} || 'cmdline' }
+	
+	my $protocol = ($ENV{SERVER_PROTOCOL} || 'HTTP/1.1') . " " .$self->code . " " . $self->http_codes->{$self->code} . $eol;
+
+    return join("",
+						$protocol,
+						$self->headers_as_string($eol),
+						$eol,
+						$content,
+						(@_ == 1 && length($content) && $content !~ /\n\z/) ? "\n" : "",
+				);
+}
+#=========================================================#
+=head2 render
+
+	$res->render;
+
+Prints the message formatted as a single string to the standard output.
+
+=cut
+
+sub render {
+	my ($self) = @_;
+	print $self->as_string();
+}
 #=========================================================#
 sub build_body {
 
@@ -322,7 +474,6 @@ sub cookie_date {
     return $expires;
 }
 #=========================================================#
-
 has 'http_codes' => (
 						is => 'rw',
 						isa => 'HashRef',
@@ -382,6 +533,72 @@ has 'http_codes' => (
 						505 => 'HTTP Version Not Supported',
 	}});
 #=========================================================#
+=head2 status_message($code)
+
+The status_message() function will translate status codes to human
+readable strings. If the $code is unknown, then C<undef> is returned.
+
+=cut
+
+sub status_message {my $self = shift; $self->http_codes->{$_[0]};}
+#=========================================================#
+=head2 is_info( $code )
+
+Return TRUE if C<$code> is an I<Informational> status code (1xx).  This
+class of status code indicates a provisional response which can't have
+any content.
+
+=cut
+
+sub is_info {shift; $_[0] >= 100 && $_[0] < 200; }
+#=========================================================#
+=item is_success( $code )
+
+Return TRUE if C<$code> is a I<Successful> status code (2xx).
+
+=cut
+
+sub is_success {shift; $_[0] >= 200 && $_[0] < 300; }
+#=========================================================#
+=item is_redirect( $code )
+
+Return TRUE if C<$code> is a I<Redirection> status code (3xx). This class of
+status code indicates that further action needs to be taken by the
+user agent in order to fulfill the request.
+
+=cut
+
+sub is_redirect {shift; $_[0] >= 300 && $_[0] < 400; }
+#=========================================================#
+=item is_error( $code )
+
+Return TRUE if C<$code> is an I<Error> status code (4xx or 5xx).  The function
+returns TRUE for both client and server error status codes.
+
+=cut
+
+sub is_error {shift; $_[0] >= 400 && $_[0] < 600; }
+#=========================================================#
+=item is_client_error( $code )
+
+Return TRUE if C<$code> is a I<Client Error> status code (4xx). This class
+of status code is intended for cases in which the client seems to have
+erred.
+
+=cut
+
+sub is_client_error {shift; $_[0] >= 400 && $_[0] < 500; }
+#=========================================================#
+=item is_server_error( $code )
+
+Return TRUE if C<$code> is a I<Server Error> status code (5xx). This class
+of status codes is intended for cases in which the server is aware
+that it has erred or is incapable of performing the request.
+
+=cut
+
+sub is_server_error {shift; $_[0] >= 500 && $_[0] < 600; }
+#=========================================================#
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
@@ -404,7 +621,7 @@ Source repository is at L<https://github.com/mewsoft/Nile>.
 
 =head1 ACKNOWLEDGMENT
 
-This module is based on L<Plack::Response>
+This module is based on L<Plack::Response> L<HTTP::Message>
 
 =head1 SEE ALSO
 

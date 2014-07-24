@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.26';
+our $VERSION = '0.27';
 
 =pod
 
@@ -16,7 +16,7 @@ our $VERSION = '0.26';
 
 =head1 NAME
 
-Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Multi Theme.
+Nile - Android Like Visual Web App Framework Separating Code From Design Multi Lingual And Multi Theme.
 
 =head1 SYNOPSIS
 	
@@ -78,7 +78,7 @@ Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Mu
 
 =head1 DESCRIPTION
 
-Nile - Visual Web App Framework Separating Code From Design Multi Lingual And Multi Theme.
+Nile - Android Like Visual Web App Framework Separating Code From Design Multi Lingual And Multi Theme.
 
 B<Alpha> version, do not use it for production. The project's homepage L<https://github.com/mewsoft/Nile>.
 

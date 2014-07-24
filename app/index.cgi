@@ -85,6 +85,21 @@
 	#$app->debug->off;
 	#say $app->debug(1),"  ,  ", $app->debug;
 	
+	#my $response = $app->response;
+	#$response->code(200);
+	#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
+	#$response->header('Content-Type' => 'text/plain');
+	#$response->header(Content_Base => 'http://www.mewsoft.com/');
+	#$response->header(Accept => "text/html, text/plain, image/*");
+	#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
+	#$response->content("Hello world content.");
+	#my $res = $response->finalize;
+	#my ($code, $headers, $body) = @$res;
+	#say "" , $response->as_string("\n");
+	# Content-Disposition: attachment; filename="genome.jpg"
+
+	#my $mime = $app->mime;
+	#say $mime->for_file("path/file.gif");
 
 	exit;
 #=========================================================#
