@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::File;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 =pod
 
@@ -20,18 +20,21 @@ Nile::File - Files and folders manager.
 
 =head1 SYNOPSIS
 	
+	# get app context
+	$app = $self->me;
+
 	# get the file content as a single string.
-	$content = $self->me->file->get($file);
+	$content = $app->file->get($file);
 
 	# get the file content as an array of lines.
-	@lines = $self->me->file->get($file);
+	@lines = $app->file->get($file);
 	
 	# get list of specific files in a folder
-	@files = $self->me->file->files("c:/apache/htdocs/nile/", "*.pm, *.cgi");
+	@files = $app->file->files("c:/apache/htdocs/nile/", "*.pm, *.cgi");
 		
 	# get list of specific files in a folder recursively
 	# files_tree($dir, $match, $relative, $depth)
-	@files = $self->me->file->files_tree("c:/apache/htdocs/nile/", "*.pm, *.cgi");
+	@files = $app->file->files_tree("c:/apache/htdocs/nile/", "*.pm, *.cgi");
 
 	# get list of sub folders in a folder
 	#folders($dir, $match, $relative)
@@ -47,18 +50,18 @@ The file object provides tools for reading files, folders, and most of the funct
 
 to get file content as single string or array of strings:
 	
-	$content = $self->me->file->get($file);
-	@lines = $self->me->file->get($file);
+	$content = $app->file->get($file);
+	@lines = $app->file->get($file);
 
 supports options same as L<File::Slurp>.
 
 To get list of files in a specific folder:
 	
 	#files($dir, $match, $relative)
-	@files = $self->me->file->files("c:/apache/htdocs/nile/", "*.pm, *.cgi");
+	@files = $app->file->files("c:/apache/htdocs/nile/", "*.pm, *.cgi");
 	
 	#files_tree($dir, $match, $relative, $depth)
-	@files = $self->me->file->files_tree("c:/apache/htdocs/nile/", "*.pm, *.cgi");
+	@files = $app->file->files_tree("c:/apache/htdocs/nile/", "*.pm, *.cgi");
 
 	#folders($dir, $match, $relative)
 	@folders = $self->file->folders("c:/apache/htdocs/nile/", "", 1);
@@ -101,11 +104,11 @@ BEGIN {
 =head2 get()
 	
 	# file($file, $options)
-	$content = $self->me->file->get("/path/file.txt");
-	@lines = $self->me->file->get("/path/file.txt");
+	$content = $app->file->get("/path/file.txt");
+	@lines = $app->file->get("/path/file.txt");
 
-	$bin = $self->me->file->get("/path/file.bin", binmode => ':raw');
-	$utf = $self->me->file->get("/path/file.txt", binmode => ':utf8');
+	$bin = $app->file->get("/path/file.bin", binmode => ':raw');
+	$utf = $app->file->get("/path/file.txt", binmode => ':utf8');
 
 Reads file contents into a single variable or an array. This method is a wrapper around L<File::Slurp> read_file method.
 
@@ -130,16 +133,16 @@ sub get {
 =head2 put()
 	
 	# put($file, $options)
-	$self->me->file->put($file, @data);
-	$self->me->file->put($file, {binmode => ':raw'}, $buffer);
+	$app->file->put($file, @data);
+	$app->file->put($file, {binmode => ':raw'}, $buffer);
 
-	$self->me->file->put($file, \$buffer);
+	$app->file->put($file, \$buffer);
 	# the same as
-	$self->me->file->put($file, $buffer);
+	$app->file->put($file, $buffer);
 
-	$self->me->file->put($file, \@lines) ;
+	$app->file->put($file, \@lines) ;
 	# the same as
-	$self->me->file->put($file, @lines) ;
+	$app->file->put($file, @lines) ;
 
 Writes contents into a file. This method is a wrapper around L<File::Slurp> write_file method. 
 The first argument is the filename. The second argument is an optional hash reference and it 
@@ -157,23 +160,23 @@ sub put {
 #=========================================================#
 =head2 File::Spec supported methods
 	
-	$self->me->file->canonpath;
-	$self->me->file->catdir
-	$self->me->file->catfile
-	$self->me->file->curdir
-	$self->me->file->rootdir
-	$self->me->file->updir
-	$self->me->file->no_upwards
-	$self->me->file->file_name_is_absolute
-	$self->me->file->path
-	$self->me->file->devnull
-	$self->me->file->tmpdir
-	$self->me->file->splitpath
-	$self->me->file->splitdir
-	$self->me->file->catpath
-	$self->me->file->abs2rel
-	$self->me->file->rel2abs
-	$self->me->file->case_tolerant
+	$app->file->canonpath;
+	$app->file->catdir
+	$app->file->catfile
+	$app->file->curdir
+	$app->file->rootdir
+	$app->file->updir
+	$app->file->no_upwards
+	$app->file->file_name_is_absolute
+	$app->file->path
+	$app->file->devnull
+	$app->file->tmpdir
+	$app->file->splitpath
+	$app->file->splitdir
+	$app->file->catpath
+	$app->file->abs2rel
+	$app->file->rel2abs
+	$app->file->case_tolerant
 
 Wrapper methods around L<File::Spec> functions.
 
@@ -200,7 +203,7 @@ sub case_tolerant {shift; File::Spec->case_tolerant(@_);}
 =head2 files()
 	
 	# files($dir, $match, $relative)
-	@files = $self->me->file->files("c:/apache/htdocs/nile/", "*.pm, *.cgi");
+	@files = $app->file->files("c:/apache/htdocs/nile/", "*.pm, *.cgi");
 
 Returns a list of files in a specific folder. The first argument is the path, the second argument is the filename match
 if not set will match all files, the third argument is the relative flag, if set will include the relative path of the files.
@@ -217,7 +220,7 @@ sub files {
 =head2 files_tree()
 	
 	# files_tree($dir, $match, $relative, $depth)
-	@files = $self->me->file->files_tree("c:/apache/htdocs/nile/", "*.pm, *.cgi");
+	@files = $app->file->files_tree("c:/apache/htdocs/nile/", "*.pm, *.cgi");
 
 Returns a list of files in a specific folder. The first argument is the path, the second argument is the filename match
 if not set will match all files, the third argument is the relative flag, if set will include the relative path of the files.
@@ -308,7 +311,7 @@ sub scan_dir {
 #=========================================================#
 =head2 os()
 	
-	my $os = $self->me->file->os;
+	my $os = $app->file->os;
 
 Returns the name of the operating system.
 
@@ -319,7 +322,7 @@ sub os {$OS}
 #=========================================================#
 =head2 ds()
 	
-	my $ds = $self->me->file->ds;
+	my $ds = $app->file->ds;
 
 Returns the directory separator of the operating system.
 
@@ -329,9 +332,9 @@ sub ds {$DS}
 #=========================================================#
 =head2 fileparse()
 	
-	my ($filename, $dirs, $suffix) = $self->me->file->fileparse($path);
-	my ($filename, $dirs, $suffix) = $self->me->file->fileparse($path, @suffixes);
-	my $filename = $self->me->file->fileparse($path, @suffixes);
+	my ($filename, $dirs, $suffix) = $app->file->fileparse($path);
+	my ($filename, $dirs, $suffix) = $app->file->fileparse($path, @suffixes);
+	my $filename = $app->file->fileparse($path, @suffixes);
 
 Splits a file path into its $dirs, $filename and (optionally) the filename $suffix. See L<File::Basename>
 
@@ -344,8 +347,8 @@ sub fileparse {
 #=========================================================#
 =head2 basename()
 	
-	my $filename  = $self->me->file->basename($path);
-	my $filename  = $self->me->file->basename($path, @suffixes);
+	my $filename  = $app->file->basename($path);
+	my $filename  = $app->file->basename($path, @suffixes);
 
 Returns the last level of a filepath even if the last level is clearly directory. In effect, it is acting like pop() for paths. See L<File::Basename>
 
@@ -358,7 +361,7 @@ sub basename {
 #=========================================================#
 =head2 dirname()
 	
-	my $ds = $self->me->file->dirname();
+	my $ds = $app->file->dirname();
 
 Returns the directory separator of the operating system. See L<File::Basename>
 
@@ -371,7 +374,7 @@ sub dirname {
 #=========================================================#
 =head2 path_info()
 	
-	my ($name, $dir, $ext, $name_$ext) = $self->me->file->path_info($path);
+	my ($name, $dir, $ext, $name_$ext) = $app->file->path_info($path);
 
 Splits a file path into its $dir, $name, filename $suffix, and name with suffix.
 

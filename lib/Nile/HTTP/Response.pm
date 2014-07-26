@@ -1,14 +1,14 @@
 #	Copyright Infomation
 #=========================================================#
-#	Module	:	Nile::Response
+#	Module	:	Nile::HTTP::Response
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #=========================================================#
-package Nile::Response;
+package Nile::HTTP::Response;
 
-our $VERSION = '0.28';
+our $VERSION = '0.27';
 
 =pod
 
@@ -16,7 +16,7 @@ our $VERSION = '0.28';
 
 =head1 NAME
 
-Nile::Response -  The HTTP response manager.
+Nile::HTTP::Response -  The HTTP response manager.
 
 =head1 SYNOPSIS
 
@@ -63,7 +63,7 @@ Nile::Response -  The HTTP response manager.
 
 =head1 DESCRIPTION
 
-Nile::Response - The HTTP response manager allows you to create PSGI response array ref.
+Nile::HTTP::Response - The HTTP response manager allows you to create PSGI response array ref.
 
 =cut
 
@@ -412,6 +412,19 @@ sub render {
 	print $self->as_string();
 }
 #=========================================================#
+sub send_file {
+	
+	my ($self, $file, $options) = @_;
+	
+	load Nile::HTTP::SendFile;
+	
+	my $sender = Nile::HTTP::SendFile->new;
+
+	$sender->send_file($self, $file, $options);
+
+
+}
+#=========================================================#
 sub build_body {
 
 	my $self = shift;
@@ -627,21 +640,6 @@ that it has erred or is incapable of performing the request.
 =cut
 
 sub is_server_error {shift; $_[0] >= 500 && $_[0] < 600; }
-#=========================================================#
-sub return_403 {
-    my $self = shift;
-    return [403, ['Content-Type' => 'text/plain', 'Content-Length' => 9], ['forbidden']];
-}
-
-sub return_400 {
-    my $self = shift;
-    return [400, ['Content-Type' => 'text/plain', 'Content-Length' => 11], ['Bad Request']];
-}
-
-sub return_404 {
-    my $self = shift;
-    return [404, ['Content-Type' => 'text/plain', 'Content-Length' => 9], ['not found']];
-}
 #=========================================================#
 sub object {
 	my $self = shift;

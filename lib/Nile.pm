@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 =pod
 
@@ -159,7 +159,7 @@ The url routing system works in the following formats:
 	http://domain.com/?action=plugin/controller/action
 	http://domain.com/blog/2014/11/28	# route mapped from route file and args passed as request params
 
-The following urls formats are all the same and all are mapped to the route Home/Home/index or Home/Home/home (Plugin/Controller/Action):
+The following urls formats are all the same and all are mapped to the route /Home/Home/index or /Home/Home/home (/Plugin/Controller/Action):
 	
 	# direct cgi call, you can use action=home, route=home, or cmd=home
 	http://domain.com/index.cgi?action=home
@@ -346,13 +346,13 @@ The framework supports url routing, route specific short name actions like 'regi
 
 Below is B<route.xml> file example should be created under the path/route folder.
 
-<?xml version="1.0" encoding="UTF-8" ?>
-<home route="/home" action="Home/Home/home" method="get" />
-<register route="/register" action="Accounts/Register/register" method="get" nocase="1" defaults="year=1900|month=1|day=23" />
-<post route="/blog/post/{cid:\d+}/{id:\d+}" action="Blog/Article/Post" method="post" nocase="1" />
-<browse route="/blog/{id:\d+}" action="Blog/Article/Browse" method="get" />
-<view route="/blog/view/{id:\d+}" action="Blog/Article/View" method="get" />
-<edit route="/blog/edit/{id:\d+}" action="Blog/Article/Edit" method="get" />
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<home route="/home" action="/Home/Home/home" method="get" />
+	<register route="/register" action="/Accounts/Register/register" method="get" nocase="1" defaults="year=1900|month=1|day=23" />
+	<post route="/blog/post/{cid:\d+}/{id:\d+}" action="/Blog/Article/Post" method="post" nocase="1" />
+	<browse route="/blog/{id:\d+}" action="/Blog/Article/Browse" method="get" />
+	<view route="/blog/view/{id:\d+}" action="/Blog/Article/View" method="get" />
+	<edit route="/blog/edit/{id:\d+}" action="/Blog/Article/Edit" method="get" />
 
 =head1 CONFIG
 
@@ -571,8 +571,8 @@ use Nile::Dispatcher;
 use Nile::Paginate;
 use Nile::Database;
 use Nile::Setting;
-use Nile::Request;
-use Nile::Response;
+use Nile::HTTP::Request;
+use Nile::HTTP::Response;
 
 #use base 'Import::Base';
 use Import::Into;
@@ -695,7 +695,7 @@ sub init {
 			'theme'					=>	$arg{theme},
 			'log_file'				=>	$arg{log_file} || "log.pm",
 			'action_name'		=>	$arg{action_name} || "action,route,cmd",
-			'default_route'		=>	$arg{default_route} || "Home/Home/index",
+			'default_route'		=>	$arg{default_route} || "/Home/Home/index",
 		);
 	
 	push @INC, $self->var->get("lib_dir");
@@ -894,19 +894,19 @@ has 'setting' => (
 
 has 'request' => (
       is      => 'rw',
-      isa    => 'Nile::Request',
+      isa    => 'Nile::HTTP::Request',
 	  lazy	=> 1,
 	  default => sub {
-			shift->object("Nile::Request", @_);
+			shift->object("Nile::HTTP::Request", @_);
 		}
   );
 
 has 'response' => (
       is      => 'rw',
-      isa    => 'Nile::Response',
+      isa    => 'Nile::HTTP::Response',
 	  lazy	=> 1,
 	  default => sub {
-			shift->object("Nile::Response", @_);
+			shift->object("Nile::HTTP::Response", @_);
 		}
   );
 
@@ -1160,6 +1160,22 @@ sub trims {
 	my $str =  $_[0];
 	$str =~ s/\s+//g;
 	return $str;
+}
+#=========================================================#
+sub max {
+	my ($self, $max, @vars) = @_;
+	for (@vars) {
+		$max = $_ if $_ > $max;
+	}
+	return $max;
+}
+#=========================================================#
+sub min {
+	my ($self, $min, @vars) = @_;
+	for (@vars) {
+		$min = $_ if $_ < $min;
+	}
+	return $min;
 }
 #=========================================================#
 sub digit {

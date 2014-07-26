@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Router;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 =pod
 
@@ -21,13 +21,15 @@ Nile::Router - URL route manager.
 =head1 SYNOPSIS
 	
 	# get router object
-	$router = $self->me->router;
+	$router = $app->router;
 
 	# load routes file from the path/route folder. default file extension is xml.
 	$router->load("route");
 	
-	# find route action and information if exist in the routes file.
+	# find route action and its information
 	my ($action, $args, $uri, $query) = $router->match($route, $request_method);
+	my ($action, $args, $uri, $query) = $router->match("/forum/topic/123", "get");
+	my ($action, $args, $uri, $query) = $router->match("/blog/computer/software/article_name");
 	
 	# or as hash ref
 	my $route = $router->match($route, $request_method);
@@ -129,8 +131,10 @@ sub load {
 #=========================================================#
 =head2 match()
 	
-	# find route action and information if exist in the routes file.
+	# find route action and its information
 	my ($action, $args, $uri, $query) = $router->match($route, $request_method);
+	my ($action, $args, $uri, $query) = $router->match("/news/world/egypt/politics/2014/07/24/1579279", "get");
+	my ($action, $args, $uri, $query) = $router->match("/blog/computer/software/article_name");
 	
 	# or as hash ref
 	my $route = $router->match($route, $request_method);

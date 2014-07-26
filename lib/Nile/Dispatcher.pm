@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 =pod
 
@@ -25,6 +25,8 @@ Nile::Dispatcher - Application action dispatcher.
 
 	# dispatch specific route and request method
 	$app->dispatcher->dispatch($route, $request_method);
+	$app->dispatcher->dispatch('/accounts/register/create');
+	$app->dispatcher->dispatch('/accounts/register/save', 'POST');
 
 =head1 DESCRIPTION
 
@@ -78,7 +80,8 @@ sub dispatch_action {
 	$request_method ||= "*";
 
 	$route = $self->route($route);
-	
+	$route ||= "";
+
 	# beginning slash. forum/topic => /forum/topic
 	$route = "/$route" if ($route !~ /^\//);
 
@@ -101,11 +104,13 @@ sub dispatch_action {
 		return $merged;
 	}
 	#------------------------------------------------------
-	$route ||= $self->me->var->get("default_route");
+	# if route is '/' then use the default route
+	if (!$route || $route eq "/") {
+		$route = $self->me->var->get("default_route");
+	}
 	$route ||= $self->me->abort(qq{Application Error: No route defined.});
-
+	
 	my ($plugin, $controller, $action) = $self->action($route);
-	#say "(plugin=$plugin, controller=$controller, action=$action)";
 
 	my $class = "Nile::Plugin:\:$plugin:\:$controller";
 	
@@ -186,25 +191,29 @@ sub action {
 	my ($self, $route) = @_;
 
 	$route || return;
-
 	my ($plugin, $controller, $action);
+	
+	$route =~ s/^\/+//;
+	
+	my @parts = split(/\//, $route);
 
-	my @parts = split (/\//, $route);
-
-	if (@parts == 3) {
+	if (scalar @parts == 3) {
 		($plugin, $controller, $action) = @parts;
 	}
-	elsif (@parts == 2) {
+	elsif (scalar @parts == 2) {
 		$plugin = $parts[0];
 		$controller = $parts[0];
 		$action = $parts[1];
 	}
-	elsif (@parts == 1) {
+	elsif (scalar @parts == 1) {
 		$plugin = $parts[0];
 		$controller = $parts[0];
 		$action = "index";
 	}
-
+	
+	$plugin ||= "";
+	$controller ||= "";
+	
 	return (ucfirst($plugin), ucfirst($controller), $action);
 }
 #=========================================================#

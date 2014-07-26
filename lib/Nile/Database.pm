@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Database;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 =pod
 
@@ -25,7 +25,10 @@ Nile::Database - SQL database manager.
 	# $args{name}, $args{user}, $args{pass}
 	# if called without params, it will try to load from the default config vars.
 
-	$dbh = $self->me->db->connect(%args);
+	# get app context
+	$app = $self->me;
+
+	$dbh = $app->db->connect(%args);
 	
 =head1 DESCRIPTION
 
@@ -41,7 +44,7 @@ use Hash::AsObject;
 #=========================================================#
 =head2 dbh()
 	
-	$self->me->db->dbh;
+	$app->db->dbh;
 
 Get or set the current database connection handle.
 
@@ -53,7 +56,7 @@ has 'dbh' => (
 #=========================================================#
 =head2 connect()
 	
-	$dbh = $self->me->db->connect(%args);
+	$dbh = $app->db->connect(%args);
 
 Connect to the database. If %args empty, it will try to get args from the config object.
 Returns the database connection handle is success.
@@ -107,7 +110,7 @@ sub connect {
 #=========================================================#
 =head2 disconnect()
 	
-	$self->me->db->disconnect;
+	$app->db->disconnect;
 
 Disconnect from this connection handle.
 
@@ -120,7 +123,7 @@ sub disconnect {
 #=========================================================#
 =head2 run()
 	
-	$self->me->db->run($qry);
+	$app->db->run($qry);
 
 Run query using the DBI do command or abort if error.
 
@@ -133,7 +136,7 @@ sub run {
 #=========================================================#
 =head2 do()
 	
-	$self->me->db->do($qry);
+	$app->db->do($qry);
 
 Run query using the DBI do command and ignore errors.
 
@@ -146,7 +149,7 @@ sub do {
 #=========================================================#
 =head2 exec()
 	
-	$sth = $self->me->db->exec($qry);
+	$sth = $app->db->exec($qry);
 
 Prepare and execute the query and return the statment handle.
 
@@ -161,7 +164,7 @@ sub exec {
 #=========================================================#
 =head2 begin_work()
 	
-	$self->me->db->begin_work;
+	$app->db->begin_work;
 
 Enable transactions (by turning AutoCommit off) until the next call to commit or rollback. After the next commit or rollback, AutoCommit will automatically be turned on again.
 
@@ -174,7 +177,7 @@ sub begin_work {
 #=========================================================#
 =head2 commit()
 	
-	$self->me->db->commit;
+	$app->db->commit;
 
 Commit (make permanent) the most recent series of database changes if the database supports transactions and AutoCommit is off.
 
@@ -187,7 +190,7 @@ sub commit {
 #=========================================================#
 =head2 rollback()
 	
-	$self->me->db->rollback;
+	$app->db->rollback;
 
 Rollback (undo) the most recent series of uncommitted database changes if the database supports transactions and AutoCommit is off.
 
@@ -200,8 +203,8 @@ sub rollback {
 #=========================================================#
 =head2 quote()
 	
-	$self->me->db->quote($value);
-	$self->me->db->quote($value, $data_type);
+	$app->db->quote($value);
+	$app->db->quote($value, $data_type);
 
 Quote a string literal for use as a literal value in an SQL statement, by escaping any special characters (such as quotation marks)
 contained within the string and adding the required type of outer quotation marks.
@@ -215,8 +218,8 @@ sub quote {
 =head2 col()
 	
 	# select id from users. return one column array from all rows
-	@cols = $self->me->db->col($qry);
-	$cols_ref = $self->me->db->col($qry);
+	@cols = $app->db->col($qry);
+	$cols_ref = $app->db->col($qry);
 
 Return one column array from all rows
 
@@ -233,7 +236,7 @@ sub col {
 =head2 row()
 	
 	# select id, email, fname, lname from users
-	@row = $self->me->db->row($qry);
+	@row = $app->db->row($qry);
 
 Returns one row as array.
 
@@ -250,8 +253,8 @@ sub row {
 =head2 rows()
 	
 	# select id, fname, lname, email from users
-	@rows = $self->me->db->rows($qry);
-	$rows_ref = $self->me->db->rows($qry);
+	@rows = $app->db->rows($qry);
+	$rows_ref = $app->db->rows($qry);
 
 Returns all matched rows as array or array ref.
 
@@ -268,8 +271,8 @@ sub rows {
 =head2 hash()
 	
 	# select * from users where id=$id limit 1
-	%user = $self->me->db->hash($qry);
-	$user_ref = $self->me->db->hash($qry);
+	%user = $app->db->hash($qry);
+	$user_ref = $app->db->hash($qry);
 
 Returns one row as a hash or hash ref
 
@@ -286,7 +289,7 @@ sub hash {
 =head2 row_object()
 	
 	# select * from users where id=$id limit 1
-	$row_obj = $self->me->db->row_object($qry);
+	$row_obj = $app->db->row_object($qry);
 	print $row_obj->email;
 	print $row_obj->fname;
 	print $row_obj->lname;
@@ -305,8 +308,8 @@ sub row_object {
 #=========================================================#
 =head2 hashes()
 	
-	%hashes = $self->me->db->hashes($qry, $col);
-	$hashes_ref = $self->me->db->hashes($qry, $col);
+	%hashes = $app->db->hashes($qry, $col);
+	$hashes_ref = $app->db->hashes($qry, $col);
 
 Returns list or hashes of all rows. Each hash element is a hash of one row	
 =cut
@@ -321,7 +324,7 @@ sub hashes {
 =head2 colhash()
 	
 	# select id, user from users
-	%hash = $self->me->db->colhash($qry);
+	%hash = $app->db->colhash($qry);
 
 Returns all rows as a hash of the first column as the keys and the second column as the values.
 
@@ -337,7 +340,7 @@ sub colhash {
 =head2 value()
 	
 	# select email from users where id=123. return one column value
-	$value = $self->me->db->value($qry);
+	$value = $app->db->value($qry);
 
 Returns one column value from one row.
 
@@ -354,7 +357,7 @@ sub value {
 #=========================================================#
 =head2 insertid()
 	
-	$id = $self->me->db->insertid;
+	$id = $app->db->insertid;
 
 Returns the last insert id from auto increment.
 
@@ -367,7 +370,7 @@ sub insertid {
 #=========================================================#
 =head2 db_error()
 	
-	$self->me->db->db_error;
+	$app->db->db_error;
 
 Aborts the application and display the last database error message.
 
@@ -381,7 +384,7 @@ sub db_error {
 =head2 object()
 	
 	# get a new setting object
-	#my $db_obj = $self->me->db->object;
+	#my $db_obj = $app->db->object;
 	
 	# load and manage settings table separately
 	#$db_obj->load("table", "name", "value");

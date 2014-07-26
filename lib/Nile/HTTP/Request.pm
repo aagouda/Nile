@@ -1,14 +1,14 @@
 #	Copyright Infomation
 #=========================================================#
-#	Module	:	Nile::Request
+#	Module	:	Nile::HTTP::Request
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #=========================================================#
-package Nile::Request;
+package Nile::HTTP::Request;
 
-our $VERSION = '0.28';
+our $VERSION = '0.27';
 
 =pod
 
@@ -16,7 +16,7 @@ our $VERSION = '0.28';
 
 =head1 NAME
 
-Nile::Request -  The HTTP request manager.
+Nile::HTTP::Request -  The HTTP request manager.
 
 =head1 SYNOPSIS
 	
@@ -32,7 +32,7 @@ Nile::Request -  The HTTP request manager.
 
 =head1 DESCRIPTION
 
-Nile::Request -  The HTTP request manager.
+Nile::HTTP::Request -  The HTTP request manager.
 
 The http request is available as a shared object extending the L<CGI::Simple> module. This means that all methods supported
 by L<CGI::Simple> is available with the additions to these few methods:

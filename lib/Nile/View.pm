@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::View;
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 =pod
 
@@ -459,7 +459,7 @@ sub parse_vars {
 	
 	$self->{tag} = +{};
 	my $counter = 0;
-
+	
 	#(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>])*)/>([^<]*)(<\!\[CDATA\[(.*?)\]\]>)?(</$tag>)?)
     while ( $self->{content} =~ m{
 		(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>])*)/>)|(<$tag(\s+[^\!\?\s<>](?:"[^"]*"|'[^']*'|[^"'<>\/])*)>(.*?)<\/$tag>)
@@ -518,6 +518,7 @@ sub parse_nest_blocks {
 
 	my ($k, $v);
 	
+	#The (?<xxx> syntax requires perl 5.10 or above: http://perldoc.perl.org/perl5100delta.html#Named-Capture-Buffers
     #while ($core =~ /(<!--block:(.*?)-->((?:(?:(?!<!--block:(?:.*?)-->).)|(?R))*?)<!--endblock-->|((?:(?!<!--.*?-->).)+))/igsx )
 	#while ( $core =~ /(?is)(<!--block:(.*?)-->((?:(?:(?!<!--block:(?:.*?)-->).)|(?R))*?)<!--endblock-->|((?:(?!<!--block:.*?-->).)+))/g )
 	while ( $core =~ /(?is)(?:((?&content))|(?><!--block:(.*?)-->)((?&core)|)<!--endblock-->|(<!--(?:block:.*?|endblock)-->))(?(DEFINE)(?<core>(?>(?&content)|(?><!--block:.*?-->)(?:(?&core)|)<!--endblock-->)+)(?<content>(?>(?!<!--(?:block:.*?|endblock)-->).)+))/g )
