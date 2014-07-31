@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 =pod
 
@@ -55,7 +55,7 @@ sub dispatch {
 	
 	my $content = $self->dispatch_action(@_);
 
-	print $content;
+	return $content;
 
 }
 #=========================================================#
@@ -85,29 +85,41 @@ sub dispatch_action {
 	# beginning slash. forum/topic => /forum/topic
 	$route = "/$route" if ($route !~ /^\//);
 
-	my ($target, $args, $uri, $query) = $self->me->router->match($route, $request_method);
+	#$match->{action}, $match->{args}, $match->{query}, $match->{uri}, $match->{code}, $match->{route}
+	my $match = $self->me->router->match($route, $request_method);
+	#$self->me->dump($match);
 	
-	if ($target) {
-		$route = $target;
-		while (my($k, $v) = each %$args) {
+	if ($match->{action}) {
+		$route =  $match->{action};
+		while (my($k, $v) = each %{$match->{args}}) {
 			$self->me->request->add_param($k, $v);
 		}
 	}
 	#------------------------------------------------------
+	my ($content, @result);
+	#------------------------------------------------------
 	# inline actions. $app->action("get", "/home", sub {...});
+	# inline actions. $app->capture("get", "/home", sub {...});
 	if (ref($route) eq "CODE") {
-		my ($merged, @result) = Capture::Tiny::capture_merged {eval {$route->($self->me)}};
-		#$merged .= join "", @result;
-		if ($@) {
-			$merged  = "Application inline action error: $@\n$merged\n";
+		if ($match->{route}->{attributes} =~ /capture/i) {
+			# run the action and capture output of print statements
+			($content, @result) = Capture::Tiny::capture_merged {eval {$route->($self->me)}};
+			#say "caputre code....";
 		}
-		return $merged;
+		else {
+			#say "not caputre code....";
+			# run the action and get the returned content
+			$content = eval {$route->($self->me)};
+		}
+
+		return $content;
 	}
 	#------------------------------------------------------
 	# if route is '/' then use the default route
 	if (!$route || $route eq "/") {
 		$route = $self->me->var->get("default_route");
 	}
+
 	$route ||= $self->me->abort(qq{Application Error: No route defined.});
 	
 	my ($plugin, $controller, $action) = $self->action($route);
@@ -143,15 +155,16 @@ sub dispatch_action {
 
 	my $attrs = $meta->get_method($action)->attributes;
 	#say "attr: [$action], ". $self->me->dump($attrs);
-
-	if (!grep(/^(action|public)$/i, @$attrs)) {
-		$self->me->abort("Plugin '$class' method '$action' is not marked as 'action'.");
-	}
 	
+	# sub home: Action/Capture/Public {...}
+	if (!grep(/^(action|public|capture)$/i, @$attrs)) {
+		$self->me->abort("Plugin '$class' method '$action' is not marked as 'Action' or 'Capture'.");
+	}
+
 	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH, [ajax]
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
-			$self->me->abort("Plugin '$class' action '$action' request method '$request_method' is not allowed.");
+		$self->me->abort("Plugin '$class' action '$action' request method '$request_method' is not allowed.");
 	}
 
 	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
@@ -165,14 +178,25 @@ sub dispatch_action {
 		$meta->add_attribute( 'nile' => ( is => 'rw', default => sub{$self->me}) );
 		$object->nile($self->me);
 	}
-
-	my ($merged, @result) = Capture::Tiny::capture_merged {eval {$object->$action()}};
-	#$merged .= join "", @result;
-	if ($@) {
-		$merged = "Plugin error: $@\n$merged\n";
+	
+	if (grep(/^(capture)$/i, @$attrs)) {
+		# run the action and capture output of print statements. sub home: Capture {...}
+		($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action($self->me)}};
+		#say "caputre plugin...";
+	}
+	else {
+		#say "not caputre plugin...";
+		# run the action and get the returned content sub home: Action {...}
+		$content = eval {$object->$action($self->me)};
 	}
 
-	return $merged;
+	#my ($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action()}};
+	#$content .= join "", @result;
+	if ($@) {
+		$content = "Plugin error: $@\n$content\n";
+	}
+
+	return $content;
 }
 #=========================================================#
 =head2 action()
@@ -252,7 +276,7 @@ sub route {
 	# if no route, get the route from the query string in the REQUEST_URI
 	if (!$route) {
 		my ($path, $script_name) = $self->me->request->script_name =~ m#(.*)/(.*)$#;
-		my ($request_uri, $params) = split /\?/, $ENV{REQUEST_URI} || '';
+		my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
 		if ($request_uri) {
 			$route = $request_uri;
 		

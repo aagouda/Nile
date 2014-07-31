@@ -1,5 +1,4 @@
 Changes
-docs.html
 Makefile.PL
 MANIFEST
 README
@@ -37,6 +36,8 @@ lib/Nile/View.pm
 lib/Nile/XML.pm
 lib/Nile/MIME.pm
 lib/Nile/HTTP/Request.pm
+lib/Nile/HTTP/RequestPSGI.pm
 lib/Nile/HTTP/Response.pm
+lib/Nile/HTTP/PSGI.pm
 lib/Nile/Plugin/Date/Date.pm
 t/Nile.t

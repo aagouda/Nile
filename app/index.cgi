@@ -9,97 +9,93 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #=========================================================#
-	print "Content-type: text/html;charset=utf-8\n\n";
-
+	#print "Content-type: text/html;charset=utf-8\n\n";
 	use Data::Dumper;
-	use Benchmark qw(:all);
-	
+	use utf8;
+	#======================================================
+	# push the local Nile module folder on Perl @INC, remove if Nile module installed
 	use File::Spec;
 	use File::Basename;
 	BEGIN {
 		push @INC, File::Spec->catfile(dirname(dirname(File::Spec->rel2abs(__FILE__))), "lib");
 	}
-
+	#======================================================
 	use Nile;
 
 	my $app = Nile->new();
-
+	
+	# initialize the application with the shared sessions settings
 	$app->init(
-					
-					# base application path, auto detected if not set
-					path		=>	dirname(File::Spec->rel2abs(__FILE__)),
+		# base application path, auto detected if not set
+		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
 
-					# site language for user, auto detected if not set
-					lang		=>	"en-US",
+		# load config files
+		config		=> [ qw(config) ],
 
-					# theme used
-					theme		=>	"default",
-				);
+		# load route files
+		route		=> [ qw(route) ],
+
+		# log file name
+		log_file	=>	"log.pm",
+
+		# url action name i.e. index.cgi?action=register
+		action_name	=>	"action,route,cmd",
+
+		# app home page plugin/module/method
+		default_route	=>	"/Home/Home/index",
+	);
 	
-	#$app->run();
-	#exit;
+	# set the application per single user session settings
+	$app->start(
+		# site language for user, auto detected if not set
+		lang	=>	"en-US",
+
+		# theme used
+		theme	=>	"default",
+		
+		# load language files
+		langs	 => [ qw(general) ],
+		
+		# charset for encoding/decoding and output
+		charset => "utf-8",
+	);
+
+	# inline actions, return content. url: /forum/home
+	$app->action("get", "/forum/home", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		my $content = "Host: " . $self->request->virtual_host ."<br>\n";
+		$content .= "PSGI status: " . $self->psgi . "<br>\n";
+		$content .= "Time: ". time . "<br>\n";
+		$content .= "Hello world from inline action /forum/home" ."<br>\n";
+		$content .= "أحمد الششتاوى" ."<br>\n";
+		$self->response->encoded(0); # encode content
+		return $content;
+	});
 	
-	my $config = $app->config;
-	$config->load("config.xml");
-	#$app->dump($config);
+	# inline actions, capture print statements, no returns. url: /accounts/login
+	$app->capture("get", "/accounts/login", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		say "Host: " . $self->request->virtual_host || "" . "<br>\n";
+		say "Request method: " . $self->request->request_method || "" . "<br>\n";
+		say "PSGI status: " . $self->psgi . "<br>\n";
+		say "Time: ". time . "<br>\n";
+		say "Hello world from inline action with capture /accounts/login", "<br>\n";
+		say $self->encode("أحمد الششتاوى") ."<br>\n";
+		$self->response->encoded(1); # content already encoded
+	});
 
 	# connect to the database. pass the connection params or try to load it from the config object.
 	#$app->connect();
 	#$app->connect(%params);
-	
-	# load langauge file general.xml
-	$app->lang->load("general");
-	
-	# load routes file route.xml
-	$app->router->load("route");
-	
-	# inline actions
-	$app->action("get", "/forum/home", sub {
-		my ($self) = @_;
-		# $self is set to the application context object same as $self->me in plugins
-		say $self->request->virtual_host;
-		say "Hello world from inline actions forum/home.";
-	});
-
-	$app->action("get", "/accounts/login", sub {
-		my ($self) = @_;
-		say "Hello world from inline actions accounts/login.";
-	});
-
-	$app->dispatcher->dispatch;
-	
-	# run any plugin action or route
-	#$app->dispatcher->dispatch('/accounts/register/create');
-	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
-	
 	# disconnect from database
 	#$app->disconnect();
-
-	#$app->bm->lap("start");
-	#sleep 1;	
-	#$app->bm->lap("end");
-	#$app->bm->stop;
-	#print $app->bm->summary;
-	#print $app->bm->total_time;
-
-	#$app->debug->off;
-	#say $app->debug(1),"  ,  ", $app->debug;
 	
-	my $response = $app->response;
-	$response->code(200);
-	$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
-	#$response->header('Content-Type' => 'text/plain');
-	#$response->header(Content_Base => 'http://www.mewsoft.com/');
-	#$response->header(Accept => "text/html, text/plain, image/*");
-	#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
-	#$response->content("Hello world content.");
-	my $res = $response->finalize;
-	my ($code, $headers, $body) = @$res;
-	#say "" , $response->as_string("\n");
-	#my $mime = $app->mime;
-	#say $mime->for_file("path/file.gif");
+	# run the application and return the PSGI response or print to the output
+	# the run process will also run plugins with matched routes files loaded
+	$app->run();
 
-	exit;
 #=========================================================#
 sub test_paginate {
 

@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 =pod
 
@@ -25,56 +25,72 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 	use Nile;
 
 	my $app = Nile->new();
-
+	
+	# initialize the application with the shared sessions settings
 	$app->init(
 		# base application path, auto detected if not set
-		path	=>    dirname(File::Spec->rel2abs(__FILE__)),
+		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
 
+		# load config files
+		config		=> [ qw(config) ],
+
+		# load route files
+		route		=> [ qw(route) ],
+
+		# log file name
+		log_file	=>	"log.pm",
+
+		# url action name i.e. index.cgi?action=register
+		action_name	=>	"action,route,cmd",
+
+		# app home page plugin/module/method
+		default_route	=>	"/Home/Home/index",
+	);
+	
+	# set the application per single user session settings
+	$app->start(
 		# site language for user, auto detected if not set
-		lang	=>    "en-US",
+		lang	=>	"en-US",
 
 		# theme used
-		theme	=>    "default",
-	  );
+		theme	=>	"default",
+		
+		# load language files
+		langs	=> [ qw(general) ],
+		
+		# charset for encoding/decoding and output
+		charset => "utf-8",
+	);
 
-	#$app->run();
-	#exit;
-	
-	my $config = $app->config;
-	$config->load("config.xml");
-	#$app->dump($config);
-
-	# connect to the database. pass the connection params or try to load it from the config object.
-	#$app->connect();
-	#$app->connect(%params);
-	
-	# load langauge file general.xml
-	$app->lang->load("general");
-	
-	# load routes file route.xml
-	$app->router->load("route");
-	
-	# inline actions
+	# inline actions, return content. url: /forum/home
 	$app->action("get", "/forum/home", sub {
 		my ($self) = @_;
 		# $self is set to the application context object same as $self->me in plugins
-		say $self->request->virtual_host;
-		say "Hello world from inline actions forum/home.";
+		my $content = "Host: " . $self->request->virtual_host ."<br>\n";
+		$content .= "PSGI status: " . $self->psgi . "<br>\n";
+		$content .= "Time: ". time . "<br>\n";
+		$content .= "Hello world from inline action /forum/home" ."<br>\n";
+		$content .= "أحمد الششتاوى" ."<br>\n";
+		$self->response->encoded(0); # encode content
+		return $content;
 	});
-
-	$app->action("get", "/accounts/login", sub {
-		my ($self) = @_;
-		say "Hello world from inline actions accounts/login.";
-	});
-
-	$app->dispatcher->dispatch;
-
-	# run any plugin action or route
-	#$app->dispatcher->dispatch('/accounts/register/create');
-	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
 	
-	# disconnect from database
-	#$app->disconnect();
+	# inline actions, capture print statements, no returns. url: /accounts/login
+	$app->capture("get", "/accounts/login", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		say "Host: " . $self->request->virtual_host || "" . "<br>\n";
+		say "Request method: " . $self->request->request_method || "" . "<br>\n";
+		say "PSGI status: " . $self->psgi . "<br>\n";
+		say "Time: ". time . "<br>\n";
+		say "Hello world from inline action with capture /accounts/login", "<br>\n";
+		say $self->encode("أحمد الششتاوى") ."<br>\n";
+		$self->response->encoded(1); # content already encoded
+	});
+	
+	# run the application and return the PSGI response or print to the output
+	# the run process will also run plugins with matched routes files loaded
+	$app->run();
 
 =head1 DESCRIPTION
 
@@ -85,62 +101,7 @@ B<Alpha> version, do not use it for production. The project's homepage L<https:/
 The main idea in this framework is to separate all the html design and layout from programming. 
 The framework uses html templates for the design with special xml tags for inserting the dynamic output into the templates.
 All the application text is separated in langauge files in xml format supporting multi lingual applications with easy translating and modifying all the text.
-
-	#!/usr/bin/perl
-
-	use Nile;
-
-	my $app = Nile->new();
-
-	$app->init(
-		# base application path, auto detected if not set
-		path	=>    dirname(File::Spec->rel2abs(__FILE__)),
-
-		# site language for user, auto detected if not set
-		lang	=>    "en-US",
-
-		# theme used
-		theme	=>    "default",
-	  );
-
-	#$app->run();
-	#exit;
-	
-	my $config = $app->config;
-	$config->load("config.xml");
-	#$app->dump($config);
-
-	# connect to the database. pass the connection params or try to load it from the config object.
-	#$app->connect();
-	#$app->connect(%params);
-	
-	# load langauge file general.xml
-	$app->lang->load("general");
-	
-	# load routes file route.xml
-	$app->router->load("route");
-	
-	# inline actions
-	$app->action("get", "/forum/home", sub {
-		my ($self) = @_;
-		# $self is set to the application context object same as $self->me in plugins
-		say $self->request->virtual_host;
-		say "Hello world from inline actions forum/home.";
-	});
-
-	$app->action("get", "/accounts/login", sub {
-		my ($self) = @_;
-		say "Hello world from inline actions accounts/login.";
-	});
-
-	$app->dispatcher->dispatch;
-
-	# run any plugin action or route
-	#$app->dispatcher->dispatch('/accounts/register/create');
-	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
-	
-	# disconnect from database
-	#$app->disconnect();
+The framework supports PSGI and also direct CGI without any modifications to your applications.
 
 =head1 EXAMPLE APPLICATION
 
@@ -529,14 +490,15 @@ use MooseX::MethodAttributes;
 use namespace::autoclean;
 #use MooseX::ClassAttribute;
 
-use CGI::Carp qw(fatalsToBrowser);
+use CGI::Carp;# qw(fatalsToBrowser);
+use Try::Tiny;
 
 use utf8;
 use File::Spec;
 use File::Basename;
 use Cwd;
 use URI;
-use Encode;
+use Encode ();
 use URI::Escape;
 use Crypt::RC4;
 #use Crypt::CBC;
@@ -544,13 +506,13 @@ use Capture::Tiny ();
 use Time::Local;
 use File::Slurp;
 use Time::HiRes qw(gettimeofday tv_interval);
-use MIME::Base64 qw(encode_base64 decode_base64 decode_base64url encode_base64url);
+use MIME::Base64 3.11 qw(encode_base64 decode_base64 decode_base64url encode_base64url) ; #3.11
 
 use Data::Dumper;
 $Data::Dumper::Deparse = 1; #stringify coderefs
 #use LWP::UserAgent;
-use Log::Tiny;
-use CGI::Simple;
+#use Log::Tiny;
+#use CGI::Simple;
 use HTTP::AcceptLanguage;
 
 #no warnings qw(void once uninitialized numeric);
@@ -661,8 +623,9 @@ sub warns {
 	goto &CGI::Carp::cluck;
 }
 #=========================================================#
-sub BUILD {
+sub BUILD { # our sub new {..}
 	my ($self, $args) = @_;
+
 	#$self->error(" ...  error   ...  ");
 	#$self->warn(" ...  warn   ...  ");
 }
@@ -675,35 +638,75 @@ sub init {
 	
 	$arg{path} ||= $self->detect_script_path($script);
 
-	$arg{lang} ||= "";
-	$arg{theme} ||= "default";
-
 	$self->var->set(
 			# app directories
 			'path'					=>	$arg{path},
-			'langs_dir'			=>	$self->file->catdir($arg{path}, "lang"),
-			'lang_dir'				=>	$self->file->catdir($arg{path}, "lang", $arg{lang}),
-			'themes_dir'		=>	$self->file->catdir($arg{path}, "theme"),
-			'theme_dir'			=>	$self->file->catdir($arg{path}, "theme", $arg{theme}),
-			'route_dir'			=>	$self->file->catdir($arg{path}, "route"),
-			'log_dir'				=>	$self->file->catdir($arg{path}, "log"),
+			
 			'lib_dir'				=>	$self->file->catdir($arg{path}, "lib"),
+			'log_dir'				=>	$self->file->catdir($arg{path}, "log"),
 			'config_dir'			=>	$self->file->catdir($arg{path}, "config"),
+			'route_dir'			=>	$self->file->catdir($arg{path}, "route"),
+			
+			'log_file'				=>	$arg{log_file} || "log.pm",
+			'action_name'		=>	$arg{action_name} || "action,route,cmd",
+			'default_route'	=>	$arg{default_route} || "/Home/Home/index",
+		);
+	
+	push @INC, $self->var->get("lib_dir");
+	
+	if (exists $arg{psgi}) {
+		$self->psgi($arg{psgi});
+	}
+	else {
+		# force PSGI if PLACK_ENV is set
+		$ENV{'PLACK_ENV'} ? $self->psgi(1) : $self->psgi(0);
+	}
+	
+	# load config files
+	foreach (@{$arg{config}}) {
+		#$self->config->xml->keep_order(1);
+		$self->config->load($_);
+	}
+
+	# load route files
+	foreach (@{$arg{route}}) {
+		$self->router->load($_);
+	}
+
+}
+#=========================================================#
+sub start {
+
+	my ($self, %arg) = @_;
+
+	$arg{lang} ||= "";
+	$arg{theme} ||= "default";
+	
+	my $path = $self->var->get("path");
+
+	$self->var->set(
+			'langs_dir'			=>	$self->file->catdir($path, "lang"),
+			'lang_dir'				=>	$self->file->catdir($path, "lang", $arg{lang}),
+			'themes_dir'		=>	$self->file->catdir($path, "theme"),
+			'theme_dir'			=>	$self->file->catdir($path, "theme", $arg{theme}),
 			
 			# app default settings
 			'lang'					=>	$arg{lang},
 			'theme'					=>	$arg{theme},
-			'log_file'				=>	$arg{log_file} || "log.pm",
-			'action_name'		=>	$arg{action_name} || "action,route,cmd",
-			'default_route'		=>	$arg{default_route} || "/Home/Home/index",
 		);
 	
-	push @INC, $self->var->get("lib_dir");
-
 	if (!$arg{lang}) {
 		$arg{lang} = $self->detect_user_language;
 		$self->var->set("lang", $arg{lang});	
 		$self->var->set("lang_dir", $self->file->catdir($arg{path}, "lang", $arg{lang}));
+	}
+
+	# load language files
+	#$self->lang->load("general");
+	
+	# load language files
+	foreach (@{$arg{langs}}) {
+		$self->lang->load($_);
 	}
 
 }
@@ -712,35 +715,234 @@ sub run {
 
 	my ($self, %arg) = @_;
 	
-	if (%arg) {
-		my ($package, $script) = caller;
-		$arg{path} ||= $self->detect_script_path($script);
-		$self->init(%arg)
+	#$self->log->info("application run start");
+	#$ENV{'PLACK_ENV'} ? $self->psgi(1) : $self->psgi(0);
+	
+	#$self->response($self->response->new);
+	my ($content, $request, $response);
+
+	if ($self->psgi) {
+
+		# PSGI mode. PSGI app will loop inside this closure, so reset any user session shared data inside it.
+		my $psgi = sub {
+
+			my $env = shift;
+
+			$self->env($env);
+			
+			#*ENV = $env;
+			#----------------------------------------------
+			my $path = $self->env->{PATH_INFO} || $self->env->{REQUEST_URI};
+			
+			$path = $self->file->catfile($self->var->get("path"), $path);
+			#say "path: $path, [".$self->var->get("path")."]";
+
+			if (-f $path) {
+				# file response: /favicon.ico
+				$response->file_response($path);
+				my $res = $response->finalize;
+				my ($code, $headers, $body) = @$res;
+				return [ $code, $headers,  $body];
+			}
+			#----------------------------------------------
+			$self->response($self->object("Nile::HTTP::Response"));
+			$response = $self->response;
+			$request = $self->new_request($env);
+			#$self->dump($env);
+			
+			$content = try {
+				$self->dispatcher->dispatch;
+			} catch {
+				$response->content_type('text/plain');
+				return "$_";
+			};
+			
+			my $ctype = $response->header('Content-Type');
+			if ($self->charset && $ctype && content_type_text($ctype)) {
+				$response->header('Content-Type' => "$ctype; charset=" . $self->charset) if $ctype !~ /charset/i;
+			}
+
+			$response->content($content);
+
+			if (!$ctype) {
+				$response->content_type('text/html;charset=' . $self->charset || "utf-8");
+			}
+
+			if (!defined $response->header('Content-Length')) {
+				use bytes; # turn off character semantics
+				$response->header('Content-Length' => length($content));
+			}
+
+			#$response->code(200) unless ($response->code);
+			#$response->content_type('text/html') unless ($response->content_type);
+			
+			#$response->content_encoding('gzip');
+			#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
+			#$response->header(Content_Base => 'http://www.mewsoft.com/');
+			#$response->header(Accept => "text/html, text/plain, image/*");
+			#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
+			#$response->content("Hello world content.");
+
+			$response->content($content);
+
+			return $response->finalize;
+		};
+		return $psgi;
+	}
+	else {
+
+		# CGI mode. Direct CGI mode. We need to add also here direct FCGI support.
+		$request = $self->new_request();
+
+		$self->response($self->object("Nile::HTTP::Response"));
+		$response = $self->response;
+
+		# run the action and get the output content
+		#my $content = $self->dispatcher->dispatch;
+	
+		$content = try {
+			$self->dispatcher->dispatch;
+		} catch {
+			$response->content_type('text/plain');
+			return "$_";
+		};
+
+		# assume OK response if not set
+		$response->code(200) unless ($response->code);
+
+		if (ref($content) eq 'GLOB') {
+			# response is file handle
+			if (!defined $response->header('Content-Length')) {
+				my $size = (stat($content))[7];
+				$response->header('Content-Length' => $size);
+			}
+			$response->content($content);
+		}
+		else {
+			my $ctype = $response->header('Content-Type');
+			if ($self->charset && $ctype && content_type_text($ctype)) {
+				$response->header('Content-Type' => "$ctype; charset=" . $self->charset) if $ctype !~ /charset/i;
+			}
+
+			$response->content($content);
+
+			if (!$ctype) {
+				$response->content_type('text/html;charset=' . $self->charset);
+			}
+
+			if (!defined $response->header('Content-Length')) {
+				use bytes; # turn off character semantics
+				$response->header('Content-Length' => length($content));
+			}
+		}
+
+		# run any plugin action or route
+		#$app->dispatcher->dispatch('/accounts/register/create');
+		#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
+
+		#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
+		#$response->content_type('text/html;charset=utf-8');
+		#$response->content_encoding('utf-8');
+		#$response->header('Content-Type' => 'text/html');
+		#$response->header(Content_Base => 'http://www.mewsoft.com/');
+		#$response->header(Accept => "text/html, text/plain, image/*");
+		#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
+		#$response->content("Hello world content.");
+		#my $res = $response->finalize;
+		#my $res = $response->headers_as_string;
+		
+		my $res = $response->as_string;
+		
+		#print "Content-type: text/html;charset=utf-8\n\n";
+		#print $res, "\n", $response->content;
+		#binmode STDOUT, ":UTF8";
+		#binmode STDOUT, ':encoding(utf8)';
+
+		print $res;
+		return;
 	}
 
-	#$self->log->info("application run start");
-
-	my $request = $self->request;
-
-	#$self->config->xml->keep_order(1);
-	$self->config->load("config");
-
-	#$self->connect();
-
-	#my $var = $app->var;
-	#$var->Body("Body variable");
-	#say "var: ". $var->set("Title", "Hello world Title")->get("Title");
-	
-	# load language files
-	$self->lang->load("general");
-	
-	# load routes files
-	$self->router->load("route");
-	
-	# process the request and dispatch the action
-	$self->dispatcher->dispatch;
-	
 	#$self->log->log("application run end");
+}
+#=========================================================#
+sub content_type_text {
+	my ($self, $content_type) = @_;
+	return $content_type =~ /(\bx(?:ht)?ml\b|text|json|javascript)/;
+}
+#=========================================================#
+sub action {
+	my $self = shift;
+	my ($method, $route, $action) = $self->action_args(@_);
+	$self->router->add_route(
+							name  => "",
+							path  => $route,
+							target  => $action,
+							method  => $method,
+							defaults  => {
+									#id => 1
+								},
+							attributes => undef,
+						);
+}
+#=========================================================#
+sub capture {
+	my $self = shift;
+	my ($method, $route, $action) = $self->action_args(@_);
+	$self->router->add_route(
+							name  => "",
+							path  => $route,
+							target  => $action,
+							method  => $method,
+							defaults  => {
+									#id => 1
+								},
+							attributes => "capture",
+						);
+
+}
+#=========================================================#
+sub action_args {
+	
+	my $self = shift;
+
+	#my @methods = qw(get post put patch delete options head);
+
+	my ($method, $route, $action);
+
+	if (@_ == 1) {
+		#$app->action(sub {});
+		($action) = @_;
+	}
+	elsif (@_ == 2) {
+		#$app->action("/home", sub {});
+		($route, $action) = @_;
+	}
+	elsif (@_ == 3) {
+		#$app->action("get", "/home", sub {});
+		($method, $route, $action) = @_;
+	}
+	else {
+		$self->abort("Action error. Empty action and route. Syntax \$app->action(\$method, \$route, \$coderef) ");
+	}
+
+	$method ||= "";
+	$route ||= "/";
+	
+	if (ref($action) ne "CODE") {
+		$self->abort("Action error, must be a valid code reference. Syntax \$app->action(\$method, \$route, \$coderef) ");
+	}
+	
+	return ($method, $route, $action);
+}
+#=========================================================#
+sub encode {
+	my ($self, $data) = @_;
+	return Encode::encode($self->charset, $data);
+}
+#=========================================================#
+sub decode {
+	my ($self, $data) = @_;
+	return Encode::decode($self->charset, $data);
 }
 #=========================================================#
 =head2 bm()
@@ -777,6 +979,12 @@ has 'bm' => (
 		  load Benchmark::Stopwatch;
 		  Benchmark::Stopwatch->new->start;
 	  }
+  );
+
+has 'psgi' => (
+      is      => 'rw',
+      isa     => 'Bool',
+      default => 0,
   );
 
 =head2 ua()
@@ -817,7 +1025,6 @@ has 'uri' => (
 
 has 'charset' => (
       is      => 'rw',
-      isa     => 'Str',
 	  lazy	=> 1,
       default => 'utf8'
   );
@@ -892,14 +1099,18 @@ has 'setting' => (
 		}
   );
 
+has 'env' => (
+	is => 'rw',
+	isa => 'HashRef',
+	default => sub { +{} }
+);
+
+
 has 'request' => (
-      is      => 'rw',
-      isa    => 'Nile::HTTP::Request',
-	  lazy	=> 1,
-	  default => sub {
-			shift->object("Nile::HTTP::Request", @_);
-		}
-  );
+	is      => 'rw',
+	lazy	=> 1,
+	default => sub {undef},
+);
 
 has 'response' => (
       is      => 'rw',
@@ -944,6 +1155,7 @@ has 'log' => (
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
+			load Log::Tiny;
 			Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm'));
 		}
   );
@@ -981,6 +1193,25 @@ sub connect {
 	$self->db;
 }
 #=========================================================#
+sub new_request {
+	
+	my ($self, $env) = @_;
+
+	if (defined($env) && ref ($env) eq "HASH") {
+		$self->psgi(1);
+		#load Nile::HTTP::PSGI;
+		load Nile::HTTP::RequestPSGI;
+		$self->request($self->object("Nile::HTTP::RequestPSGI", $env));
+	}
+	else {
+		$self->psgi(0);
+		load Nile::HTTP::Request;
+		$self->request($self->object("Nile::HTTP::Request"));
+	}
+	
+	$self->request;
+}
+#=========================================================#
 sub paginate {
 	my ($self) = shift;
 	return $self->object("Nile::Paginate", @_);
@@ -999,19 +1230,24 @@ sub database {
 sub object {
 
 	my ($self, $class, @args) = @_;
-	my %args;
+	my (%args, $obj);
 	
-	if (@args && @args % 2) {
+	if (@args == 1 && ref($args[0]) eq "HASH") {
+		# Moose single arguments must be hash ref
+		$obj = $class->new(@args);
+	}
+	elsif (@args>1 && @args % 2) {
 		# Moose needs args as hash, so convert odd size arrays to even for hashing
 		push @args, undef;
 		%args = @args;
 		pop @args;
+		$obj = $class->new(%args);
 	}
 	else {
 		%args = @args;
+		$obj = $class->new(%args);
 	}
 
-	my $obj = $class->new(%args);
 	my $meta = $obj->meta;
 
 	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
@@ -1065,60 +1301,6 @@ sub detect_user_language {
 
 	$lang ||= $langs[0] ||= "en-US";
 	return $lang;
-}
-#=========================================================#
-sub action {
-	
-	my $self = shift;
-
-	#my @methods = qw(get post put patch delete options head);
-
-	my ($method, $route, $action);
-
-	if (@_ == 1) {
-		#$app->action(sub {});
-		($action) = @_;
-	}
-	elsif (@_ == 2) {
-		#$app->action("/home", sub {});
-		($route, $action) = @_;
-	}
-	elsif (@_ == 3) {
-		#$app->action("get", "/home", sub {});
-		($method, $route, $action) = @_;
-	}
-	else {
-		$self->abort("Action error. Empty action and route. Syntax \$app->action(\$method, \$route, \$coderef) ");
-	}
-
-	$method ||= "";
-	$route ||= "/";
-	
-	if (ref($action) ne "CODE") {
-		$self->abort("Action error, must be a valid code reference. Syntax \$app->action(\$method, \$route, \$coderef) ");
-	}
-
-	$self->router->add_route(
-							name  => "",
-							path  => $route,
-							target  => $action,
-							method  => $method,
-							defaults  => {
-									#id => 1
-								}
-						);
-
-}
-#=========================================================#
-sub run_action {
-	my ($self, $code) = @_;
-	$code->();
-}
-#=========================================================#
-
-sub start {
-	my $self = shift;
-	
 }
 #=========================================================#
 sub dump {
@@ -1203,7 +1385,7 @@ sub commify {
 	return scalar reverse $str;
 }
 #=========================================================#
-sub capture {
+sub capture_output {
 my ($self, $code) = @_;
 	
 	my ($merged, @result) = Capture::Tiny::capture_merged {eval $code};
@@ -1225,39 +1407,43 @@ sub abort {
 
 =head1 Sub Modules
 
-Views	L<Nile::View|Nile::View>.
+Views	L<Nile::View>.
 
-Shared Vars	L<Nile::Var|Nile::Var>.
+Shared Vars	L<Nile::Var>.
 
-Langauge	L<Nile::Lang|Nile::Lang>.
+Langauge	L<Nile::Lang>.
 
-Request	L<Nile::Request|Nile::Request>.
+Request	L<Nile::HTTP::Request>.
 
-Response	L<Nile::Response|Nile::Response>.
+Request	L<Nile::HTTP::RequestPSGI>.
 
-Dispatcher L<Nile::Dispatcher|Nile::Dispatcher>.
+Request	L<Nile::HTTP::PSGI>.
 
-Router L<Nile::Router|Nile::Router>.
+Response	L<Nile::HTTP::Response>.
 
-File Utils L<Nile::File|Nile::File>.
+Dispatcher L<Nile::Dispatcher>.
 
-Paginatation L<Nile::Paginate|Nile::Paginate>.
+Router L<Nile::Router>.
 
-Database L<Nile::Database|Nile::Database>.
+File Utils L<Nile::File>.
 
-XML L<Nile::XML|Nile::XML>.
+Paginatation L<Nile::Paginate>.
 
-Settings	L<Nile::Setting|Nile::Setting>.
+Database L<Nile::Database>.
 
-Serializer L<Nile::Serializer|Nile::Serializer>.
+XML L<Nile::XML>.
 
-Deserializer L<Nile::Deserializer|Nile::Deserializer>.
+Settings	L<Nile::Setting>.
 
-Serialization L<Nile::Serialization|Nile::Serialization>.
+Serializer L<Nile::Serializer>.
 
-MIME L<Nile::MIME|Nile::MIME>.
+Deserializer L<Nile::Deserializer>.
 
-Abort L<Nile::Abort|Nile::Abort>.
+Serialization L<Nile::Serialization>.
+
+MIME L<Nile::MIME>.
+
+Abort L<Nile::Abort>.
 
 =head1 Bugs
 

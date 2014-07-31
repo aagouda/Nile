@@ -9,8 +9,10 @@ call perldoc -o html lib/Nile/File.pm > File.html
 call perldoc -o html lib/Nile/Lang.pm > Lang.html
 call perldoc -o html lib/Nile/Paginate.pm > Paginate.html
 call perldoc -o html lib/Nile/Setting.pm > Setting.html
-call perldoc -o html lib/Nile/Request.pm > Request.html
-call perldoc -o html lib/Nile/Response.pm > Response.html
+call perldoc -o html lib/Nile/HTTP/Request.pm > Request.html
+call perldoc -o html lib/Nile/HTTP/Request.pm > RequestPSGI.html
+call perldoc -o html lib/Nile/HTTP/Response.pm > Response.html
+call perldoc -o html lib/Nile/HTTP/PSGI.pm > PSGI.html
 call perldoc -o html lib/Nile/Router.pm > Router.html
 call perldoc -o html lib/Nile/MIME.pm > MIME.html
 call perldoc -o html lib/Nile/Say.pm > Say.html

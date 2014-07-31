@@ -20,7 +20,7 @@ WriteMakefile(
 			Time::Local => 0,
 			File::Slurp => 0,
 			Time::HiRes => 0,
-			MIME::Base64 => 0,
+			MIME::Base64 => 3.11,
 			Data::Dumper => 0,
 			HTTP::Tiny => 0,
 			Log::Tiny => 0,

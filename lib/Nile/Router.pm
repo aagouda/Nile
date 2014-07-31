@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Router;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 =pod
 
@@ -71,6 +71,7 @@ sub BUILD {
 	my ($self, $args) = @_;
 
     $self->{cache} = +{};
+    $self->{cache_route} = +{};
     $self->{routes} = [];
     $self->{patterns} = +{};
     $self->{names} = +{};
@@ -123,6 +124,7 @@ sub load {
 					target  => $v->{-action},
 					method  => $v->{-method} || '*',
 					defaults  => $defaults,
+					attributes => undef,
 				);
 	}
 
@@ -132,13 +134,12 @@ sub load {
 =head2 match()
 	
 	# find route action and its information
-	my ($action, $args, $uri, $query) = $router->match($route, $request_method);
-	my ($action, $args, $uri, $query) = $router->match("/news/world/egypt/politics/2014/07/24/1579279", "get");
-	my ($action, $args, $uri, $query) = $router->match("/blog/computer/software/article_name");
-	
-	# or as hash ref
-	my $route = $router->match($route, $request_method);
-	$route->{action}, $route->{args}, $route->{query}, $route->{uri}
+	my $match = $router->match($route, $request_method);
+	say $match->{action}, $match->{args}, $match->{query}, $match->{uri}, $match->{code}, $match->{route}
+
+	my $match = $router->match("/news/world/egypt/politics/2014/07/24/1579279", "get");
+	my $match = $router->match("/blog/computer/software/article_name");
+	my $match = $router->match($route, $request_method);
 
 Match routes from the loaded routes files. If route matched returns route target or action, default arguments if provided,
 and uri and query information.
@@ -150,13 +151,22 @@ sub match {
 	my ($self, $route, $method) = @_;
 	
 	$route || return;
+
 	my $uri = $self->_match($route, $method);
 	
 	$uri || return;
 	
-	# inline actions. $app->action("get", "/home", sub {});
+	# get the full matched route object
+	my $matched_route = $self->cash_route($route, $method);
+	
+	#my $route = $router->route_for($uri, $method);
+
+	# inline actions. $app->action("get", "/home", sub {}); $app->capture("get", "/home", sub {});
 	if (ref($uri) eq "CODE") {
-		return wantarray? $uri : {action=>$uri};
+		#return wantarray? ($uri,  $route_obj->{attributes}, $route_obj): {action=>$uri, route=>$route_obj->{attributes}};
+		# ($action, $args, $uri, $query, $code, $matched_route)
+		#return wantarray? ($uri, undef, undef, undef, 1, $matched_route): {action=>$uri, code=>1, route=>$matched_route};
+		return {action=>$uri, args=>undef, query=>undef, uri=>undef, code=>1, route=>$matched_route};
 	}
 	
 	#$uri = /blog/view/?lang=en&locale=us&Article=Home
@@ -169,7 +179,8 @@ sub match {
 		$args->{$k} = $self->url_decode($v);
 	}
 
-	return wantarray? ($action, $args, $uri, $query) : {action=>$action, args=>$args, query=>$query, uri=>$uri};
+	#return wantarray? ($action, $args, $uri, $query, 0, $matched_route) : {action=>$action, args=>$args, query=>$query, uri=>$uri, code=>0, route=>$matched_route};
+	return {action=>$action, args=>$args, query=>$query, uri=>$uri, code=>0, route=>$matched_route};
 }
 #=========================================================#
 sub _match {
@@ -182,6 +193,7 @@ sub _match {
 	my ($uri, $querystring) = split /\?/, $full_uri;
   
 	if (exists( $self->{cache}->{"$method $full_uri"})) {
+
 		if (ref($self->{cache}->{"$method $full_uri"})) {
 			return wantarray ? @{ $self->{cache}->{"$method $full_uri"} } : $self->{cache}->{"$method $full_uri"};
 		}
@@ -189,27 +201,37 @@ sub _match {
 			return unless defined $self->{cache}->{"$method $full_uri"};
 			return $self->{cache}->{"$method $full_uri"};
 		}
+
 	}
   
 	foreach my $route (grep { $method eq '*' || $_->{method} eq $method || $_->{method} eq '*' } @{$self->{routes}}) {
 		if (my @captured = ($uri =~ $route->{regexp})) {
+			
+			# cash the full matched route
+			$self->{cache_route}->{"$method $full_uri"} = $route;
+
 			if (ref($route->{target}) eq 'ARRAY') {
 				$self->{cache}->{"$method $full_uri"} = [
 					 map {
 						$self->_prepare_target( $route, $_, $querystring, @captured)
 					 } @{ $route->{target} }
-			];
-			return wantarray ? @{ $self->{cache}->{"$method $full_uri"} } : $self->{cache}->{"$method $uri"};
-      }
-      else {
-				#return $s->{cache}->{"$method $full_uri"} = $s->_prepare_target( $route, "$route->{target}", $querystring, @captured );
-				return $self->{cache}->{"$method $full_uri"} = $self->_prepare_target( $route, $route->{target}, $querystring, @captured );
+				];
+				return wantarray ? @{ $self->{cache}->{"$method $full_uri"} } : $self->{cache}->{"$method $uri"};
+			}
+			else {
+				#return $s->{cache}->{"$method $full_uri"} = $s->_prepare_target($route, "$route->{target}", $querystring, @captured);
+				return $self->{cache}->{"$method $full_uri"} = $self->_prepare_target($route, $route->{target}, $querystring, @captured);
 			}# end if()
 		}# end if()
 	}# end foreach()
   
 	$self->{cache}->{"$method $uri"} = undef;
 	return;
+}
+#=========================================================#
+sub cash_route {
+	my ($self, $uri, $method) = @_;
+	return $self->{cache_route}->{"$method $uri"};
 }
 #=========================================================#
 sub _prepare_target {
@@ -389,6 +411,7 @@ sub add_route {
 	}
   
 	push @{$self->{routes}}, \%args;
+
 	$self->{patterns}->{$regUID} = $args{path};
 	$self->{names}->{$args{name}} = $self->{routes}->[-1];
 	$self->{paths_methods}->{$uid} = $self->{routes}->[-1];

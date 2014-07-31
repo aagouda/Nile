@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::HTTP::Response;
 
-our $VERSION = '0.27';
+our $VERSION = '0.29';
 
 =pod
 
@@ -391,7 +391,7 @@ sub as_string {
 	my $protocol = ($ENV{SERVER_PROTOCOL} || 'HTTP/1.1') . " " .$self->code . " " . $self->http_codes->{$self->code} . $eol;
 
     return join("",
-						$protocol,
+						#$protocol,
 						$self->headers_as_string($eol),
 						$eol,
 						$content,
@@ -425,6 +425,8 @@ sub send_file {
 
 }
 #=========================================================#
+has encoded => (is => 'rw', isa => 'Bool', default => 0);
+#=========================================================#
 sub build_body {
 
 	my $self = shift;
@@ -432,6 +434,11 @@ sub build_body {
 	my $body = $self->body;
 
 	$body = [] unless defined $body;
+	
+	if (!$self->encoded) {
+		$self->encoded(1);
+		$body = Encode::encode($self->me->charset, $body);
+	}
 
 	if (!ref $body or Scalar::Util::blessed($body) && overload::Method($body, q("")) && !$body->can('getline')) {
 		return [$body];
@@ -439,7 +446,7 @@ sub build_body {
 		return $body;
 	}
 }
-
+#=========================================================#
 sub build_cookies {
     my($self, $headers) = @_;
 	while (my($name, $val) = each %{$self->cookies}) {
@@ -447,7 +454,7 @@ sub build_cookies {
         push @$headers, 'Set-Cookie' => $cookie;
     }
 }
-
+#=========================================================#
 sub build_cookie {
 
     my($self, $name, $val) = @_;
@@ -467,7 +474,32 @@ sub build_cookie {
 
     return join "; ", @cookie;
 }
+#=========================================================#
+sub file_response {
 
+	my ($self, $file, $mime, $status) = @_;
+	
+	$mime ||= $self->me->mime->for_file($file) || "application/x-download",
+
+	$self->status($status) if ($status);
+	
+	my ($size, $last_modified) = (stat $file)[7,9];
+
+	$last_modified = $self->http_date($last_modified);
+
+	#my $ifmod = $ENV{HTTP_IF_MODIFIED_SINCE};
+
+	open (my $fh, '<', $file);
+	binmode $fh;
+
+	$self->content($fh);
+
+	$self->header('Last-Modified' => $last_modified);
+	$self->header('Content-Type' => $mime);
+	$self->header('Content-Length' => $size);
+
+}
+#=========================================================#
 my @MON  = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 my @WDAY = qw(Sun Mon Tue Wed Thu Fri Sat);
 
@@ -640,6 +672,39 @@ that it has erred or is incapable of performing the request.
 =cut
 
 sub is_server_error {shift; $_[0] >= 500 && $_[0] < 600; }
+#=========================================================#
+sub http_code_response {
+    
+	my ($self, $code) = @_;
+
+	$self->code($code);
+	
+	$self->header('Content-Type' => 'text/plain');
+	
+	my $body = $self->status_message($code);
+
+	$self->content($body);
+	
+	use bytes; # turn off character semantics
+	$self->header('Content-Length' => length($body));
+
+	return $self->finalize;
+}
+#=========================================================#
+sub response_403 {
+	# 403 => 'Forbidden',
+	return shift->http_code_response(403);
+}
+#=========================================================#
+sub response_400 {
+	# 400 => 'Bad Request',
+	return shift->http_code_response(400);
+}
+#=========================================================#
+sub response_404 {
+	# 404 => 'Not Found',
+	return shift->http_code_response(404);
+}
 #=========================================================#
 sub object {
 	my $self = shift;

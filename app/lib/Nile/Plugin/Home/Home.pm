@@ -8,15 +8,17 @@
 #=========================================================#
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 use Nile::Base;
 #=========================================================#
+# url: /home
 sub home : GET Action {
 	
-	my ($self) = @_;
+	my ($self, $me) = @_;
 	
-	my $me = $self->me;
+	# $me is set to the application context object, same as $self->me inside any method
+	#my $me = $self->me;
 
 	my $view = $me->view("home");
 	
@@ -39,9 +41,20 @@ sub home : GET Action {
 
 	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
-	$view->show;
+	return $view->out;
+
+	#$view->show;
 	#$view->process;
 	#$view->render;
+}
+#=========================================================#
+# url: /home/news
+sub news: GET Capture {
+
+	my ($self, $me) = @_;
+
+	say qq{Hello world. This content is captured from print statements. The action must be marked by 'Capture' attribute. No returns.};
+
 }
 #=========================================================#
 

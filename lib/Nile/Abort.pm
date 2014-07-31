@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Abort;
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 =pod
 
@@ -30,13 +30,14 @@ Nile::Abort - Abort the application at anytime with optional message and stacktr
 
 =cut
 
-use Carp;# qw(croak shortmess longmess);
-use utf8;
-
+use Nile::Base;
 #=========================================================#
 sub abort {
+
 	my ($self) = shift;
-	my ($title, $msg, $trace, @trace);
+
+	my ($title, $msg, $trace, @trace, $out);
+
 	#my ($callpackage, $callfile, $callline, $subroutine, $hasargs, $wantarray, $evaltext, $is_require) = caller;
 
 	if (@_ == 2) {
@@ -47,10 +48,11 @@ sub abort {
 		$title = "Application Error";
 	}
 	
-	@trace = reverse split(/\n/, Carp::longmess());
-	$trace = join ("<br>\n", @trace);
-	#$msg =~ s/\n/\<br\>\n/g;
+	#@trace = reverse split(/\n/, Carp::longmess());
+	#$trace = join ("<br>\n", @trace);
+	$trace = Carp::longmess();
 
+=cuts
 my $out = <<HTML;
 <html>
 <head>
@@ -74,11 +76,19 @@ my $out = <<HTML;
 </body>
 </html>
 HTML
+=cut
+	
+	#$out = "Content-Type: text/plain\n\n";
+
+	$out .= "$title\n\n";
+	$out .= "$msg\n\n";
+	$out .= "$trace\n\n";
 
 	#header();
-	print "$out";
+	#say "Content-Type: text/html\n\n";
+	#say $out;
+	die $out;
 	#if ($self->me->db->connected) {$self->me->db->disconnect();}
-	exit 0;	
 }
 #=========================================================#
 
