@@ -1,5 +1,5 @@
-#!C:\perl\bin\perl.exe
 #!/usr/bin/perl
+#!C:\perl\bin\perl.exe
 #=========================================================#
 #	Copyright Infomation
 #=========================================================#
@@ -43,6 +43,9 @@
 
 		# app home page plugin/module/method
 		default_route	=>	"/Home/Home/index",
+		
+		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
+		#mode	=>	"fcgi", # psgi, cgi, fcgi
 	);
 	
 	# set the application per single user session settings
@@ -64,8 +67,9 @@
 	$app->action("get", "/forum/home", sub {
 		my ($self) = @_;
 		# $self is set to the application context object same as $self->me in plugins
-		my $content = "Host: " . $self->request->virtual_host ."<br>\n";
-		$content .= "PSGI status: " . $self->psgi . "<br>\n";
+		my $content = "Host: " . ($self->request->virtual_host || "") ."<br>\n";
+		$content .= "Request method: " . ($self->request->request_method || "") . "<br>\n";
+		$content .= "App Mode: " . $self->mode . "<br>\n";
 		$content .= "Time: ". time . "<br>\n";
 		$content .= "Hello world from inline action /forum/home" ."<br>\n";
 		$content .= "أحمد الششتاوى" ."<br>\n";
@@ -77,12 +81,12 @@
 	$app->capture("get", "/accounts/login", sub {
 		my ($self) = @_;
 		# $self is set to the application context object same as $self->me in plugins
-		say "Host: " . $self->request->virtual_host || "" . "<br>\n";
-		say "Request method: " . $self->request->request_method || "" . "<br>\n";
-		say "PSGI status: " . $self->psgi . "<br>\n";
+		say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
+		say "Request method: " . ($self->request->request_method || "") . "<br>\n";
+		say "App Mode: " . $self->mode . "<br>\n";
 		say "Time: ". time . "<br>\n";
 		say "Hello world from inline action with capture /accounts/login", "<br>\n";
-		say $self->encode("أحمد الششتاوى") ."<br>\n";
+		say $self->encode("أحمد الششتاوى ") ."<br>\n";
 		$self->response->encoded(1); # content already encoded
 	});
 

@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Router;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 =pod
 
@@ -173,6 +173,8 @@ sub match {
 	my ($action, $query) = split (/\?/, $uri);
 	
 	my ($args, $k, $v);
+	
+	$query ||= "";
 
 	foreach (split(/&/, $query)) {
 		($k, $v) = split (/=/, $_);

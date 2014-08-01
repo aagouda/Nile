@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Abort;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 =pod
 
@@ -50,7 +50,7 @@ sub abort {
 	
 	#@trace = reverse split(/\n/, Carp::longmess());
 	#$trace = join ("<br>\n", @trace);
-	$trace = Carp::longmess();
+	#$trace = Carp::longmess();
 
 =cuts
 my $out = <<HTML;
@@ -79,12 +79,12 @@ HTML
 =cut
 	
 	#$out = "Content-Type: text/plain\n\n";
-
+	
+	#$title = qq{<div style="color: red;font: 18px;margin: auto; text-align: center;">$title</div>};
 	$out .= "$title\n\n";
 	$out .= "$msg\n\n";
-	$out .= "$trace\n\n";
+	#$out .= "$trace\n\n";
 
-	#header();
 	#say "Content-Type: text/html\n\n";
 	#say $out;
 	die $out;

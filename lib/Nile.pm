@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 =pod
 
@@ -160,24 +160,38 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 	package Nile::Plugin::Home::Home;
 
 	use Nile::Base;
-
-	sub home  : GET Action {
+	
+	# plugin action, return content. url is routed direct or from routes files. url: /home
+	sub home : GET Action {
 		
-		my ($self) = @_;
+		my ($self, $me) = @_;
+		
+		# $me is set to the application context object, same as $self->me inside any method
+		#my $me = $self->me;
 
-		my $view = $self->me->view("home");
+		my $view = $me->view("home");
 		
 		$view->var(
-				fname			=>	'Ahmed',
-				lname			=>	'Elsheshtawy',
-				email			=>	'ahmed@mewsoft.com',
-				website		=>	'http://www.mewsoft.com',
-				singleline		=>	'Single line variable <b>Good</b>',
-				multiline		=>	'Multi line variable <b>Nice</b>',
-			);
+			fname			=>	'Ahmed',
+			lname			=>	'Elsheshtawy',
+			email			=>	'sales@mewsoft.com',
+			website		=>	'http://www.mewsoft.com',
+			singleline		=>	'Single line variable <b>Good</b>',
+			multiline		=>	'Multi line variable <b>Nice</b>',
+		);
+		
+		$view->block("first", "1st Block New Content ");
+		$view->block("six", "6th Block New Content ");
 
-		$view->process;
-		$view->render;
+		#say $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
+		
+		return $view->out;
+	}
+
+	# run action and capture print statements, no returns. url: /home/news
+	sub news: GET Capture {
+		my ($self, $me) = @_;
+		say qq{Hello world. This content is captured from print statements. The action must be marked by 'Capture' attribute. No returns.};
 	}
 
 	1;
@@ -309,8 +323,8 @@ Below is B<route.xml> file example should be created under the path/route folder
 
 	<?xml version="1.0" encoding="UTF-8" ?>
 	<home route="/home" action="/Home/Home/home" method="get" />
-	<register route="/register" action="/Accounts/Register/register" method="get" nocase="1" defaults="year=1900|month=1|day=23" />
-	<post route="/blog/post/{cid:\d+}/{id:\d+}" action="/Blog/Article/Post" method="post" nocase="1" />
+	<register route="/register" action="/Accounts/Register/register" method="get" defaults="year=1900|month=1|day=23" />
+	<post route="/blog/post/{cid:\d+}/{id:\d+}" action="/Blog/Article/Post" method="post" />
 	<browse route="/blog/{id:\d+}" action="/Blog/Article/Browse" method="get" />
 	<view route="/blog/view/{id:\d+}" action="/Blog/Article/View" method="get" />
 	<edit route="/blog/edit/{id:\d+}" action="/Blog/Article/Edit" method="get" />
@@ -483,15 +497,28 @@ Loads xml files into hash tree using L<XML::TreePP>
 The database class provides methods for connecting to the sql database and easy methods for sql operations.
 
 =cut
-#$|=1;
+
+BEGIN {
+	$|=1;
+	use CGI::Carp qw(fatalsToBrowser set_message);
+	use Devel::StackTrace;
+	use Devel::StackTrace::AsHTML;
+	use PadWalker;
+	use Devel::StackTrace::WithLexicals;
+	sub handle_errors {
+		#print "Content-type: text/html;charset=utf-8\n\n";
+		my $msg = shift;
+		#my $trace = Devel::StackTrace->new;
+		my $trace = Devel::StackTrace::WithLexicals->new(indent => 1, message => $msg);
+		print $trace->as_html;
+	}
+	set_message(\&handle_errors);
+}
 
 use Moose;
 use MooseX::MethodAttributes;
 use namespace::autoclean;
 #use MooseX::ClassAttribute;
-
-use CGI::Carp;# qw(fatalsToBrowser);
-use Try::Tiny;
 
 use utf8;
 use File::Spec;
@@ -653,15 +680,49 @@ sub init {
 		);
 	
 	push @INC, $self->var->get("lib_dir");
+	#------------------------------------------------------
+	# detect and load request and response handler classes
+	$arg{mode} ||= "cgi";
+	$arg{mode} = lc($arg{mode});
+	$self->mode($arg{mode});
 	
-	if (exists $arg{psgi}) {
-		$self->psgi($arg{psgi});
+	#$self->log->debug("mode: $arg{mode}");
+
+	# force PSGI if PLACK_ENV is set
+	if ($ENV{'PLACK_ENV'}) {
+		$self->mode("psgi");
+	}
+	#$self->log->debug("mode after PLACK_ENV: $arg{mode}");
+	
+	# FCGI sets $ENV{GATEWAY_INTERFACE }=> 'CGI/1.1' inside the accept request loop but nothing is set before the accept loop
+	# command line invocations will not set this variable also
+	if ($self->mode ne "psgi") {
+		if (exists $ENV{GATEWAY_INTERFACE} ) {
+			# CGI
+			$self->mode("cgi");
+		}
+		else {
+			# FCGI or command line
+			$self->mode("fcgi");
+		}
+	}
+	
+	#$self->log->debug("mode to run: $arg{mode}");
+
+	if ($self->mode eq "psgi") {
+		load Nile::HTTP::RequestPSGI;
+		load Nile::Handler::PSGI;
+	}
+	elsif ($self->mode eq "fcgi") {
+		load Nile::HTTP::Request;
+		load Nile::Handler::CGI;
+		load Nile::Handler::FCGI;
 	}
 	else {
-		# force PSGI if PLACK_ENV is set
-		$ENV{'PLACK_ENV'} ? $self->psgi(1) : $self->psgi(0);
+		load Nile::HTTP::Request;
+		load Nile::Handler::CGI;
 	}
-	
+	#------------------------------------------------------
 	# load config files
 	foreach (@{$arg{config}}) {
 		#$self->config->xml->keep_order(1);
@@ -715,151 +776,25 @@ sub run {
 
 	my ($self, %arg) = @_;
 	
-	#$self->log->info("application run start");
-	#$ENV{'PLACK_ENV'} ? $self->psgi(1) : $self->psgi(0);
+	#$self->log->info("application run start in mode: ".$self->mode);
 	
-	#$self->response($self->response->new);
-	my ($content, $request, $response);
-
-	if ($self->psgi) {
-
-		# PSGI mode. PSGI app will loop inside this closure, so reset any user session shared data inside it.
-		my $psgi = sub {
-
-			my $env = shift;
-
-			$self->env($env);
-			
-			#*ENV = $env;
-			#----------------------------------------------
-			my $path = $self->env->{PATH_INFO} || $self->env->{REQUEST_URI};
-			
-			$path = $self->file->catfile($self->var->get("path"), $path);
-			#say "path: $path, [".$self->var->get("path")."]";
-
-			if (-f $path) {
-				# file response: /favicon.ico
-				$response->file_response($path);
-				my $res = $response->finalize;
-				my ($code, $headers, $body) = @$res;
-				return [ $code, $headers,  $body];
-			}
-			#----------------------------------------------
-			$self->response($self->object("Nile::HTTP::Response"));
-			$response = $self->response;
-			$request = $self->new_request($env);
-			#$self->dump($env);
-			
-			$content = try {
-				$self->dispatcher->dispatch;
-			} catch {
-				$response->content_type('text/plain');
-				return "$_";
-			};
-			
-			my $ctype = $response->header('Content-Type');
-			if ($self->charset && $ctype && content_type_text($ctype)) {
-				$response->header('Content-Type' => "$ctype; charset=" . $self->charset) if $ctype !~ /charset/i;
-			}
-
-			$response->content($content);
-
-			if (!$ctype) {
-				$response->content_type('text/html;charset=' . $self->charset || "utf-8");
-			}
-
-			if (!defined $response->header('Content-Length')) {
-				use bytes; # turn off character semantics
-				$response->header('Content-Length' => length($content));
-			}
-
-			#$response->code(200) unless ($response->code);
-			#$response->content_type('text/html') unless ($response->content_type);
-			
-			#$response->content_encoding('gzip');
-			#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
-			#$response->header(Content_Base => 'http://www.mewsoft.com/');
-			#$response->header(Accept => "text/html, text/plain, image/*");
-			#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
-			#$response->content("Hello world content.");
-
-			$response->content($content);
-
-			return $response->finalize;
-		};
+	if ($self->mode eq "psgi") {
+		# PSGI handler
+		#$self->log->debug("PSGI handler start");
+		my $psgi = $self->object("Nile::Handler::PSGI")->start();
 		return $psgi;
 	}
+	elsif ($self->mode eq "fcgi") {
+		# FCGI handler
+		#$self->log->debug("FCGI handler start");
+		$self->object("Nile::Handler::FCGI")->start();
+		#$self->log->debug("FCGI handler end");
+	}
 	else {
-
-		# CGI mode. Direct CGI mode. We need to add also here direct FCGI support.
-		$request = $self->new_request();
-
-		$self->response($self->object("Nile::HTTP::Response"));
-		$response = $self->response;
-
-		# run the action and get the output content
-		#my $content = $self->dispatcher->dispatch;
-	
-		$content = try {
-			$self->dispatcher->dispatch;
-		} catch {
-			$response->content_type('text/plain');
-			return "$_";
-		};
-
-		# assume OK response if not set
-		$response->code(200) unless ($response->code);
-
-		if (ref($content) eq 'GLOB') {
-			# response is file handle
-			if (!defined $response->header('Content-Length')) {
-				my $size = (stat($content))[7];
-				$response->header('Content-Length' => $size);
-			}
-			$response->content($content);
-		}
-		else {
-			my $ctype = $response->header('Content-Type');
-			if ($self->charset && $ctype && content_type_text($ctype)) {
-				$response->header('Content-Type' => "$ctype; charset=" . $self->charset) if $ctype !~ /charset/i;
-			}
-
-			$response->content($content);
-
-			if (!$ctype) {
-				$response->content_type('text/html;charset=' . $self->charset);
-			}
-
-			if (!defined $response->header('Content-Length')) {
-				use bytes; # turn off character semantics
-				$response->header('Content-Length' => length($content));
-			}
-		}
-
-		# run any plugin action or route
-		#$app->dispatcher->dispatch('/accounts/register/create');
-		#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
-
-		#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
-		#$response->content_type('text/html;charset=utf-8');
-		#$response->content_encoding('utf-8');
-		#$response->header('Content-Type' => 'text/html');
-		#$response->header(Content_Base => 'http://www.mewsoft.com/');
-		#$response->header(Accept => "text/html, text/plain, image/*");
-		#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
-		#$response->content("Hello world content.");
-		#my $res = $response->finalize;
-		#my $res = $response->headers_as_string;
-		
-		my $res = $response->as_string;
-		
-		#print "Content-type: text/html;charset=utf-8\n\n";
-		#print $res, "\n", $response->content;
-		#binmode STDOUT, ":UTF8";
-		#binmode STDOUT, ':encoding(utf8)';
-
-		print $res;
-		return;
+		# CGI handler
+		#$self->log->debug("CGI handler start");
+		$self->object("Nile::Handler::CGI")->start();
+		#$self->log->debug("CGI handler end");
 	}
 
 	#$self->log->log("application run end");
@@ -935,6 +870,24 @@ sub action_args {
 	return ($method, $route, $action);
 }
 #=========================================================#
+sub is_cli {
+	# return 1 if called from browser, 0 if called from command line
+	if  (exists $ENV{REQUEST_METHOD} || defined $ENV{GATEWAY_INTERFACE} ||  exists $ENV{HTTP_HOST}){
+		return 0;
+	}
+	return 1;
+	#if (-t STDIN) { }
+	#use IO::Interactive qw(is_interactive interactive busy);if ( is_interactive() ) {print "Running interactively\n";}
+}
+#=========================================================#
+sub utf8_safe {
+	my ($self, $str) = @_;
+	if (utf8::is_utf8($str)) {
+		utf8::encode($str);
+	}
+	$str;
+}
+#=========================================================#
 sub encode {
 	my ($self, $data) = @_;
 	return Encode::encode($self->charset, $data);
@@ -981,10 +934,10 @@ has 'bm' => (
 	  }
   );
 
-has 'psgi' => (
+has 'mode' => (
       is      => 'rw',
-      isa     => 'Bool',
-      default => 0,
+      isa     => 'Str',
+      default => "cgi",
   );
 
 =head2 ua()
@@ -1149,17 +1102,6 @@ has 'router' => (
 		}
   );
 
-has 'log' => (
-      is      => 'rw',
-	  isa    => 'Log::Tiny',
-	  lazy	=> 1,
-	  default => sub {
-			my $self = shift;
-			load Log::Tiny;
-			Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm'));
-		}
-  );
-
 has 'dispatcher' => (
       is      => 'rw',
 	  isa    => 'Nile::Dispatcher',
@@ -1169,6 +1111,31 @@ has 'dispatcher' => (
 		}
   );
 
+#=========================================================#
+has 'logger' => (
+      is      => 'rw',
+	  lazy	=> 1,
+	  default => sub {
+			my $self = shift;
+			load Log::Tiny;
+			Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm'));
+		}
+  );
+sub log {
+	my $self = shift;
+	$self->start_logger if (!$self->logger);
+	$self->logger(@_);
+}
+sub start_logger {
+	my $self = shift;
+	$self->stop_logger;
+	$self->logger(Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm')));
+}
+sub stop_logger {
+	my $self = shift;
+	# close log file
+	$self->logger(undef);
+}
 #=========================================================#
 has 'dbh' => (
       is      => 'rw',
@@ -1198,14 +1165,11 @@ sub new_request {
 	my ($self, $env) = @_;
 
 	if (defined($env) && ref ($env) eq "HASH") {
-		$self->psgi(1);
+		$self->mode("psgi");
 		#load Nile::HTTP::PSGI;
-		load Nile::HTTP::RequestPSGI;
 		$self->request($self->object("Nile::HTTP::RequestPSGI", $env));
 	}
 	else {
-		$self->psgi(0);
-		load Nile::HTTP::Request;
 		$self->request($self->object("Nile::HTTP::Request"));
 	}
 	
@@ -1236,7 +1200,7 @@ sub object {
 		# Moose single arguments must be hash ref
 		$obj = $class->new(@args);
 	}
-	elsif (@args>1 && @args % 2) {
+	elsif (@args && @args % 2) {
 		# Moose needs args as hash, so convert odd size arrays to even for hashing
 		push @args, undef;
 		%args = @args;
@@ -1263,7 +1227,8 @@ sub object {
 		$meta->add_attribute('nile' => ( is => 'rw', default => sub{$self}));
 		$obj->nile($self);
 	}
-
+	
+	# if class has defined "main" method, then call it
 	if ($obj->can("main")) {
 		$obj->main(@args);
 	}

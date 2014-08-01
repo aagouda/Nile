@@ -8,11 +8,11 @@
 #=========================================================#
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 use Nile::Base;
 #=========================================================#
-# url: /home
+# plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
 	
 	my ($self, $me) = @_;
@@ -23,13 +23,13 @@ sub home : GET Action {
 	my $view = $me->view("home");
 	
 	$view->var(
-			fname			=>	'Ahmed',
-			lname			=>	'Elsheshtawy',
-			email			=>	'sales@mewsoft.com',
-			website		=>	'http://www.mewsoft.com',
-			singleline		=>	'Single line variable <b>Good</b>',
-			multiline		=>	'Multi line variable <b>Nice</b>',
-		);
+		fname			=>	'Ahmed',
+		lname			=>	'Elsheshtawy',
+		email			=>	'sales@mewsoft.com',
+		website		=>	'http://www.mewsoft.com',
+		singleline		=>	'Single line variable <b>Good</b>',
+		multiline		=>	'Multi line variable <b>Nice</b>',
+	);
 	
 	#my $var = $view->block();
 	#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
@@ -48,7 +48,7 @@ sub home : GET Action {
 	#$view->render;
 }
 #=========================================================#
-# url: /home/news
+# run action and capture print statements, no returns. url: /home/news
 sub news: GET Capture {
 
 	my ($self, $me) = @_;

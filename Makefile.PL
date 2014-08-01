@@ -39,6 +39,11 @@ WriteMakefile(
 			File::Find::Rule => 0,
 			Scalar::Util => 0,
 			HTTP::Headers => 0,
+			Devel::StackTrace => 0,
+			Devel::StackTrace::AsHTML => 0,
+			PadWalker => 0,
+			Devel::StackTrace::WithLexicals => 0,
+
 	}, # e.g., Module::Name => 1.1
 
     ($] >= 5.005 ?     ## Add these new keywords supported since 5.005

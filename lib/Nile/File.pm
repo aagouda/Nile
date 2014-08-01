@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::File;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 =pod
 
@@ -67,7 +67,7 @@ To get list of files in a specific folder:
 	@folders = $self->file->folders("c:/apache/htdocs/nile/", "", 1);
 
 	#folders_tree($dir, $match, $relative, $depth)
-	@folders = $self->file->#folders_tree("c:/apache/htdocs/nile/", "", 1);
+	@folders = $self->file->folders_tree("c:/apache/htdocs/nile/", "", 1);
 
 Nile::File - Files and folders manager.
 
@@ -374,7 +374,7 @@ sub dirname {
 #=========================================================#
 =head2 path_info()
 	
-	my ($name, $dir, $ext, $name_$ext) = $app->file->path_info($path);
+	my ($name, $dir, $ext, $name_ext) = $app->file->path_info($path);
 
 Splits a file path into its $dir, $name, filename $suffix, and name with suffix.
 

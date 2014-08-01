@@ -39,5 +39,8 @@ lib/Nile/HTTP/Request.pm
 lib/Nile/HTTP/RequestPSGI.pm
 lib/Nile/HTTP/Response.pm
 lib/Nile/HTTP/PSGI.pm
+lib/Nile/Handler/CGI.pm
+lib/Nile/Handler/FCGI.pm
+lib/Nile/Handler/PSGI.pm
 lib/Nile/Plugin/Date/Date.pm
 t/Nile.t

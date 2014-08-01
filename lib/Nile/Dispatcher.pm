@@ -8,7 +8,7 @@
 #=========================================================#
 package Nile::Dispatcher;
 
-our $VERSION = '0.29';
+our $VERSION = '0.30';
 
 =pod
 
@@ -101,7 +101,7 @@ sub dispatch_action {
 	# inline actions. $app->action("get", "/home", sub {...});
 	# inline actions. $app->capture("get", "/home", sub {...});
 	if (ref($route) eq "CODE") {
-		if ($match->{route}->{attributes} =~ /capture/i) {
+		if (defined $match->{route}->{attributes} && $match->{route}->{attributes} =~ /capture/i) {
 			# run the action and capture output of print statements
 			($content, @result) = Capture::Tiny::capture_merged {eval {$route->($self->me)}};
 			#say "caputre code....";
