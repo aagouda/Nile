@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Config
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Config;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -74,7 +74,7 @@ This class extends L<Nile::XML> class, therefore all methods from L<Nile::XML> i
 use Nile::Base;
 extends 'Nile::XML';
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 around 'load' => sub {
 
 	my ($orig, $self, $file) = @_;
@@ -82,7 +82,7 @@ around 'load' => sub {
 	return $self->$orig($self->me->file->catfile($self->me->var->get("config_dir"), $file));
 
 };
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()
 	
 	# get a new config object
@@ -99,7 +99,7 @@ sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

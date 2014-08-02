@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Serialization
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Serialization;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -34,7 +34,7 @@ This is a base class for L<Nile::Serializer> and L<Nile::Deserializer> modules. 
 #use Nile::Base;
 use Moose;
 use Module::Load;
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 Json
 	
 	$json = $app->freeze->Json;
@@ -124,7 +124,7 @@ has 'Xml' => (
 		  XML::TreePP->new;
 	  }
   );
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

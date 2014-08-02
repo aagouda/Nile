@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Serializer
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Serializer;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -40,7 +40,7 @@ Nile::Serializer - Data structures Serializer
 #use Nile::Base;
 use Moose;
 extends qw(Nile::Serialization);
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 json()
 	
 	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
@@ -58,7 +58,7 @@ Serialize a data structure to a JSON structure.
 sub json {
 	return shift->Json->utf8->encode(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 yaml()
 	
 	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
@@ -82,7 +82,7 @@ sub yaml {
 	shift->Yaml;
 	return YAML::freeze(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 storable()
 	
 	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
@@ -101,7 +101,7 @@ sub storable {
 	return Storable::nfreeze(@_);
 	#return Storable::freeze(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dumper()
 	
 	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
@@ -131,7 +131,7 @@ sub dumper {
 
 	return $d->Dump;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
 	
 	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
@@ -159,7 +159,7 @@ sub xml {
 	$xml->set(indent => 0);
 	return $xml->write(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

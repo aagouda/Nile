@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Base
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Base;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 

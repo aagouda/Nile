@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Router
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Router;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -66,7 +66,7 @@ Routes are loaded and matched in the same order they exist in the file, the sort
 =cut
 
 use Nile::Base;
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
 	my ($self, $args) = @_;
 
@@ -79,7 +79,7 @@ sub BUILD {
     
 	$self->{route_counter} = 0;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 load()
 	
 	# load routes file. default file extension is xml. load route.xml file.
@@ -130,7 +130,7 @@ sub load {
 
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 match()
 	
 	# find route action and its information
@@ -184,7 +184,7 @@ sub match {
 	#return wantarray? ($action, $args, $uri, $query, 0, $matched_route) : {action=>$action, args=>$args, query=>$query, uri=>$uri, code=>0, route=>$matched_route};
 	return {action=>$action, args=>$args, query=>$query, uri=>$uri, code=>0, route=>$matched_route};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub _match {
 
 	my ($self, $full_uri, $method) = @_;
@@ -230,12 +230,12 @@ sub _match {
 	$self->{cache}->{"$method $uri"} = undef;
 	return;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub cash_route {
 	my ($self, $uri, $method) = @_;
 	return $self->{cache_route}->{"$method $uri"};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub _prepare_target {
 
 	my ($self, $route, $target, $querystring, @captured) = @_;
@@ -280,7 +280,7 @@ sub _prepare_target {
 	}# end if()
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 uri_for()
 
 	my $route = $router->uri_for($route_name, \%params);
@@ -325,7 +325,7 @@ sub uri_for {
   
 	return $template;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 route_for()
 	
 	my $route = $router->route_for($path, [$method]);
@@ -351,7 +351,7 @@ sub route_for {
   
 	return;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 add_route()
 	
 	# add new route information to the router object
@@ -420,7 +420,7 @@ sub add_route {
 
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub _patternize {
   
 	my ($self, $path) = @_;
@@ -511,13 +511,13 @@ sub _patternize {
   
 	return ($regexp, \@captures, $uri_template);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub replace_route {
 	my ($self, %args) = @_;
 	$self->add_route(%args) unless eval { $self->uri_for($args{name}) };
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 url_decode()
 	
 	my $decode_url = $router->url_decode($url);
@@ -531,7 +531,7 @@ sub url_decode {
     $decode =~ s/%([a-fA-F0-9]{2})/ pack "C", hex $1 /eg;
     return $decode;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 url_encode()
 	
 	my $encoded_url = $router->url_encode($url);
@@ -545,12 +545,12 @@ sub url_decode {
 	$encode =~ tr/ /+/;
 	return $encode;
   }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

@@ -19,7 +19,7 @@ DirectoryIndex index.cgi index.html index.shtml
 RewriteEngine On
 
 #RewriteBase /auction
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # force use www with http and https so http://domain.com redirect to http://www.domain.com
 #add www with https support - you have to put this in .htaccess file in the site root folder
 # skip local host
@@ -29,7 +29,7 @@ RewriteCond %{HTTP_HOST} ^([a-z.]+)$ [NC]
 RewriteCond %{HTTP_HOST} !^www\. 
 RewriteCond %{HTTPS}s ^on(s)|''
 RewriteRule ^ http%1://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # if query string empty, then set the url GET variables to the query_string
 #RewriteCond %{REQUEST_FILENAME} !-f
 #RewriteCond %{REQUEST_FILENAME} !-d

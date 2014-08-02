@@ -1,17 +1,17 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Plugin::Home::Home
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 use Nile::Base;
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
 	
@@ -42,21 +42,18 @@ sub home : GET Action {
 	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
 	return $view->out;
-
-	#$view->show;
-	#$view->process;
-	#$view->render;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # run action and capture print statements, no returns. url: /home/news
 sub news: GET Capture {
 
 	my ($self, $me) = @_;
 
-	say qq{Hello world. This content is captured from print statements. The action must be marked by 'Capture' attribute. No returns.};
+	say qq{Hello world. This content is captured from print statements.
+		The action must be marked by 'Capture' attribute. No returns.};
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

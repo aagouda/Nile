@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Paginate
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Paginate;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -156,7 +156,7 @@ B<mode> - the mode (which defaults to 'slide') determins how the paging will wor
 =back 4
 
 =cut
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
 	my $self = shift;
 	my $args = shift;
@@ -200,7 +200,7 @@ sub BUILD {
 	$self->do_calculation();
 	#$self->render();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub do_calculation {
 	my ($self) = shift;
 	
@@ -261,7 +261,7 @@ sub do_calculation {
 	#now render all the navigation output
 	$self->render();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub render {
 	my ($self) = shift;
 	my ($page, $link);
@@ -375,7 +375,7 @@ sub render {
 		$self->{out} = qq!<ul class="$self->{css_class}">$self->{prev_page_out}$self->{first_page_out}$self->{prev_more_out}$self->{pages_out}$self->{next_more_out}$self->{last_page_out}$self->{next_page_out}</ul>!;
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub render2 {
 	my ($self) = shift;
 	my ($page, $link);
@@ -468,7 +468,7 @@ sub render2 {
 	}
 	$self->{out} = qq!<ul class="$self->{css_class}">$self->{first_page_out}$self->{prev_page_out}$self->{pages_out}$self->{next_page_out}$self->{last_page_out}</ul>!;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 total_entries()
 
   $paginate->total_entries($total_entries);
@@ -486,7 +486,7 @@ sub total_entries {
 	}
 	return $self->{total_entries};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 entries_per_page()
 
   $paginate->entries_per_page($entries_per_page);
@@ -504,7 +504,7 @@ sub entries_per_page {
 	}
 	return $self->{entries_per_page};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 current_page()
 
   $paginate->current_page($page_num);
@@ -522,7 +522,7 @@ sub current_page {
 	}
 	return $self->{current_page};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 mode()
 	
 	$paginate->mode('slide');
@@ -541,7 +541,7 @@ sub mode {
 	}
 	return $self->{mode};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 pages_per_set()
 
   $paginate->pages_per_set($number_of_pages_per_set);
@@ -560,7 +560,7 @@ sub pages_per_set {
 	}
 	return $self->{pages_per_set};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 entries_on_current_page()
 
   $paginate->entries_on_current_page();
@@ -578,7 +578,7 @@ sub entries_on_current_page {
 		return $self->last - $self->first + 1;
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 first_page()
 
   $paginate->first_page();
@@ -591,7 +591,7 @@ sub first_page {
 	my ($self) = shift;
 	return 1;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 last_page()
 
   $paginate->last_page();
@@ -604,7 +604,7 @@ sub last_page {
 	my ($self) = shift; 
 	return $self->{last_page};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 total_pages()
 
   $paginate->total_pages();
@@ -617,7 +617,7 @@ sub total_pages {
 	my ($self) = shift; 
 	return $self->{last_page};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 first()
 
   $paginate->first();
@@ -630,7 +630,7 @@ sub first {
 	my ($self) = shift;
 	return $self->{first};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 last()
 
   $paginate->last();
@@ -643,7 +643,7 @@ sub last {
 	my ($self) = shift;
 	return $self->{last};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 prev_page()
 
   $paginate->prev_page();
@@ -656,7 +656,7 @@ sub prev_page {
 	my ($self) = shift;
 	return $self->{previous_page};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 next_page()
 
   $paginate->next_page();
@@ -669,7 +669,7 @@ sub next_page {
 	my ($self) = shift;
 	return $self->{next_page};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 first_page_in_set()
 
   $paginate->first_page_in_set();
@@ -682,7 +682,7 @@ sub first_page_in_set {
 	my ($self) = shift;
 	return $self->{first_page_in_set};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 last_page_in_set()
 
   $paginate->last_page_in_set();
@@ -695,7 +695,7 @@ sub last_page_in_set {
 	my ($self) = shift;
 	return $self->{last_page_in_set};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The code below originally from the module Data::Pageset
 sub calculate_visible_pages {
 	my ($self) = shift;
@@ -769,7 +769,7 @@ sub calculate_visible_pages {
     }
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # The code below originally from the module Data::Pageset
 # Calculate the first page in the current set
 sub calc_start_page {
@@ -786,7 +786,7 @@ sub calc_start_page {
 
     return ( $current_page_set * $self->{pages_per_set} ) + 1;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 previous_set()
 
   print "Previous set starts at ", $paginate->previous_set(), "\n";
@@ -801,7 +801,7 @@ sub previous_set {
     return $self->{page_set_previous} if defined $self->{page_set_previous};
     return undef;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 next_set()
 
   print "Next set starts at ", $paginate->next_set(), "\n";
@@ -816,7 +816,7 @@ sub next_set {
     return $self->{page_set_next} if defined $self->{page_set_next};
     return undef;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 pages_in_set()
 
   foreach my $page_num (@{$paginate->pages_in_set()}) {
@@ -832,7 +832,7 @@ sub pages_in_set {
 	my ($self) = shift;
     return $self->{page_set_pages};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 out()
 
   print "out: ", $paginate->out(), "\n";
@@ -843,7 +843,7 @@ sub out {
 	my ($self) = shift;
     return $self->{out};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 showing()
 
   print "showing: ", $paginate->showing(), "\n";
@@ -854,7 +854,7 @@ sub showing {
 	my ($self) = shift;
     return $self->{showing};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 showing_list()
 
   print "showing list: ", $paginate->showing_list(), "\n";
@@ -865,12 +865,12 @@ sub showing_list {
 	my ($self) = shift;
     return $self->{showing_list};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

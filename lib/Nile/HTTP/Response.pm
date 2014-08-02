@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::HTTP::Response
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Response;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -71,7 +71,7 @@ use Nile::Base;
 use Scalar::Util ();
 use HTTP::Headers;
 use URI::Escape ();
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
 	my ($self, $args) = @_;
 	my ($code, $headers, $content) = %$args;
@@ -79,7 +79,7 @@ sub BUILD {
     $self->headers($headers) if defined $headers;
     $self->body($content) if defined $content;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 headers
 
   $headers = $res->headers;
@@ -118,7 +118,7 @@ sub headers {
 		return $self->{headers} ||= HTTP::Headers->new();
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 header
 
   $res->header('X-Foo' => 'bar');
@@ -129,7 +129,7 @@ Sets and gets HTTP header of the response.
 =cut
 
 sub header { shift->headers->header(@_) }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =head2 remove_header
 	
@@ -141,7 +141,7 @@ sub header { shift->headers->header(@_) }
 =cut
 
 sub remove_header { shift->headers->remove_header(@_) }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 status
 
   $res->status(200);
@@ -153,7 +153,7 @@ Sets and gets HTTP status code. C<code> is an alias.
 
 has status => (is => 'rw');
 sub code    { shift->status(@_) }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 body
 
   $res->body($body_str);
@@ -171,7 +171,7 @@ C<content_length> method.
 
 has body => (is => 'rw');
 sub content { shift->body(@_) }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cookies
 
 	$res->cookies->{name} = 123;
@@ -197,7 +197,7 @@ B<does not> convert string formats such as C<+3M>.
 =cut
 
 has cookies => (is => 'rw', isa => 'HashRef', default => sub {+{}});
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 content_length
 
   $res->content_length(123);
@@ -208,7 +208,7 @@ Shortcut for the equivalent get/set method in C<< $res->headers >>.
 =cut
 
 sub content_length {shift->headers->content_length(@_)}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 content_type
 
   $res->content_type('text/plain');
@@ -219,7 +219,7 @@ Shortcut for the equivalent get/set method in C<< $res->headers >>.
 =cut
 
 sub content_type {shift->headers->content_type(@_)}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 content_encoding
 
   $res->content_encoding('gzip');
@@ -229,7 +229,7 @@ Shortcut for the equivalent get/set method in C<< $res->headers >>.
 =cut
 
 sub content_encoding {shift->headers->content_encoding(@_)}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 location
 
 Gets and sets C<Location> header.
@@ -240,7 +240,7 @@ setter.
 =cut
 
 sub location {shift->headers->header('Location' => @_)}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 redirect
 
   $res->redirect($url);
@@ -267,7 +267,7 @@ sub redirect {
 
     return $self->location;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 finalize
 
 	$res = $res->finalize;
@@ -299,7 +299,7 @@ sub finalize {
 
 	return [$self->status, \@headers, $self->build_body];
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 to_app
 
   $res_app = $res->to_app;
@@ -309,7 +309,7 @@ A helper shortcut for C<< sub { $res->finalize } >>.
 =cut
 
 sub to_app {sub {shift->finalize}}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 headers_as_string
 
 	$headers = $res->headers_as_string($eol)
@@ -346,7 +346,7 @@ sub headers_as_string {
 
 	return join($eol, @result, '');
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub process_newline {
     local $_ = shift;
     my $eol = shift;
@@ -357,7 +357,7 @@ sub process_newline {
     s/\n/$eol/g;    # substitute with requested line ending
     $_;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 as_string
 
 	$message = $res->as_string($eol);
@@ -398,7 +398,7 @@ sub as_string {
 						(@_ == 1 && length($content) && $content !~ /\n\z/) ? "\n" : "",
 				);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 render
 
 	$res->render;
@@ -411,7 +411,7 @@ sub render {
 	my ($self) = @_;
 	print $self->as_string();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub send_file {
 	
 	my ($self, $file, $options) = @_;
@@ -424,9 +424,9 @@ sub send_file {
 
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has encoded => (is => 'rw', isa => 'Bool', default => 0);
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub build_body {
 
 	my $self = shift;
@@ -446,7 +446,7 @@ sub build_body {
 		return $body;
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub build_cookies {
     my($self, $headers) = @_;
 	while (my($name, $val) = each %{$self->cookies}) {
@@ -454,7 +454,7 @@ sub build_cookies {
         push @$headers, 'Set-Cookie' => $cookie;
     }
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub build_cookie {
 
     my($self, $name, $val) = @_;
@@ -474,7 +474,7 @@ sub build_cookie {
 
     return join "; ", @cookie;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub file_response {
 
 	my ($self, $file, $mime, $status) = @_;
@@ -499,7 +499,7 @@ sub file_response {
 	$self->header('Content-Length' => $size);
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 my @MON  = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
 my @WDAY = qw(Sun Mon Tue Wed Thu Fri Sat);
 
@@ -519,7 +519,7 @@ sub cookie_date {
     }
     return $expires;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 http_date
 
 	say $res->http_date(time);
@@ -533,7 +533,7 @@ sub http_date {
     my ($self, $time) = @_;
 	return $self->make_date($time, "http");
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub make_date {
 
 	my ($self, $time, $format) = @_;
@@ -547,7 +547,7 @@ sub make_date {
 	return sprintf("%s, %02d$sp%s$sp%s %02d:%02d:%02d GMT",
 				   $WDAY[$wday], $mday, $MON[$mon], $year, $hour, $min, $sec);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'http_codes' => (
 						is => 'rw',
 						isa => 'HashRef',
@@ -606,7 +606,7 @@ has 'http_codes' => (
 						504 => 'Gateway Timeout',
 						505 => 'HTTP Version Not Supported',
 	}});
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 status_message($code)
 
 The status_message() function will translate status codes to human
@@ -615,7 +615,7 @@ readable strings. If the $code is unknown, then C<undef> is returned.
 =cut
 
 sub status_message {my $self = shift; $self->http_codes->{$_[0]};}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 is_info( $code )
 
 Return TRUE if C<$code> is an I<Informational> status code (1xx).  This
@@ -625,7 +625,7 @@ any content.
 =cut
 
 sub is_info {shift; $_[0] >= 100 && $_[0] < 200; }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =item is_success( $code )
 
 Return TRUE if C<$code> is a I<Successful> status code (2xx).
@@ -633,7 +633,7 @@ Return TRUE if C<$code> is a I<Successful> status code (2xx).
 =cut
 
 sub is_success {shift; $_[0] >= 200 && $_[0] < 300; }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =item is_redirect( $code )
 
 Return TRUE if C<$code> is a I<Redirection> status code (3xx). This class of
@@ -643,7 +643,7 @@ user agent in order to fulfill the request.
 =cut
 
 sub is_redirect {shift; $_[0] >= 300 && $_[0] < 400; }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =item is_error( $code )
 
 Return TRUE if C<$code> is an I<Error> status code (4xx or 5xx).  The function
@@ -652,7 +652,7 @@ returns TRUE for both client and server error status codes.
 =cut
 
 sub is_error {shift; $_[0] >= 400 && $_[0] < 600; }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =item is_client_error( $code )
 
 Return TRUE if C<$code> is a I<Client Error> status code (4xx). This class
@@ -662,7 +662,7 @@ erred.
 =cut
 
 sub is_client_error {shift; $_[0] >= 400 && $_[0] < 500; }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =item is_server_error( $code )
 
 Return TRUE if C<$code> is a I<Server Error> status code (5xx). This class
@@ -672,7 +672,7 @@ that it has erred or is incapable of performing the request.
 =cut
 
 sub is_server_error {shift; $_[0] >= 500 && $_[0] < 600; }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub http_code_response {
     
 	my ($self, $code) = @_;
@@ -690,27 +690,27 @@ sub http_code_response {
 
 	return $self->finalize;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub response_403 {
 	# 403 => 'Forbidden',
 	return shift->http_code_response(403);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub response_400 {
 	# 400 => 'Bad Request',
 	return shift->http_code_response(400);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub response_404 {
 	# 404 => 'Not Found',
 	return shift->http_code_response(404);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Setting
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Setting;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -88,7 +88,7 @@ Now you can get, set and delete the settings anywhere in your application.
 
 use Nile::Base;
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 setting_table_name()
 	
 	# set database settings table name
@@ -139,7 +139,7 @@ has 'setting_value_column' => (
 	is			=> 'rw',
     default	=> 'value',
   );
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub AUTOLOAD {
 	my ($self) = shift;
 
@@ -156,7 +156,7 @@ sub AUTOLOAD {
 		return $self->{vars}->{$method};
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 load()
 	
 	# load settings from database to the setting object.
@@ -174,7 +174,7 @@ sub load {
 	$self->{vars} = $self->me->db->colhash(qq{select $self->name($name), $self->value($value) from $self->table($table)});
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 unload()
 	
 	# clears all settings from memory.
@@ -190,7 +190,7 @@ sub unload {
 	$self->{vars} = +{};
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 vars()
 	
 	# get all settings as a hash or a hash ref.
@@ -205,7 +205,7 @@ sub vars {
 	my ($self) = @_;
 	return $self->{vars};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 set()
 	
 	# set settings variables.
@@ -237,7 +237,7 @@ sub set {
 
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 get()
 	
 	# get settings
@@ -255,7 +255,7 @@ sub get {
 	my ($self, $name, $default) = @_;
 	exists $self->{vars}->{$name}? $self->{vars}->{$name} : $default;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 list()
 	
 	# get a list of settings variables.
@@ -269,7 +269,7 @@ sub list {
 	my ($self, @n) = @_;
 	@{$self->{vars}}{@n};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 keys()
 	
 	# returns all settings names.
@@ -283,7 +283,7 @@ sub keys {
 	my ($self) = @_;
 	(keys %{$self->{vars}});
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 exists()
 	
 	# check if a setting variable exist or not.
@@ -297,7 +297,7 @@ sub exists {
 	my ($self, $name) = @_;
 	exists $self->{vars}->{$name};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 delete()
 	
 	# delete settings from memory and database table.
@@ -312,7 +312,7 @@ sub delete {
 	$self->me->db->run(qq{delete from $self->table where $self->name=} . $self->me->db->quote($_)) for @n;
 	delete $self->{vars}->{$_} for @n;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 clear()
 	
 	# delete all settings from memory and database table.
@@ -329,7 +329,7 @@ sub clear {
 	$self->me->db->run(q{delete from $self->table});
 	$self->{vars} = +{};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()
 	
 	# get a new setting object
@@ -346,10 +346,10 @@ sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

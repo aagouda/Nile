@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Deserializer
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Deserializer;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -37,7 +37,7 @@ Nile::Deserializer - Data structures deserializer
 
 use Nile::Base;
 extends qw(Nile::Serialization);
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 json()
 	
 	$encoded = qq!{"lname":"elsheshtawy","fname":"ahmed","phone":{"home":"02222444","mobile":"012222333"}}!;
@@ -54,7 +54,7 @@ Deserialize a JSON structure to a data structure.
 sub json {
 	return shift->Json->utf8->decode(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 yaml()
 	
 	$data = $app->thaw->yaml($encoded);
@@ -70,7 +70,7 @@ sub yaml {
 	shift->Yaml;
 	return YAML::thaw(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 storable()
 	
 	$data = $app->thaw->storable($encoded);
@@ -86,7 +86,7 @@ sub storable {
 	shift->Storable;
 	return Storable::thaw(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dumper()
 	
 	$data = $app->thaw->dumper($encoded);
@@ -110,7 +110,7 @@ sub dumper {
 	}
     return $M ? $M : $res;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
 	
 	$data = $app->thaw->xml($encoded);
@@ -126,7 +126,7 @@ sub xml {
 	my $xml = shift->Xml->parse(@_);
 	return $xml;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

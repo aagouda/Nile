@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Handler::PSGI
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -19,6 +19,9 @@ our $VERSION = '0.30';
 Nile::Handler::PSGI - PSGI Handler.
 
 =head1 SYNOPSIS
+
+	# run the app in  PSGI mode and return the PSGI closure subroutine
+	my $psgi = $app->object("Nile::Handler::PSGI")->run();
 		
 =head1 DESCRIPTION
 
@@ -27,8 +30,8 @@ Nile::Handler::PSGI - PSGI Handler.
 =cut
 
 use Nile::Base;
-#=========================================================#
-sub start {
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub run {
 	
 	my ($self) = shift;
 
@@ -42,6 +45,8 @@ sub start {
 
 		my $me = $self->me;
 		
+		$me->start;
+
 		#$me->start_logger;
 		#$me->log->debug("PSGI request start");
 
@@ -65,13 +70,9 @@ sub start {
 			$me->stop_logger;
 			return $response->finalize;
 		}
-		#----------------------------------------------
-		my $content = eval {$me->dispatcher->dispatch};
-		if ($@) {
-			$response->content_type('text/plain');
-			$content = "$_";
-		}
-
+		#--------------------------------------------------
+		my $content = $me->dispatcher->dispatch;
+		#--------------------------------------------------
 		my $ctype = $response->header('Content-Type');
 		if ($me->charset && $ctype && $me->content_type_text($ctype)) {
 			$response->header('Content-Type' => "$ctype; charset=" . $me->charset) if $ctype !~ /charset/i;
@@ -111,7 +112,7 @@ sub start {
 	$me->stop_logger;
 	return $psgi;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

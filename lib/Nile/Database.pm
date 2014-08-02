@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Database
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Database;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -41,7 +41,7 @@ use DBI;
 use Hash::AsObject;
 #my $hash = Hash::AsObject->new(\%hash); $hash->foo(27); print $hash->foo; print $hash->baz->quux;
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dbh()
 	
 	$app->db->dbh;
@@ -53,7 +53,7 @@ Get or set the current database connection handle.
 has 'dbh' => (
       is      => 'rw',
   );
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 connect()
 	
 	$dbh = $app->db->connect(%args);
@@ -107,7 +107,7 @@ sub connect {
 	#$dbh->{'mysql_enable_utf8'} = 1;
 	#$dbh->do('SET NAMES utf8');
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 disconnect()
 	
 	$app->db->disconnect;
@@ -120,7 +120,7 @@ sub disconnect {
 	my ($self) = @_;
 	$self->dbh->disconnect if ($self->dbh);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 run()
 	
 	$app->db->run($qry);
@@ -133,7 +133,7 @@ sub run {
 	my ($self, $qry) = @_;
 	$self->dbh->do($qry) or $self->db_error($qry);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 do()
 	
 	$app->db->do($qry);
@@ -146,7 +146,7 @@ sub do {
 	my ($self, $qry) = @_;
 	$self->dbh->do($qry);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 exec()
 	
 	$sth = $app->db->exec($qry);
@@ -161,7 +161,7 @@ sub exec {
 	$sth->execute() or $self->db_error($qry);
 	return $sth;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 begin_work()
 	
 	$app->db->begin_work;
@@ -174,7 +174,7 @@ sub begin_work {
 	my ($self) = @_;
 	return $self->dbh->begin_work or $self->db_error();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 commit()
 	
 	$app->db->commit;
@@ -187,7 +187,7 @@ sub commit {
 	my ($self) = @_;
 	$self->dbh->commit or $self->db_error();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 rollback()
 	
 	$app->db->rollback;
@@ -200,7 +200,7 @@ sub rollback {
 	my ($self) = @_;
 	$self->dbh->rollback or $self->db_error();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 quote()
 	
 	$app->db->quote($value);
@@ -214,7 +214,7 @@ sub quote {
 	my ($self, @args) = @_;
 	return $self->dbh->quote(@args);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 col()
 	
 	# select id from users. return one column array from all rows
@@ -232,7 +232,7 @@ sub col {
 	if (!defined($ret) && $self->dbh->err()) {$self->db_error($qry);}
 	return wantarray? @{$ret} : $ret;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 row()
 	
 	# select id, email, fname, lname from users
@@ -249,7 +249,7 @@ sub row {
 	if (!@ret && $self->dbh->err()) {$self->db_error($qry);}
 	return @ret;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 rows()
 	
 	# select id, fname, lname, email from users
@@ -267,7 +267,7 @@ sub rows {
 	if (!defined($ret) && $self->dbh->err()) {$self->db_error($qry);}
 	return wantarray? @$ret : $ret;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 hash()
 	
 	# select * from users where id=$id limit 1
@@ -285,7 +285,7 @@ sub hash {
 	if (!defined($ret) && $self->dbh->err()) {$self->db_error($qry);}
 	return wantarray? %{$ret} : $ret;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 row_object()
 	
 	# select * from users where id=$id limit 1
@@ -305,7 +305,7 @@ sub row_object {
 	if (!defined($ret) && $self->dbh->err()) {$self->db_error($qry);}
 	return Hash::AsObject->new($ret);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 hashes()
 	
 	%hashes = $app->db->hashes($qry, $col);
@@ -320,7 +320,7 @@ sub hashes {
 	if (!defined($ret) && $self->dbh->err()) {$self->db_error($qry);}
 	return wantarray? %{$ret} : $ret;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 colhash()
 	
 	# select id, user from users
@@ -336,7 +336,7 @@ sub colhash {
 	my %list = map {$_->[0], $_->[1]} @{$self->dbh->selectall_arrayref($qry)};
 	return %list;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 value()
 	
 	# select email from users where id=123. return one column value
@@ -354,7 +354,7 @@ sub value {
 	($ret) = @{$ret};
 	return $ret;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 insertid()
 	
 	$id = $app->db->insertid;
@@ -367,7 +367,7 @@ sub insertid {
 	my ($self) = @_;
 	return $self->dbh->{mysql_insertid};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 db_error()
 	
 	$app->db->db_error;
@@ -380,7 +380,7 @@ sub db_error {
 	my $self = shift;
 	$self->me->abort("Database Error: $DBI::errstr<br>@_");
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()
 	
 	# get a new setting object
@@ -397,7 +397,7 @@ sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

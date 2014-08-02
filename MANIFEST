@@ -4,6 +4,7 @@ MANIFEST
 README
 
 app/.htaccess
+app/.htaccessFCGI
 app/index.cgi
 app/config/config.xml
 app/lang/ar/general.xml

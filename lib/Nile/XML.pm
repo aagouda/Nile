@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::XML
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::XML;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -109,7 +109,7 @@ Parsing and writing XML files into a hash tree object supports sorted order and 
 use Nile::Base;
 use XML::TreePP;
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
 	
 	# get a new XML::TreePP object.
@@ -176,7 +176,7 @@ has 'indent' => (
     default	=> 4,
   );
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub AUTOLOAD {
 	my ($self) = shift;
 
@@ -194,7 +194,7 @@ sub AUTOLOAD {
 		return $self->get($method);
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 load()
 	
 	# get xml object
@@ -235,7 +235,7 @@ sub load {
 
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 keep_order()
 	
 	# keep sort order when loading and saving the file. default is off.
@@ -257,7 +257,7 @@ sub keep_order {
 	$self->xml->set(use_ixhash => $status);
 	return $self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 get()
 	
 	# get value of email tag <email>ahmed@mewsoft.com</email>
@@ -298,7 +298,7 @@ sub get {
 
 	return $v;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 set()
 	
 	# set tag value
@@ -350,7 +350,7 @@ sub set {
 
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 list()
 	
 	# get a list of tags values.
@@ -367,7 +367,7 @@ sub list {
 	push @v, $self->get($_) for @n;
 	return @v
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 var()
 	
 	# get a hash ref to the xml data for direct access.
@@ -383,7 +383,7 @@ sub var {
 	my ($self) = @_;
 	return $self->{vars};
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 delete()
 	
 	# delete tags from memory, changes will apply when saving file.
@@ -399,7 +399,7 @@ sub delete {
 	delete $self->{vars}->{$_} for @vars;
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 clear()
 	
 	# delete entire xml object data.
@@ -415,7 +415,7 @@ sub clear {
 	$self->{vars} = +{};
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 update()
 	
 	# save a list of variables and update the file.
@@ -431,7 +431,7 @@ sub update {
 	$self->save();
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 save()
 	
 	# write the output file.
@@ -447,7 +447,7 @@ sub save {
 	$self->xml->writefile($file || $self->file, $self->{vars}, $self->encoding);
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 get_file()
 	
 	# load xml file content and return it as a hash, not added to the object
@@ -468,7 +468,7 @@ sub get_file {
 	my $xml = $self->xml->parsefile($file);
 	return wantarray? %{$xml} : $xml;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 add_file()
 	
 	# load and append another xml file to the object
@@ -486,7 +486,7 @@ sub add_file {
 	}
 	$self;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()
 	
 	# get a new xml object
@@ -503,10 +503,10 @@ sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

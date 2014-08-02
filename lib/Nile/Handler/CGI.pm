@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Handler::CGI
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::CGI;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -20,6 +20,8 @@ Nile::Handler::CGI - CGI Handler.
 
 =head1 SYNOPSIS
 		
+	# run the app in  CGI standalone mode
+	$app->object("Nile::Handler::CGI")->run();
 
 =head1 DESCRIPTION
 
@@ -29,12 +31,14 @@ Nile::Handler::CGI - CGI Handler.
 
 use Nile::Base;
 use Try::Tiny;
-#=========================================================#
-sub start {
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub run {
 	
 	my ($self) = shift;
 
 	my $me = $self->me;
+
+	$me->start;
 
 	#$me->log->debug("CGI/FCGI request start");
 
@@ -43,13 +47,9 @@ sub start {
 
 	$me->response($me->object("Nile::HTTP::Response"));
 	my $response = $me->response;
-	
-	my $content = eval {$me->dispatcher->dispatch};
-	if ($@) {
-		$response->content_type('text/plain');
-		$content = $@;
-	}
-
+	#------------------------------------------------------
+	my $content = $me->dispatcher->dispatch;
+	#------------------------------------------------------
 	# assume OK response if not set
 	$response->code(200) unless ($response->code);
 
@@ -107,7 +107,7 @@ sub start {
 
 	print $res;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

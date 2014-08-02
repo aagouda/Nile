@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -26,15 +26,15 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 
 	my $app = Nile->new();
 	
-	# initialize the application with the shared sessions settings
+	# initialize the application with the shared and safe sessions settings
 	$app->init(
 		# base application path, auto detected if not set
 		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
 
-		# load config files
+		# load config files, default extension is xml
 		config		=> [ qw(config) ],
 
-		# load route files
+		# load route files, default extension is xml
 		route		=> [ qw(route) ],
 
 		# log file name
@@ -43,12 +43,15 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 		# url action name i.e. index.cgi?action=register
 		action_name	=>	"action,route,cmd",
 
-		# app home page plugin/module/method
-		default_route	=>	"/Home/Home/index",
+		# app home page Plugin/Controller/method
+		default_route	=>	"/Home/Home/home",
+		
+		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
+		#mode	=>	"fcgi", # psgi, cgi, fcgi
 	);
 	
 	# set the application per single user session settings
-	$app->start(
+	$app->start_setting({
 		# site language for user, auto detected if not set
 		lang	=>	"en-US",
 
@@ -56,18 +59,19 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 		theme	=>	"default",
 		
 		# load language files
-		langs	=> [ qw(general) ],
+		langs	 => [ qw(general) ],
 		
 		# charset for encoding/decoding and output
 		charset => "utf-8",
-	);
-
+	});
+	
 	# inline actions, return content. url: /forum/home
 	$app->action("get", "/forum/home", sub {
 		my ($self) = @_;
 		# $self is set to the application context object same as $self->me in plugins
-		my $content = "Host: " . $self->request->virtual_host ."<br>\n";
-		$content .= "PSGI status: " . $self->psgi . "<br>\n";
+		my $content = "Host: " . ($self->request->virtual_host || "") ."<br>\n";
+		$content .= "Request method: " . ($self->request->request_method || "") . "<br>\n";
+		$content .= "App Mode: " . $self->mode . "<br>\n";
 		$content .= "Time: ". time . "<br>\n";
 		$content .= "Hello world from inline action /forum/home" ."<br>\n";
 		$content .= "أحمد الششتاوى" ."<br>\n";
@@ -79,15 +83,15 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 	$app->capture("get", "/accounts/login", sub {
 		my ($self) = @_;
 		# $self is set to the application context object same as $self->me in plugins
-		say "Host: " . $self->request->virtual_host || "" . "<br>\n";
-		say "Request method: " . $self->request->request_method || "" . "<br>\n";
-		say "PSGI status: " . $self->psgi . "<br>\n";
+		say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
+		say "Request method: " . ($self->request->request_method || "") . "<br>\n";
+		say "App Mode: " . $self->mode . "<br>\n";
 		say "Time: ". time . "<br>\n";
 		say "Hello world from inline action with capture /accounts/login", "<br>\n";
-		say $self->encode("أحمد الششتاوى") ."<br>\n";
+		say $self->encode("أحمد الششتاوى ") ."<br>\n";
 		$self->response->encoded(1); # content already encoded
 	});
-	
+
 	# run the application and return the PSGI response or print to the output
 	# the run process will also run plugins with matched routes files loaded
 	$app->run();
@@ -159,8 +163,10 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 
 	package Nile::Plugin::Home::Home;
 
+	our $VERSION = '0.31';
+
 	use Nile::Base;
-	
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# plugin action, return content. url is routed direct or from routes files. url: /home
 	sub home : GET Action {
 		
@@ -180,19 +186,29 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 			multiline		=>	'Multi line variable <b>Nice</b>',
 		);
 		
+		#my $var = $view->block();
+		#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
+		#$view->block("first/second/third/fourth/fifth", "Block Modified ");
+		#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
+
 		$view->block("first", "1st Block New Content ");
 		$view->block("six", "6th Block New Content ");
 
-		#say $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
+		#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 		
 		return $view->out;
 	}
-
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# run action and capture print statements, no returns. url: /home/news
 	sub news: GET Capture {
+
 		my ($self, $me) = @_;
-		say qq{Hello world. This content is captured from print statements. The action must be marked by 'Capture' attribute. No returns.};
+
+		say qq{Hello world. This content is captured from print statements.
+					The action must be marked by 'Capture' attribute. No returns.};
+
 	}
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	1;
 
@@ -202,29 +218,47 @@ Create an html file name it as B<home.html>, put it in the default theme folder 
 and put in this file the following code:
 
 	<vars type="widget" name="header" charset_name="UTF-8" lang_name="en" />
-	  
-	{first_name} <vars name="fname"/>
-	{last_name} <vars name="lname" />
-	{email} <vars type="var" name='email' />
-	{website} <vars type="var" name="website" />
 
-	{date_now} <vars type="plugin" name="Date::Date->date" format="%Y %M %D" />
-	{time_now} <vars type="plugin" name="Date->now" format="%M %Y  %D" />
-	{date_time} <vars type="plugin" name="date" format="%M %Y  %D" />
+	{first_name} <vars name="fname"/><br>
+	{last_name} <vars name="lname" /><br>
+	{email} <vars type="var" name='email' /><br>
+	{website} <vars type="var" name="website" /><br>
+	<br>
 
-	Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars>
+	{date_now} <vars type="plugin" name="Date::Date->date" format="%Y %M %D %T - %a, %d %b %Y %H:%M:%S" /><br>
+	{time_now} <vars type="plugin" name="Date->now" format="%A %d, %B %Y  %T %p" /><br>
+	{date_time} <vars type="plugin" name="date" format="%B %d, %Y  %r" /><br>
+	<br>
 
-	<vars type="perl">system ('dir c:\\*.bat');</vars>
+	Our Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars><br>
+	<br>
+
+	<pre>
+		<vars type="perl">system ('dir *.cgi');</vars>
+	</pre>
+	<br>
 
 	<vars type="var" name="singleline" width="400px" height="300px" content="ahmed<b>class/subclass">
-		cdata start here is may have html tags and 'single' and "double" qoutes
+	cdata start here is may have html tags and 'single' and "double" qoutes
 	</vars>
+	<br>
 
 	<vars type="var" name="multiline" width="400px" height="300px"><![CDATA[ 
 		cdata start here is may have html tags <b>hello</b> and 'single' and "double" qoutes
 		another cdata line
 	]]></vars>
+	<br>
 
+	<vars type="perl"><![CDATA[ 
+		say "";
+		say "<br>active language: " . $self->me->var->get("lang");
+		say "<br>active theme: " . $self->me->var->get("theme");
+		say "<br>app path: " . $self->me->var->get("path");
+		say "<br>";
+	]]></vars>
+	<br>
+	<br>
+	html content 1-5 top
 	<!--block:first-->
 		<table border="1" style="color:red;">
 		<tr class="lines">
@@ -252,9 +286,28 @@ and put in this file the following code:
 		some html content here 1 bottom
 	</table>
 	<!--endblock-->
-	some html content here1-5 bottom base
+	html content 1-5 bottom
 
-	<vars type="widget" name="footer" title="cairo" lang="ar" />
+	<br><br>
+
+	html content 6-8 top
+	<!--block:six-->
+		some html content here 6 top
+		<!--block:seven-->
+			some html content here 7 top
+			<!--block:eight-->
+				some html content here 8a
+				some html content here 8b
+			<!--endblock-->
+			some html content here 7 bottom
+		<!--endblock-->
+		some html content here 6 bottom
+	<!--endblock-->
+	html content 6-8 bottom
+
+	<br><br>
+
+	 <vars type="widget" name="footer" title="cairo" lang="ar" />
 
 =head1 YOUR FIRST WIDGETS 'header' AND 'footer'
 
@@ -401,7 +454,7 @@ Below is a sample .htaccess which redirects all requests to index.cgi file.
 	# Please check that, if you get an "Internal Server Error".
 	RewriteEngine On
 
-	#=========================================================#
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# force use www with http and https so http://domain.com redirect to http://www.domain.com
 	#add www with https support - you have to put this in .htaccess file in the site root folder
 	# skip local host
@@ -411,7 +464,7 @@ Below is a sample .htaccess which redirects all requests to index.cgi file.
 	RewriteCond %{HTTP_HOST} !^www\. 
 	RewriteCond %{HTTPS}s ^on(s)|''
 	RewriteRule ^ http%1://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-	#=========================================================#
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	RewriteCond %{REQUEST_FILENAME} !-f
 	RewriteCond %{REQUEST_FILENAME} !-d
 	RewriteCond %{REQUEST_URI} !=/favicon.ico
@@ -497,7 +550,8 @@ Loads xml files into hash tree using L<XML::TreePP>
 The database class provides methods for connecting to the sql database and easy methods for sql operations.
 
 =cut
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# the first thing to do, catch and show errors nicely
 BEGIN {
 	$|=1;
 	use CGI::Carp qw(fatalsToBrowser set_message);
@@ -506,18 +560,18 @@ BEGIN {
 	use PadWalker;
 	use Devel::StackTrace::WithLexicals;
 	sub handle_errors {
-		#print "Content-type: text/html;charset=utf-8\n\n";
 		my $msg = shift;
-		#my $trace = Devel::StackTrace->new;
-		my $trace = Devel::StackTrace::WithLexicals->new(indent => 1, message => $msg);
+		#my $trace = Devel::StackTrace->new(indent => 1, message => $msg, ignore_package => [qw(Carp CGI::Carp)]);
+		my $trace = Devel::StackTrace::WithLexicals->new(indent => 1, message => $msg, ignore_package => [qw(Carp CGI::Carp)]);
+		$trace->frames(reverse $trace->frames);
 		print $trace->as_html;
 	}
 	set_message(\&handle_errors);
 }
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 use Moose;
-use MooseX::MethodAttributes;
 use namespace::autoclean;
+use MooseX::MethodAttributes;
 #use MooseX::ClassAttribute;
 
 use utf8;
@@ -538,16 +592,10 @@ use MIME::Base64 3.11 qw(encode_base64 decode_base64 decode_base64url encode_bas
 use Data::Dumper;
 $Data::Dumper::Deparse = 1; #stringify coderefs
 #use LWP::UserAgent;
-#use Log::Tiny;
-#use CGI::Simple;
 use HTTP::AcceptLanguage;
 
 #no warnings qw(void once uninitialized numeric);
 
-#use Nile::Autouse;
-
-#use  later 'Nile::View'; #load module at runtime, overrides AUTOLOAD in the module.
-use Nile::Abort;
 use Nile::Say;
 use Nile::View;
 use Nile::XML;
@@ -583,9 +631,7 @@ use base 'Exporter';
 our @EXPORT = qw();
 our @EXPORT_OK = qw();
 
-our $nile;
-our %vars;
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
 	my ($class, @args) = @_;
 	my ($package, $script) = caller;
@@ -598,7 +644,7 @@ sub import {
         use_module($module)->import::into($package, @{$imports});
     }
 	#------------------------------------------------------
-	$class->detect_script_path($script);
+	$class->detect_app_path($script);
 	#------------------------------------------------------
 	my $caller = $class.'::';
 	{
@@ -613,8 +659,8 @@ sub import {
 	$class->export_to_level(1, $class, @args);
 	#------------------------------------------------------
   }
-#=========================================================#
-sub detect_script_path {
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub detect_app_path {
 
 	my ($self, $script) = @_;
 	$script ||= (caller)[1];
@@ -632,7 +678,7 @@ sub detect_script_path {
 	$ENV{NILE_APP_DIR} = $path;
 	return ($path);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub error {
 	my $self = shift;
 	goto &CGI::Carp::croak;
@@ -649,21 +695,21 @@ sub warns {
 	my $self = shift;
 	goto &CGI::Carp::cluck;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD { # our sub new {..}
 	my ($self, $args) = @_;
 
 	#$self->error(" ...  error   ...  ");
 	#$self->warn(" ...  warn   ...  ");
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub init {
 
 	my ($self, %arg) = @_;
 	
 	my ($package, $script) = caller;
 	
-	$arg{path} ||= $self->detect_script_path($script);
+	$arg{path} ||= $self->detect_app_path($script);
 
 	$self->var->set(
 			# app directories
@@ -735,76 +781,86 @@ sub init {
 	}
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+has 'start_setting' => (
+	is => 'rw',
+	isa => 'HashRef',
+	default => sub { +{} }
+);
+
 sub start {
 
-	my ($self, %arg) = @_;
+	my ($self, $arg) = @_;
+	
+	if (!(defined($arg) && ref($arg) eq "HASH")) {
+		$arg = $self->start_setting;
+	}
 
-	$arg{lang} ||= "";
-	$arg{theme} ||= "default";
+	$arg->{lang} ||= "";
+	$arg->{theme} ||= "default";
 	
 	my $path = $self->var->get("path");
 
 	$self->var->set(
 			'langs_dir'			=>	$self->file->catdir($path, "lang"),
-			'lang_dir'				=>	$self->file->catdir($path, "lang", $arg{lang}),
+			'lang_dir'				=>	$self->file->catdir($path, "lang", $arg->{lang}),
 			'themes_dir'		=>	$self->file->catdir($path, "theme"),
-			'theme_dir'			=>	$self->file->catdir($path, "theme", $arg{theme}),
+			'theme_dir'			=>	$self->file->catdir($path, "theme", $arg->{theme}),
 			
 			# app default settings
-			'lang'					=>	$arg{lang},
-			'theme'					=>	$arg{theme},
+			'lang'					=>	$arg->{lang},
+			'theme'					=>	$arg->{theme},
 		);
 	
-	if (!$arg{lang}) {
-		$arg{lang} = $self->detect_user_language;
-		$self->var->set("lang", $arg{lang});	
-		$self->var->set("lang_dir", $self->file->catdir($arg{path}, "lang", $arg{lang}));
+	if (!$arg->{lang}) {
+		$arg->{lang} = $self->detect_user_language;
+		$self->var->set("lang", $arg->{lang});	
+		$self->var->set("lang_dir", $self->file->catdir($arg->{path}, "lang", $arg->{lang}));
 	}
 
 	# load language files
 	#$self->lang->load("general");
 	
 	# load language files
-	foreach (@{$arg{langs}}) {
+	foreach (@{$arg->{langs}}) {
 		$self->lang->load($_);
 	}
-
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
 
 	my ($self, %arg) = @_;
 	
 	#$self->log->info("application run start in mode: ".$self->mode);
-	
+
 	if ($self->mode eq "psgi") {
 		# PSGI handler
 		#$self->log->debug("PSGI handler start");
-		my $psgi = $self->object("Nile::Handler::PSGI")->start();
+		my $psgi = $self->object("Nile::Handler::PSGI")->run();
+		#$self->log->debug("PSGI handler end");
 		return $psgi;
 	}
 	elsif ($self->mode eq "fcgi") {
 		# FCGI handler
 		#$self->log->debug("FCGI handler start");
-		$self->object("Nile::Handler::FCGI")->start();
+		$self->object("Nile::Handler::FCGI")->run();
 		#$self->log->debug("FCGI handler end");
 	}
 	else {
 		# CGI handler
 		#$self->log->debug("CGI handler start");
-		$self->object("Nile::Handler::CGI")->start();
+		$self->object("Nile::Handler::CGI")->run();
 		#$self->log->debug("CGI handler end");
 	}
 
 	#$self->log->log("application run end");
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub content_type_text {
 	my ($self, $content_type) = @_;
 	return $content_type =~ /(\bx(?:ht)?ml\b|text|json|javascript)/;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub action {
 	my $self = shift;
 	my ($method, $route, $action) = $self->action_args(@_);
@@ -819,7 +875,7 @@ sub action {
 							attributes => undef,
 						);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub capture {
 	my $self = shift;
 	my ($method, $route, $action) = $self->action_args(@_);
@@ -835,7 +891,7 @@ sub capture {
 						);
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub action_args {
 	
 	my $self = shift;
@@ -869,7 +925,7 @@ sub action_args {
 	
 	return ($method, $route, $action);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_cli {
 	# return 1 if called from browser, 0 if called from command line
 	if  (exists $ENV{REQUEST_METHOD} || defined $ENV{GATEWAY_INTERFACE} ||  exists $ENV{HTTP_HOST}){
@@ -879,7 +935,7 @@ sub is_cli {
 	#if (-t STDIN) { }
 	#use IO::Interactive qw(is_interactive interactive busy);if ( is_interactive() ) {print "Running interactively\n";}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub utf8_safe {
 	my ($self, $str) = @_;
 	if (utf8::is_utf8($str)) {
@@ -887,17 +943,17 @@ sub utf8_safe {
 	}
 	$str;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub encode {
 	my ($self, $data) = @_;
 	return Encode::encode($self->charset, $data);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub decode {
 	my ($self, $data) = @_;
 	return Encode::decode($self->charset, $data);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 bm()
 	
 	$app->bm->lap("start task");
@@ -1111,7 +1167,7 @@ has 'dispatcher' => (
 		}
   );
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'logger' => (
       is      => 'rw',
 	  lazy	=> 1,
@@ -1136,7 +1192,7 @@ sub stop_logger {
 	# close log file
 	$self->logger(undef);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'dbh' => (
       is      => 'rw',
   );
@@ -1159,7 +1215,7 @@ sub connect {
 	$self->dbh($self->db->connect(@_));
 	$self->db;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub new_request {
 	
 	my ($self, $env) = @_;
@@ -1175,22 +1231,22 @@ sub new_request {
 	
 	$self->request;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub paginate {
 	my ($self) = shift;
 	return $self->object("Nile::Paginate", @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub view {
 	my ($self) = shift;
 	return $self->object("Nile::View", @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub database {
 	my ($self) = shift;
 	return $self->object("Nile::Database", @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 
 	my ($self, $class, @args) = @_;
@@ -1239,19 +1295,19 @@ sub object {
 	
 	return $obj;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub theme_list {
 	my ($self) = @_;
 	my @folders = ($self->file->folders($self->var->get("themes_dir"), "", 1));
 	return grep (/^[^_]/, @folders);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub lang_list {
 	my ($self) = @_;
 	my @folders = ($self->file->folders($self->var->get("langs_dir"), "", 1));
 	return grep (/^[^_]/, @folders);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub detect_user_language {
 	my ($self) = @_;
 	#my $lang = $self->request->param("lang") || $self->request->cookie("userlang") || $self->reg->get("lang");
@@ -1267,13 +1323,13 @@ sub detect_user_language {
 	$lang ||= $langs[0] ||= "en-US";
 	return $lang;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub dump {
 	my $self = shift;
 	say Dumper (@_);
 	return "";
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub trim {
 	my ($self) = shift;
 	my (@out) = @_;
@@ -1283,7 +1339,7 @@ sub trim {
 	}
 	return (scalar @out >1)? @out : $out[0];
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub ltrim {
 	my ($self) = shift;
 	my (@out) = @_;
@@ -1292,7 +1348,7 @@ sub ltrim {
 	}
 	return (scalar @out >1)? @out : $out[0];
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub rtrim {
 	my ($self) = shift;
 	my (@out) = @_;
@@ -1301,14 +1357,14 @@ sub rtrim {
 	}
 	return (scalar @out >1)? @out : $out[0];
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub trims {
 	my ($self) = shift;
 	my $str =  $_[0];
 	$str =~ s/\s+//g;
 	return $str;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub max {
 	my ($self, $max, @vars) = @_;
 	for (@vars) {
@@ -1316,7 +1372,7 @@ sub max {
 	}
 	return $max;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub min {
 	my ($self, $min, @vars) = @_;
 	for (@vars) {
@@ -1324,7 +1380,7 @@ sub min {
 	}
 	return $min;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub digit {
 	my ($self) = shift;
 	my $str =  $_[0];
@@ -1332,7 +1388,7 @@ sub digit {
 	$str += 0;
 	return $str;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub number {
 	my ($self) = shift;
 	my $str =  $_[0];
@@ -1342,14 +1398,14 @@ sub number {
 	}
 	return "";
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub commify {
 	my ($self) = shift;
 	my $str =  reverse $_[0];
 	$str =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
 	return scalar reverse $str;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub capture_output {
 my ($self, $code) = @_;
 	
@@ -1360,14 +1416,15 @@ my ($self, $code) = @_;
 	}
 	return $merged;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub abort {
 	my ($self) = shift;
+	load Nile::Abort;
 	Nile::Abort->abort(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #__PACKAGE__->meta->make_immutable;#(inline_constructor => 0)
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 =head1 Sub Modules
@@ -1385,6 +1442,12 @@ Request	L<Nile::HTTP::RequestPSGI>.
 Request	L<Nile::HTTP::PSGI>.
 
 Response	L<Nile::HTTP::Response>.
+
+PSGI Handler L<Nile::Handler::PSGI>.
+
+FCGI Handler L<Nile::Handler::FCGI>.
+
+CGI Handler L<Nile::Handler::CGI>.
 
 Dispatcher L<Nile::Dispatcher>.
 

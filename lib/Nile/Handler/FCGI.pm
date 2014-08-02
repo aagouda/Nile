@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Handler::FCGI
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::FCGI;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -19,7 +19,9 @@ our $VERSION = '0.30';
 Nile::Handler::FCGI - FCGI Handler.
 
 =head1 SYNOPSIS
-		
+	
+	# run the app in  FCGI standalone mode
+	$app->object("Nile::Handler::FCGI")->run();
 
 =head1 DESCRIPTION
 
@@ -29,7 +31,7 @@ Nile::Handler::FCGI - FCGI Handler.
 
 use Nile::Base;
 use FCGI;
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	our $fcgi_request_count = 0; # the number of requests this fcgi process handled.
 	our $handling_request = 0;
 	our $exit_requested = 0;
@@ -40,31 +42,8 @@ use FCGI;
 
 	our $fcgi_request = FCGI::Request();
 	#$fcgi_request = FCGI::Request(\*STDIN, \*STDOUT, \*STDERR, \%ENV, $socket);
-#=========================================================#
-sub request {
-	$fcgi_request;
-}
-#=========================================================#
-sub is_fcgi {
-	my ($self) = shift;
-	if (defined($fcgi_request) && ref($fcgi_request) && $fcgi_request->IsFastCGI()) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-#=========================================================#
-sub accept {
-	my ($self) = shift;
-	$fcgi_request->Accept() >= 0;
-}
-#=========================================================#
-sub finish {
-	my ($self) = shift;
-	$exit_requested = 1;
-}
-#=========================================================#
-sub start {
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub run {
 
 	my ($self) = shift;
 
@@ -77,7 +56,7 @@ sub start {
 		#$me->log->debug("FCGI request start");
 
 		# handle it as the normal CGI request
-		$me->object("Nile::Handler::CGI")->start();
+		$me->object("Nile::Handler::CGI")->run();
 
 		$handling_request = 0;
 		last if $exit_requested;
@@ -89,7 +68,30 @@ sub start {
 
 	$fcgi_request->Finish();
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub request {
+	$fcgi_request;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub is_fcgi {
+	my ($self) = shift;
+	if (defined($fcgi_request) && ref($fcgi_request) && $fcgi_request->IsFastCGI()) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub accept {
+	my ($self) = shift;
+	$fcgi_request->Accept() >= 0;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub finish {
+	my ($self) = shift;
+	$exit_requested = 1;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

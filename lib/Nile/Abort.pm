@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Abort
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Abort;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -31,7 +31,7 @@ Nile::Abort - Abort the application at anytime with optional message and stacktr
 =cut
 
 use Nile::Base;
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub abort {
 
 	my ($self) = shift;
@@ -78,19 +78,15 @@ my $out = <<HTML;
 HTML
 =cut
 	
-	#$out = "Content-Type: text/plain\n\n";
-	
-	#$title = qq{<div style="color: red;font: 18px;margin: auto; text-align: center;">$title</div>};
-	$out .= "$title\n\n";
+	$out = "";
+	#$out .= "$title\n\n";
 	$out .= "$msg\n\n";
 	#$out .= "$trace\n\n";
 
-	#say "Content-Type: text/html\n\n";
-	#say $out;
 	die $out;
 	#if ($self->me->db->connected) {$self->me->db->disconnect();}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::File
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::File;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -100,7 +100,7 @@ BEGIN {
 	$DS = $DS{$OS} || '/';
 }
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 get()
 	
 	# file($file, $options)
@@ -129,7 +129,7 @@ sub get {
 	#my $utf_text = read_file( $bin_file, binmode => ':utf8' ); chomp=>1
 	return read_file($file, $opts);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 put()
 	
 	# put($file, $options)
@@ -157,7 +157,7 @@ sub put {
 	#write_file( $bin_file, {binmode => ':utf8', append => 1}, $utf_text );
 	return write_file(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 File::Spec supported methods
 	
 	$app->file->canonpath;
@@ -199,7 +199,7 @@ sub catpath {shift; File::Spec->catpath(@_);}
 sub abs2rel {shift; File::Spec->abs2rel(@_);}
 sub rel2abs {shift; File::Spec->rel2abs(@_);}
 sub case_tolerant {shift; File::Spec->case_tolerant(@_);}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 files()
 	
 	# files($dir, $match, $relative)
@@ -216,7 +216,7 @@ sub files {
 	#($dir, $match, $depth, $folders, $relative)
 	return $self->scan_dir($dir, $match, 1, 0, $relative);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 files_tree()
 	
 	# files_tree($dir, $match, $relative, $depth)
@@ -232,7 +232,7 @@ sub files_tree {
 	#($dir, $match, $depth, $folders, $relative)
 	return $self->scan_dir($dir, $match, $depth, 0, $relative);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 folders()
 	
 	# get list of sub folders in a folder
@@ -251,7 +251,7 @@ sub folders {
 	my ($self, $dir, $match, $relative) = @_;
 	return $self->scan_dir($dir, $match, 1, 1, $relative);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 folders_tree()
 	
 	# get list of sub folders in a folder recursively
@@ -266,7 +266,7 @@ sub folders_tree {
 	my ($self, $dir, $match, $relative, $depth) = @_;
 	return $self->scan_dir($dir, $match, $depth, 1, $relative);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub scan_dir {
 	my ($self, $dir, $match, $depth, $folders, $relative) = @_;
 	my ($rule, @match);
@@ -308,7 +308,7 @@ sub scan_dir {
 		return ($rule->in($self->catdir($dir)));
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 os()
 	
 	my $os = $app->file->os;
@@ -319,7 +319,7 @@ Returns the name of the operating system.
 
 sub os {$OS}
 
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 ds()
 	
 	my $ds = $app->file->ds;
@@ -329,7 +329,7 @@ Returns the directory separator of the operating system.
 =cut
 
 sub ds {$DS}
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 fileparse()
 	
 	my ($filename, $dirs, $suffix) = $app->file->fileparse($path);
@@ -344,7 +344,7 @@ sub fileparse {
 	my ($self) = shift;
 	return File::Basename::fileparse(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 basename()
 	
 	my $filename  = $app->file->basename($path);
@@ -358,7 +358,7 @@ sub basename {
 	my ($self) = shift;
 	return File::Basename::basename(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dirname()
 	
 	my $ds = $app->file->dirname();
@@ -371,7 +371,7 @@ sub dirname {
 	my ($self) = shift;
 	return File::Basename::dirname(@_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 path_info()
 	
 	my ($name, $dir, $ext, $name_ext) = $app->file->path_info($path);
@@ -385,7 +385,7 @@ sub path_info {
 	my ($name, $dir, $ext) = File::Basename::fileparse($path,  qr/\.[^.]*/); # qr/\.[^.]*/ matched against the end of the $filename.
 	return ($name, $dir, $ext, $name.$ext);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 open()
 	
 	$fh = $app->file->open($file);
@@ -419,7 +419,7 @@ sub open {
 	binmode $fh, ":encoding($charset)" if ($charset);
     return $fh;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 tempfile()
 	
 	#$template = "tmpdirXXXXXX";
@@ -440,7 +440,7 @@ sub tempfile {
 	binmode($fh, ":utf8");
 	return ($fh, $filename);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 tempdir()
 	
 	$tmpdir = $app->file->tempdir($template);
@@ -461,12 +461,12 @@ sub tempdir {
 		return File::Temp::tempdir(@_);
 	}
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

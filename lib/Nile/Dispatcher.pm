@@ -1,14 +1,14 @@
 #	Copyright Infomation
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Module	:	Nile::Dispatcher
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.30';
+our $VERSION = '0.31';
 
 =pod
 
@@ -36,7 +36,7 @@ Nile::Dispatcher - Application action dispatcher.
 
 use Nile::Base;
 use Capture::Tiny ();
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dispatch()
 	
 	# dispatch the default route or detect route from request
@@ -58,7 +58,7 @@ sub dispatch {
 	return $content;
 
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dispatch_action()
 	
 	# dispatch the default route or detect route from request
@@ -112,6 +112,10 @@ sub dispatch_action {
 			$content = eval {$route->($self->me)};
 		}
 
+		if ($@) {
+			$self->me->abort("Dispatcher error. Inline action dispatcher error for route '$route'.\n\n$@");
+		}
+
 		return $content;
 	}
 	#------------------------------------------------------
@@ -120,7 +124,7 @@ sub dispatch_action {
 		$route = $self->me->var->get("default_route");
 	}
 
-	$route ||= $self->me->abort(qq{Application Error: No route defined.});
+	$route ||= $self->me->abort("Dispatcher error. No route defined.");
 	
 	my ($plugin, $controller, $action) = $self->action($route);
 
@@ -129,7 +133,7 @@ sub dispatch_action {
 	eval "use $class;";
 
 	if ($@) {
-		$self->me->abort("Plugin '$class' Error. $@");
+		$self->me->abort("Dispatcher error. Plugin error for route '$route' class '$class'.\n\n$@");
 	}
 	
 	my $object = $class->new();
@@ -147,7 +151,9 @@ sub dispatch_action {
 			}
 		}
 		else {
-			$self->me->abort("Plugin '$class' action '$action' does not exist.");
+			$self->me->abort("Dispatcher error. Plugin '$class' action '$action' does not exist.");
+			#$@ , "
+			#return "Dispatcher error. Plugin '$class' action '$action' does not exist.";
 		}
 	}
 	
@@ -158,13 +164,13 @@ sub dispatch_action {
 	
 	# sub home: Action/Capture/Public {...}
 	if (!grep(/^(action|public|capture)$/i, @$attrs)) {
-		$self->me->abort("Plugin '$class' method '$action' is not marked as 'Action' or 'Capture'.");
+		$self->me->abort("Dispatcher error. Plugin '$class' method '$action' is not marked as 'Action' or 'Capture'.");
 	}
 
 	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH, [ajax]
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
-		$self->me->abort("Plugin '$class' action '$action' request method '$request_method' is not allowed.");
+		$self->me->abort("Dispatcher error. Plugin '$class' action '$action' request method '$request_method' is not allowed.");
 	}
 
 	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
@@ -198,7 +204,7 @@ sub dispatch_action {
 
 	return $content;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 action()
 	
 	my ($plugin, $controller, $action) = $self->me->dispatcher->action($route);
@@ -240,7 +246,7 @@ sub action {
 	
 	return (ucfirst($plugin), ucfirst($controller), $action);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 route()
 	
 	my $route = $self->me->dispatcher->route($route);
@@ -296,12 +302,12 @@ sub route {
 
 	return $route;
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;
 	$self->me->object(__PACKAGE__, @_);
 }
-#=========================================================#
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 
