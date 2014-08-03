@@ -1,6 +1,5 @@
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Module	:	Nile::Handler::PSGI
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
@@ -8,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 =pod
 
@@ -20,7 +19,7 @@ Nile::Handler::PSGI - PSGI Handler.
 
 =head1 SYNOPSIS
 
-	# run the app in  PSGI mode and return the PSGI closure subroutine
+	# run the app in PSGI mode and return the PSGI closure subroutine
 	my $psgi = $app->object("Nile::Handler::PSGI")->run();
 		
 =head1 DESCRIPTION

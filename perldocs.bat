@@ -13,9 +13,15 @@ call perldoc -o html lib/Nile/HTTP/Request.pm > Request.html
 call perldoc -o html lib/Nile/HTTP/Request.pm > RequestPSGI.html
 call perldoc -o html lib/Nile/HTTP/Response.pm > Response.html
 call perldoc -o html lib/Nile/HTTP/PSGI.pm > PSGI.html
+
+call perldoc -o html lib/Nile/Handler/PSGI.pm > PSGI.html
+call perldoc -o html lib/Nile/Handler/FCGI.pm > FCGI.html
+call perldoc -o html lib/Nile/Handler/CGI.pm > CGI.html
+
 call perldoc -o html lib/Nile/Router.pm > Router.html
 call perldoc -o html lib/Nile/MIME.pm > MIME.html
 call perldoc -o html lib/Nile/Say.pm > Say.html
 call perldoc -o html lib/Nile/Var.pm > Var.html
 call perldoc -o html lib/Nile/View.pm > View.html
 call perldoc -o html lib/Nile/XML.pm > XML.html
+call perldoc -o html lib/Nile/Timer.pm > Timer.html

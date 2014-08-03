@@ -1,6 +1,5 @@
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Module	:	Nile::Router
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
@@ -8,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Router;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 =pod
 
@@ -26,14 +25,30 @@ Nile::Router - URL route manager.
 	# load routes file from the path/route folder. default file extension is xml.
 	$router->load("route");
 	
-	# find route action and its information
-	my ($action, $args, $uri, $query) = $router->match($route, $request_method);
-	my ($action, $args, $uri, $query) = $router->match("/forum/topic/123", "get");
-	my ($action, $args, $uri, $query) = $router->match("/blog/computer/software/article_name");
-	
-	# or as hash ref
-	my $route = $router->match($route, $request_method);
-	$route->{action}, $route->{args}, $route->{query}, $route->{uri}
+	# find route action and its information, result is hash ref
+	my $match = $router->match($route, $request_method);
+	say $match->{action},
+		$match->{args},
+		$match->{query},
+		$match->{uri},
+		$match->{code},
+		$match->{route};
+
+	my $match = $router->match("/news/world/egypt/politics/2014/07/24/1579279", "get");
+	my $match = $router->match("/blog/computer/software/article_name");
+	my $match = $router->match($route, $request_method);
+
+	# add new route information to the router object
+	$router->add_route(
+		name  => "blogview",
+		path  => "blog/view/{id:\d+}",
+		target  => "/Blog/Blog/view", # can be a code ref like sub{...}
+		method  => "*", # get, post, put, patch, delete, options, head, ajax, *
+		defaults  => {
+				id => 1
+			},
+		attributes => "capture", # undef or "capture" for inline actions capture
+	);
 
 =head1 DESCRIPTION
 
@@ -133,13 +148,14 @@ sub load {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 match()
 	
-	# find route action and its information
+	# find route action and its information, result is hash ref
 	my $match = $router->match($route, $request_method);
-	say $match->{action}, $match->{args}, $match->{query}, $match->{uri}, $match->{code}, $match->{route}
-
-	my $match = $router->match("/news/world/egypt/politics/2014/07/24/1579279", "get");
-	my $match = $router->match("/blog/computer/software/article_name");
-	my $match = $router->match($route, $request_method);
+	say $match->{action},
+		$match->{args},
+		$match->{query},
+		$match->{uri},
+		$match->{code},
+		$match->{route};
 
 Match routes from the loaded routes files. If route matched returns route target or action, default arguments if provided,
 and uri and query information.
@@ -356,14 +372,15 @@ sub route_for {
 	
 	# add new route information to the router object
 	$router->add_route(
-							name  => "blogview",
-							path  => "blog/view/{id:\d+}",
-							target  => "/Blog/Blog/view", # can be a code ref like sub{...}
-							method  => "*", # get, post, put, patch, delete, options, head, ajax, *
-							defaults  => {
-									id => 1
-								}
-						);
+		name  => "blogview",
+		path  => "blog/view/{id:\d+}",
+		target  => "/Blog/Blog/view", # can be a code ref like sub{...}
+		method  => "*", # get, post, put, patch, delete, options, head, ajax, *
+		defaults  => {
+				id => 1
+			},
+		attributes => "capture", # undef or "capture" for inline actions capture
+	);
 
 This method adds a new route information to the routing table. Routes must be unique, so you can't have two routes that both look like /blog/:id for example. 
 An exception will be thrown if an attempt is made to add a route that already exists.

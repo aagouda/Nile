@@ -36,6 +36,7 @@ lib/Nile/Var.pm
 lib/Nile/View.pm
 lib/Nile/XML.pm
 lib/Nile/MIME.pm
+lib/Nile/Timer.pm
 lib/Nile/HTTP/Request.pm
 lib/Nile/HTTP/RequestPSGI.pm
 lib/Nile/HTTP/Response.pm

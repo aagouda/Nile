@@ -1,6 +1,5 @@
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Module	:	Nile::HTTP::Response
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
@@ -8,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Response;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 =pod
 
@@ -72,9 +71,8 @@ use Scalar::Util ();
 use HTTP::Headers;
 use URI::Escape ();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub BUILD {
-	my ($self, $args) = @_;
-	my ($code, $headers, $content) = %$args;
+sub main { # sub new
+	my ($self, $code, $headers, $content) = @_;
 	$self->status($code) if defined $code;
     $self->headers($headers) if defined $headers;
     $self->body($content) if defined $content;

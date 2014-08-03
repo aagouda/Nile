@@ -1,6 +1,5 @@
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Module	:	Nile
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
@@ -8,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 =pod
 
@@ -105,7 +104,7 @@ B<Alpha> version, do not use it for production. The project's homepage L<https:/
 The main idea in this framework is to separate all the html design and layout from programming. 
 The framework uses html templates for the design with special xml tags for inserting the dynamic output into the templates.
 All the application text is separated in langauge files in xml format supporting multi lingual applications with easy translating and modifying all the text.
-The framework supports PSGI and also direct CGI without any modifications to your applications.
+The framework supports PSGI and also direct CGI and direct FCGI without any modifications to your applications.
 
 =head1 EXAMPLE APPLICATION
 
@@ -163,7 +162,7 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 
 	package Nile::Plugin::Home::Home;
 
-	our $VERSION = '0.31';
+	our $VERSION = '0.32';
 
 	use Nile::Base;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -431,7 +430,18 @@ you also can use auto getter/setter
 To hide the script name B<index.cgi> from the url and allow nice SEO url routing, you need to turn on url rewrite on
 your web server and have .htaccess file in the application folder with the index.cgi.
 
-Below is a sample .htaccess which redirects all requests to index.cgi file.
+Below is a sample .htaccess which redirects all requests to index.cgi file and hides index.cgi from the url, 
+so instead of calling the application as:
+
+	http://domain.com/index.cgi?action=register
+
+using the .htaccess you will be able to call it as:
+
+	http://domain.com/register
+
+without any changes in the code.
+
+For direct FCGI, just replace .cgi with .fcgi in the .htaccess and rename index.cgi to index.fcgi.
 
 	# Don't show directory listings for URLs which map to a directory.
 	Options -Indexes -MultiViews
@@ -453,7 +463,6 @@ Below is a sample .htaccess which redirects all requests to index.cgi file.
 	# REQUIRED: requires mod_rewrite to be enabled in Apache.
 	# Please check that, if you get an "Internal Server Error".
 	RewriteEngine On
-
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	# force use www with http and https so http://domain.com redirect to http://www.domain.com
 	#add www with https support - you have to put this in .htaccess file in the site root folder
@@ -608,6 +617,7 @@ use Nile::Dispatcher;
 use Nile::Paginate;
 use Nile::Database;
 use Nile::Setting;
+use Nile::Timer;
 use Nile::HTTP::Request;
 use Nile::HTTP::Response;
 
@@ -792,6 +802,9 @@ sub start {
 
 	my ($self, $arg) = @_;
 	
+	# start the app page load timer
+	$self->run_time->start;
+
 	if (!(defined($arg) && ref($arg) eq "HASH")) {
 		$arg = $self->start_setting;
 	}
@@ -819,9 +832,6 @@ sub start {
 	}
 
 	# load language files
-	#$self->lang->load("general");
-	
-	# load language files
 	foreach (@{$arg->{langs}}) {
 		$self->lang->load($_);
 	}
@@ -832,7 +842,7 @@ sub run {
 	my ($self, %arg) = @_;
 	
 	#$self->log->info("application run start in mode: ".$self->mode);
-
+	
 	if ($self->mode eq "psgi") {
 		# PSGI handler
 		#$self->log->debug("PSGI handler start");
@@ -848,8 +858,15 @@ sub run {
 	}
 	else {
 		# CGI handler
+
 		#$self->log->debug("CGI handler start");
+		#say "app_time: " . $self->app_time->total;
+		#say "run_time: " . $self->run_time->total;
+
 		$self->object("Nile::Handler::CGI")->run();
+
+		#say "run_time: " . $self->run_time->total;
+		#say "app_time: " . $self->app_time->total;
 		#$self->log->debug("CGI handler end");
 	}
 
@@ -987,6 +1004,32 @@ has 'bm' => (
 		  #autoload, load CGI, ':all';
 		  load Benchmark::Stopwatch;
 		  Benchmark::Stopwatch->new->start;
+	  }
+  );
+
+has 'timer' => (
+      is      => 'rw',
+	  #lazy	=> 1,
+	  default => sub{
+		  Nile::Timer->new;
+	  }
+  );
+
+# app timer since load
+has 'app_time' => (
+      is      => 'rw',
+	  #lazy	=> 1,
+	  default => sub{
+		  Nile::Timer->new;
+	  }
+  );
+
+# page load timer, run time
+has 'run_time' => (
+      is      => 'rw',
+	  #lazy	=> 1,
+	  default => sub{
+		  Nile::Timer->new;
 	  }
   );
 
@@ -1250,22 +1293,19 @@ sub database {
 sub object {
 
 	my ($self, $class, @args) = @_;
-	my (%args, $obj);
+	my ($obj, $me);
 	
-	if (@args == 1 && ref($args[0]) eq "HASH") {
-		# Moose single arguments must be hash ref
-		$obj = $class->new(@args);
-	}
-	elsif (@args && @args % 2) {
+	#if (@args == 1 && ref($args[0]) eq "HASH") {
+	#	# Moose single arguments must be hash ref
+	#	$obj = $class->new(@args);
+	#}
+
+	if (@args && @args % 2) {
 		# Moose needs args as hash, so convert odd size arrays to even for hashing
-		push @args, undef;
-		%args = @args;
-		pop @args;
-		$obj = $class->new(%args);
+		$obj = $class->new(@args, undef);
 	}
 	else {
-		%args = @args;
-		$obj = $class->new(%args);
+		$obj = $class->new(@args);
 	}
 
 	my $meta = $obj->meta;
@@ -1274,16 +1314,16 @@ sub object {
 	#$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
 	#$meta->add_class_attribute( 'cash', ());
 
-	# add method "me" to module, if module has method "me" then add "nile" instead.
-	if (!$obj->can("me")) {
-		$meta->add_attribute('me' => (is => 'rw', default => sub{$self}));
-		$obj->me($self);
+	# add method "me" or one of its alt
+	foreach (qw(me ME _me self)) {
+		unless ($obj->can($_)) {
+			$me = $_; last;
+		}
 	}
-	else {
-		$meta->add_attribute('nile' => ( is => 'rw', default => sub{$self}));
-		$obj->nile($self);
-	}
-	
+
+	$meta->add_attribute($me => (is => 'rw', default => sub{$self}));
+	$obj->$me($self);
+
 	# if class has defined "main" method, then call it
 	if ($obj->can("main")) {
 		$obj->main(@args);
@@ -1470,6 +1510,8 @@ Deserializer L<Nile::Deserializer>.
 Serialization L<Nile::Serialization>.
 
 MIME L<Nile::MIME>.
+
+Timer	L<Nile::Timer>.
 
 Abort L<Nile::Abort>.
 

@@ -1,6 +1,5 @@
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Module	:	Nile::View
 #	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
 #	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
@@ -8,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.31';
+our $VERSION = '0.32';
 
 =pod
 
@@ -306,7 +305,7 @@ sub AUTOLOAD {
 	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub main { # called automatically after the constructor new
+sub main { # our sub new{...}, called automatically after the constructor new
 	my ($self, $view, $theme) = @_;	
 	$self->{theme} = $theme if ($theme);
 	$self->view($view) if ($view);
@@ -679,10 +678,27 @@ sub translate {
 	my $vars = $self->me->lang->vars($self->{lang});
 
 	while ($passes--) {
+		# If you knew ahead of time the string was a word character for example you might try \w{1,} instead 
+		# of .+? to squeeze a tiny bit more speed out of this
 		$self->{content} =~ s/\{(.+?)\}/exists $vars->{$1} ? $vars->{$1} : "\{$1\}"/gex;
 	}
 
 	$self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub translate_text {
+	my ($self, $content, $passes) = @_;
+	
+	$passes += 0;
+	$passes ||= 1;
+	
+	my $vars = $self->me->lang->vars($self->{lang});
+
+	while ($passes--) {
+		$content =~ s/\{(.+?)\}/exists $vars->{$1} ? $vars->{$1} : "\{$1\}"/gex;
+	}
+
+	$content;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 process_vars()
@@ -793,7 +809,7 @@ sub process_widgets {
 		while (($k, $v) = each %{$var->{attr}}) {
 			$content =~ s/\[:$k:\]/$v/g;
 		}
-		$self->{content} =~ s/\Q$match\E/$content/gex;
+		$self->{content} =~ s/\Q$match\E/$content/g;
 	}
 	$self;
 }
@@ -837,7 +853,7 @@ sub process_plugins {
 
 		eval "use $class;";
 		if ($@) {
-			$content = " Error: plugin $plugin$op$sub does not exist. ";
+			$content = " View Error: plugin $plugin$op$sub does not exist name=\"$name\". ";
 			$self->{content} =~ s/\Q$match\E/$content/gex;
 			next;
 		}
@@ -852,23 +868,23 @@ sub process_plugins {
 
 		#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
 		
-		# add method "me" to module, if module has method "me" then add "mew" instead.
-		if (!$obj->can("me")) {
-			$meta->add_attribute( 'me' => ( is => 'rw', default => sub{$me}) );
-			$obj->me($me);
+		# add method "me" or one of its alt
+		foreach (qw(me ME _me self)) {
+			unless ($obj->can($_)) {
+				$me = $_; last;
+			}
 		}
-		else {
-			$meta->add_attribute( 'nile' => ( is => 'rw', default => sub{$me}) );
-			$obj->nile($me);
-		}
+
+		$meta->add_attribute($me => (is => 'rw', default => sub{$self->me}));
+		$obj->$me($self->me);
 		
 		my $found = 0;
-		foreach my $method ($sub,"index", $action) {
+		foreach my $method ($sub, "index", $action) {
 			if ($obj->can($method)) {
 				my ($merged, @result) = Capture::Tiny::capture_merged {eval $obj->$method(%attr)};
 				#$merged .= join "", @result;
 				if ($@) {
-					$content  = "Plugin error: $@\n $class->$method. $merged\n";
+					$content  = "View error: plugin name='$name' $@\n $class->$method. $merged\n";
 				}
 				else {
 					$content = $merged; 
@@ -879,7 +895,7 @@ sub process_plugins {
 		}
 
 		if (!$found) {
-			$content = " Plugin error: plugin \'$class' does not have subroutine \'$sub\'. ";
+			$content = " View error: plugin '$class' does not have subroutine '$sub' in type=\"plugin\" name='$name'. ";
 		}
 
 		$self->{content} =~ s/\Q$match\E/$content/gex;
@@ -941,7 +957,6 @@ sub process {
 		$self->process_perl;
 		$self->process_vars;
 		if ($pass < $passes) {
-			#say "parsing...";
 			$self->parse;
 		}
 	}

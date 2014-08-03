@@ -76,7 +76,7 @@
 		$self->response->encoded(0); # encode content
 		return $content;
 	});
-	
+
 	# inline actions, capture print statements, no returns. url: /accounts/login
 	$app->capture("get", "/accounts/login", sub {
 		my ($self) = @_;
