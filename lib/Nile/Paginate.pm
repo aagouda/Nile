@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Paginate;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.

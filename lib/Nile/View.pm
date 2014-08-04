@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -286,7 +286,6 @@ repeated table row and process it then replace the entire data with the block in
 
 use Nile::Base;
 use Capture::Tiny ();
-use Time::HiRes qw(gettimeofday);
 use IO::Compress::Gzip qw(gzip $GzipError);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub AUTOLOAD {
@@ -710,15 +709,24 @@ This method normally used internally when processing the template. This method c
 =cut
 
 sub process_vars {
+
 	my ($self) = $_[0];
 	my ($name, $var, $match);
 	
+	my $vars = $self->{vars};
+	
+	# get a hash reference to the global variables
+	my $shared = $self->me->var->vars();
+
 	while (($name, $var) = each %{$self->{tag}->{var}}) {
 		#$self->{tag}->{$type}->{$attr{name}} = {attr=>{%attr}, match=>$match, content=>$content};
-		if (exists $self->{vars}->{$name}) {
+		if (exists $vars->{$name}) {
 			$match = $var->{match};
-			#say "$self->{vars}->{$name} => $match";
-			$self->{content} =~ s/\Q$match\E/$self->{vars}->{$name}/gex;
+			$self->{content} =~ s/\Q$match\E/$vars->{$name}/gex;
+		}
+		elsif (exists $shared->{$name}) {
+			$match = $var->{match};
+			$self->{content} =~ s/\Q$match\E/$shared->{$name}/gex;
 		}
 	}
 	$self;
@@ -826,7 +834,7 @@ sub process_plugins {
 
 	my ($self) = $_[0];
 	my ($me, $name, $var, $match, $content, $k, $v, $class, $plugin);
-	my (%attr, $op, $sub, $obj, $meta);
+	my (%attr, $op, $sub, $object, $meta);
 
 	$me = $self->me;
 
@@ -850,12 +858,14 @@ sub process_plugins {
 		$sub ||= "index";
 		
 		$class = "Nile::Plugin:\:$plugin";
-
-		eval "use $class;";
-		if ($@) {
-			$content = " View Error: plugin $plugin$op$sub does not exist name=\"$name\". ";
-			$self->{content} =~ s/\Q$match\E/$content/gex;
-			next;
+		
+		if (!$self->me->is_loaded($class)) {
+			eval "use $class;";
+			if ($@) {
+				$content = " View Error: plugin $plugin$op$sub does not exist name=\"$name\". ";
+				$self->{content} =~ s/\Q$match\E/$content/gex;
+				next;
+			}
 		}
 
 		%attr = %{$var->{attr}};
@@ -863,25 +873,16 @@ sub process_plugins {
 		# delete the attr keys used by the vars tag itself
 		delete $attr{$_} for (qw(type name));
 		
-		$obj = $class->new(%attr);
-		$meta = $obj->meta;
+		$object = $class->new(%attr);
+		$meta = $object->meta;
 
-		#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
-		
 		# add method "me" or one of its alt
-		foreach (qw(me ME _me self)) {
-			unless ($obj->can($_)) {
-				$me = $_; last;
-			}
-		}
-
-		$meta->add_attribute($me => (is => 'rw', default => sub{$self->me}));
-		$obj->$me($self->me);
+		$self->me->add_object_context($object, $meta);
 		
 		my $found = 0;
 		foreach my $method ($sub, "index", $action) {
-			if ($obj->can($method)) {
-				my ($merged, @result) = Capture::Tiny::capture_merged {eval $obj->$method(%attr)};
+			if ($object->can($method)) {
+				my ($merged, @result) = Capture::Tiny::capture_merged {eval $object->$method(%attr)};
 				#$merged .= join "", @result;
 				if ($@) {
 					$content  = "View error: plugin name='$name' $@\n $class->$method. $merged\n";
@@ -969,6 +970,21 @@ sub process {
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 header()
+	
+	$view->header;
+
+Prints the header to the browser.
+
+=cut
+
+sub header {
+	my ($self, $type) = @_;
+	$type ||= "text/html;charset=utf-8";
+	print "Content-type: $type\n\n";
+	$self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 render()
 	
 	$view->render;
@@ -1027,21 +1043,6 @@ sub show {
 	my ($self) = $_[0];
 	$self->process();
 	$self->render();
-	$self;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 header()
-	
-	$view->header;
-
-Prints the header to the browser.
-
-=cut
-
-sub header {
-	my ($self, $type) = @_;
-	$type ||= "text/html;charset=utf-8";
-	print "Content-type: $type\n\n";
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

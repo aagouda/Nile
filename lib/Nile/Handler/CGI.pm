@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::CGI;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -37,8 +37,6 @@ sub run {
 
 	my $me = $self->me;
 
-	$me->start;
-
 	#$me->log->debug("CGI/FCGI request start");
 
 	# direct CGI mode.
@@ -46,7 +44,10 @@ sub run {
 
 	$me->response($me->object("Nile::HTTP::Response"));
 	my $response = $me->response;
+
+	$me->start;
 	#------------------------------------------------------
+	# dispatch the action
 	my $content = $me->dispatcher->dispatch;
 	#------------------------------------------------------
 	# assume OK response if not set

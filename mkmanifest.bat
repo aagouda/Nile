@@ -1,0 +1,1 @@
+call perl -e "use ExtUtils::Manifest qw(mkmanifest); mkmanifest();"

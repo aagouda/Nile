@@ -1,9 +1,19 @@
 <vars type="widget" name="header" charset_name="UTF-8" lang_name="en" />
 
-{first_name} <vars name="fname"/><br>
+{first_name} <vars name="fname" /><br>
 {last_name} <vars name="lname" /><br>
 {email} <vars type="var" name='email' /><br>
 {website} <vars type="var" name="website" /><br>
+<br>
+
+global variables:<br>
+language: <vars type="var" name='lang' /><br>
+theme: <vars type="var" name="theme" /><br>
+base url: <vars type="var" name="base_url" /><br>
+image url: <vars name="image_url" /><br>
+css url: <vars type="var" name="css_url" /><br>
+new url: <a href='<vars name="base_url" />comments' >comments</a><br>
+image: <img src="<vars name="image_url" />logo.png" /><br>
 <br>
 
 {date_now} <vars type="plugin" name="Date::Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
@@ -41,28 +51,28 @@ cdata start here is may have html tags and 'single' and "double" qoutes
 <br>
 html content 1-5 top
 <!--block:first-->
-	<table border="1" style="color:red;">
-	<tr class="lines">
-		<td align="left" valign="<--valign-->">
-			<b>bold</b><a href="http://www.mewsoft.com">mewsoft</a>
-			<!--hello--> <--again--><!--world-->
-			some html content here 1 top
-			<!--block:second-->
-				some html content here 2 top
-				<!--block:third-->
-					some html content here 3 top
-					<!--block:fourth-->
-					some html content here 4 top
-						<!--block:fifth-->
-							some html content here 5a
-							some html content here 5b
-						<!--endblock-->
-					<!--endblock-->
-					some html content here 3a
-				some html content here 3b
-			<!--endblock-->
+    <table border="1" style="color:red;">
+    <tr class="lines">
+        <td align="left" valign="<--valign-->">
+            <b>bold</b><a href="http://www.mewsoft.com">mewsoft</a>
+            <!--hello--> <--again--><!--world-->
+            some html content here 1 top
+            <!--block:second-->
+                some html content here 2 top
+                <!--block:third-->
+                    some html content here 3 top
+                    <!--block:fourth-->
+                    some html content here 4 top
+                        <!--block:fifth-->
+                            some html content here 5a
+                            some html content here 5b
+                        <!--endblock-->
+                    <!--endblock-->
+                    some html content here 3a
+                some html content here 3b
+            <!--endblock-->
         some html content here 2 bottom
-		</tr>
+        </tr>
     <!--endblock-->
     some html content here 1 bottom
 </table>

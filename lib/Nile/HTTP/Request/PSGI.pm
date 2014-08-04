@@ -5,9 +5,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::HTTP::RequestPSGI;
+package Nile::HTTP::Request::PSGI;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -15,7 +15,7 @@ our $VERSION = '0.32';
 
 =head1 NAME
 
-Nile::HTTP::RequestPSGI -  The HTTP request manager.
+Nile::HTTP::Request::PSGI -  The HTTP request manager.
 
 =head1 SYNOPSIS
 	
@@ -31,7 +31,7 @@ Nile::HTTP::RequestPSGI -  The HTTP request manager.
 
 =head1 DESCRIPTION
 
-Nile::HTTP::RequestPSGI -  The HTTP request manager.
+Nile::HTTP::Request::PSGI -  The HTTP request manager.
 
 The http request is available as a shared object extending the L<CGI::Simple> module. This means that all methods supported
 by L<CGI::Simple> is available with the additions to these few methods:
@@ -55,7 +55,13 @@ extends 'Nile::HTTP::PSGI';
 #Methods: HEAD, POST, GET, PUT, DELETE, PATCH
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_ajax {
-	(exists $ENV{HTTP_X_REQUESTED_WITH} && lc($ENV{HTTP_X_REQUESTED_WITH}) eq 'xmlhttprequest')? 1 : 0;
+	if (exists $ENV{HTTP_X_REQUESTED_WITH} && lc($ENV{HTTP_X_REQUESTED_WITH}) eq 'xmlhttprequest') {
+		return 1;
+	}
+	elsif (exists $self->env->{HTTP_X_REQUESTED_WITH} && lc($self->env->{HTTP_X_REQUESTED_WITH}) eq 'xmlhttprequest') {
+		return 1;
+	}
+	return 0;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_post {lc(shift->request_method) eq "post";}
@@ -64,6 +70,42 @@ sub is_head {lc(shift->request_method) eq "head";}
 sub is_put {lc(shift->request_method) eq "put";}
 sub is_delete {lc(shift->request_method) eq "delete";}
 sub is_patch {lc(shift->request_method) eq "patch";}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub base_url {
+	my $self = shift;
+	my $url =  $self->url();
+	my $script =  $self->url(-relative=>1);
+	$url =~ s/$script//;
+	$url = "$url/" if $url !~ m|/$|;
+	return $url;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub abs_url {
+	my $self = shift;
+	my $url =  $self->url(-absolute=>1);
+	my $script =  $self->url(-relative=>1);
+	$url =~ s/$script//;
+	$url = "$url/" if $url !~ m|/$|;
+	return $url;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub url_path {
+	my $self = shift;
+	my $route = "";
+	my ($path, $script_name) = $self->script_name =~ m#(.*)/(.*)$#;
+	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
+	if ($request_uri) {
+		$route = $request_uri;
+	
+		# remove path part from the route
+		$route =~ s/^$path//;
+
+		#remove script name from route
+		$route =~ s/$script_name\/?$//;
+	}
+	$route = "$route/" if $route !~ m|/$|;
+	return $route;
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;

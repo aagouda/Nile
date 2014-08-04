@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Timer;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -52,13 +52,6 @@ Nile::Timer - Timer to clock operations.
 use Nile::Base;
 use Time::HiRes qw(gettimeofday tv_interval);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-has 'start_time' => (
-      is      => 'rw',
-  );
-
-has 'lap_start_time' => (
-      is      => 'rw',
-  );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
 	my ($self, $args) = @_;
@@ -112,6 +105,44 @@ sub total {
     my $now = [gettimeofday()];
     my $lap = tv_interval($self->start_time, $now);
     return sprintf("%0f", $lap);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 start_time()
+	
+	say $app->timer->start_time;
+
+Returns the last start time.
+
+=cut
+
+has 'start_time' => (
+      is      => 'rw',
+  );
+
+
+=head2 lap_start_time()
+	
+	say $app->timer->lap_start_time;
+
+Returns the last lap start time.
+
+=cut
+
+has 'lap_start_time' => (
+      is      => 'rw',
+  );
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 time()
+	
+	say $app->timer->time;
+
+Returns the current time.
+
+=cut
+
+sub time {
+    my ($self) = @_;
+	return [gettimeofday()];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

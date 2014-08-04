@@ -1,0 +1,8 @@
+.*\.bak
+Nile-(\d+\.\d+).tar.gz
+MANIFEST.SKIP
+mkmanifest.bat
+perldocs.bat
+build.sh
+^blib
+^pm_to_blib

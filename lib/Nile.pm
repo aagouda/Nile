@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -26,7 +26,7 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 	my $app = Nile->new();
 	
 	# initialize the application with the shared and safe sessions settings
-	$app->init(
+	$app->init({
 		# base application path, auto detected if not set
 		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
 
@@ -47,7 +47,7 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 		
 		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
 		#mode	=>	"fcgi", # psgi, cgi, fcgi
-	);
+	});
 	
 	# set the application per single user session settings
 	$app->start_setting({
@@ -77,7 +77,7 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 		$self->response->encoded(0); # encode content
 		return $content;
 	});
-	
+
 	# inline actions, capture print statements, no returns. url: /accounts/login
 	$app->capture("get", "/accounts/login", sub {
 		my ($self) = @_;
@@ -140,7 +140,13 @@ Applications built with this framework must have basic folder structure. Applica
 
 The following is the basic application folder tree that must be created manually before runing:
 
+		├───api
+		├───cash
+		├───cmd
 		├───config
+		├───cron
+		├───data
+		├───file
 		├───lang
 		│   └───en-US
 		├───lib
@@ -149,11 +155,16 @@ The following is the basic application folder tree that must be created manually
 		│           └───Home
 		├───log
 		├───route
-		└───theme
-			└───default
-				├───image
-				├───view
-				└───widget
+		├───temp
+		├───theme
+		│   └───default
+		│       ├───css
+		│       ├───icon
+		│       ├───image
+		│       ├───js
+		│       ├───view
+		│       └───widget
+		└───web
 
 =head1 CREATING YOUR FIRST PLUGIN 'HOME' 
 
@@ -162,7 +173,7 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 
 	package Nile::Plugin::Home::Home;
 
-	our $VERSION = '0.32';
+	our $VERSION = '0.33';
 
 	use Nile::Base;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -218,13 +229,23 @@ and put in this file the following code:
 
 	<vars type="widget" name="header" charset_name="UTF-8" lang_name="en" />
 
-	{first_name} <vars name="fname"/><br>
+	{first_name} <vars name="fname" /><br>
 	{last_name} <vars name="lname" /><br>
 	{email} <vars type="var" name='email' /><br>
 	{website} <vars type="var" name="website" /><br>
 	<br>
 
-	{date_now} <vars type="plugin" name="Date::Date->date" format="%Y %M %D %T - %a, %d %b %Y %H:%M:%S" /><br>
+	global variables:<br>
+	language: <vars type="var" name='lang' /><br>
+	theme: <vars type="var" name="theme" /><br>
+	base url: <vars type="var" name="base_url" /><br>
+	image url: <vars name="image_url" /><br>
+	css url: <vars type="var" name="css_url" /><br>
+	new url: <a href='<vars name="base_url" />comments' >comments</a><br>
+	image: <img src="<vars name="image_url" />logo.png" /><br>
+	<br>
+
+	{date_now} <vars type="plugin" name="Date::Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
 	{time_now} <vars type="plugin" name="Date->now" format="%A %d, %B %Y  %T %p" /><br>
 	{date_time} <vars type="plugin" name="date" format="%B %d, %Y  %r" /><br>
 	<br>
@@ -233,7 +254,7 @@ and put in this file the following code:
 	<br>
 
 	<pre>
-		<vars type="perl">system ('dir *.cgi');</vars>
+	<vars type="perl">system ('dir *.cgi');</vars>
 	</pre>
 	<br>
 
@@ -715,32 +736,32 @@ sub BUILD { # our sub new {..}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub init {
 
-	my ($self, %arg) = @_;
+	my ($self, $arg) = @_;
 	
 	my ($package, $script) = caller;
 	
-	$arg{path} ||= $self->detect_app_path($script);
+	$arg->{path} ||= $self->detect_app_path($script);
+	my $file = $self->file;
+
+	# setup the path for the app folders
+	foreach (qw(api cash cmd config cron data file lib log route temp web)) {
+		$self->var->set($_."_dir" => $file->catdir($arg->{path}, $_));
+	}
 
 	$self->var->set(
-			# app directories
-			'path'					=>	$arg{path},
+			'path'					=>	$arg->{path},
 			
-			'lib_dir'				=>	$self->file->catdir($arg{path}, "lib"),
-			'log_dir'				=>	$self->file->catdir($arg{path}, "log"),
-			'config_dir'			=>	$self->file->catdir($arg{path}, "config"),
-			'route_dir'			=>	$self->file->catdir($arg{path}, "route"),
-			
-			'log_file'				=>	$arg{log_file} || "log.pm",
-			'action_name'		=>	$arg{action_name} || "action,route,cmd",
-			'default_route'	=>	$arg{default_route} || "/Home/Home/index",
+			'log_file'				=>	$arg->{log_file} || "log.pm",
+			'action_name'		=>	$arg->{action_name} || "action,route,cmd",
+			'default_route'	=>	$arg->{default_route} || "/Home/Home/index",
 		);
 	
 	push @INC, $self->var->get("lib_dir");
 	#------------------------------------------------------
 	# detect and load request and response handler classes
-	$arg{mode} ||= "cgi";
-	$arg{mode} = lc($arg{mode});
-	$self->mode($arg{mode});
+	$arg->{mode} ||= "cgi";
+	$arg->{mode} = lc($arg->{mode});
+	$self->mode($arg->{mode});
 	
 	#$self->log->debug("mode: $arg{mode}");
 
@@ -766,7 +787,7 @@ sub init {
 	#$self->log->debug("mode to run: $arg{mode}");
 
 	if ($self->mode eq "psgi") {
-		load Nile::HTTP::RequestPSGI;
+		load Nile::HTTP::Request::PSGI;
 		load Nile::Handler::PSGI;
 	}
 	elsif ($self->mode eq "fcgi") {
@@ -780,13 +801,13 @@ sub init {
 	}
 	#------------------------------------------------------
 	# load config files
-	foreach (@{$arg{config}}) {
+	foreach (@{$arg->{config}}) {
 		#$self->config->xml->keep_order(1);
 		$self->config->load($_);
 	}
 
 	# load route files
-	foreach (@{$arg{route}}) {
+	foreach (@{$arg->{route}}) {
 		$self->router->load($_);
 	}
 
@@ -797,17 +818,19 @@ has 'start_setting' => (
 	isa => 'HashRef',
 	default => sub { +{} }
 );
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub start {
 
 	my ($self, $arg) = @_;
 	
 	# start the app page load timer
 	$self->run_time->start;
-
-	if (!(defined($arg) && ref($arg) eq "HASH")) {
-		$arg = $self->start_setting;
-	}
+	
+	my $req = $self->request;
+	my $file = $self->file;
+	
+	$arg ||= {};
+	$arg = { %{$self->start_setting}, %$arg };
 
 	$arg->{lang} ||= "";
 	$arg->{theme} ||= "default";
@@ -815,10 +838,10 @@ sub start {
 	my $path = $self->var->get("path");
 
 	$self->var->set(
-			'langs_dir'			=>	$self->file->catdir($path, "lang"),
-			'lang_dir'				=>	$self->file->catdir($path, "lang", $arg->{lang}),
-			'themes_dir'		=>	$self->file->catdir($path, "theme"),
-			'theme_dir'			=>	$self->file->catdir($path, "theme", $arg->{theme}),
+			'langs_dir'			=>	$file->catdir($path, "lang"),
+			'lang_dir'				=>	$file->catdir($path, "lang", $arg->{lang}),
+			'themes_dir'		=>	$file->catdir($path, "theme"),
+			'theme_dir'			=>	$file->catdir($path, "theme", $arg->{theme}),
 			
 			# app default settings
 			'lang'					=>	$arg->{lang},
@@ -828,12 +851,57 @@ sub start {
 	if (!$arg->{lang}) {
 		$arg->{lang} = $self->detect_user_language;
 		$self->var->set("lang", $arg->{lang});	
-		$self->var->set("lang_dir", $self->file->catdir($arg->{path}, "lang", $arg->{lang}));
+		$self->var->set("lang_dir", $file->catdir($arg->{path}, "lang", $arg->{lang}));
+	}
+
+	# global variables, safe to render in views
+	$self->var->set(
+			url => $req->url,
+			base_url => $req->base_url,
+			abs_url => $req->abs_url,
+			url_path => $req->url_path,
+		);
+
+	#$self->uri_mode(1);
+	# app folders url's
+	foreach (qw(api cash file temp web)) {
+		$self->var->set($_."_url" => $self->uri_for("$_/"));
+	}
+	
+	# themes and current theme url's
+	$self->var->set(
+			themes_url => $self->uri_for("theme/"),
+			theme_url => $self->uri_for("theme/$arg->{theme}/"),
+		);
+
+	foreach (qw(css icon image js view widget)) {
+		$self->var->set($_."_url" => $self->uri_for("theme/$arg->{theme}/$_/"));
 	}
 
 	# load language files
 	foreach (@{$arg->{langs}}) {
 		$self->lang->load($_);
+	}
+	
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+has 'uri_mode' => (
+	is => 'rw',
+	default => 0, # 0= full, 1=absolute, 2=relative
+);
+
+sub uri_for {
+	my ($self, $uri, $mode) = @_;
+	
+	if (!defined $mode) {
+		$mode = $self->uri_mode;
+	}
+
+	if ($self->uri_mode == 1) {
+		return $self->var->get("abs_url") . $uri;
+	}
+	else {
+		return $self->var->get("base_url") . $uri;
 	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -941,34 +1009,6 @@ sub action_args {
 	}
 	
 	return ($method, $route, $action);
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub is_cli {
-	# return 1 if called from browser, 0 if called from command line
-	if  (exists $ENV{REQUEST_METHOD} || defined $ENV{GATEWAY_INTERFACE} ||  exists $ENV{HTTP_HOST}){
-		return 0;
-	}
-	return 1;
-	#if (-t STDIN) { }
-	#use IO::Interactive qw(is_interactive interactive busy);if ( is_interactive() ) {print "Running interactively\n";}
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub utf8_safe {
-	my ($self, $str) = @_;
-	if (utf8::is_utf8($str)) {
-		utf8::encode($str);
-	}
-	$str;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub encode {
-	my ($self, $data) = @_;
-	return Encode::encode($self->charset, $data);
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub decode {
-	my ($self, $data) = @_;
-	return Encode::decode($self->charset, $data);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 bm()
@@ -1161,7 +1201,7 @@ has 'env' => (
 has 'request' => (
 	is      => 'rw',
 	lazy	=> 1,
-	default => sub {undef},
+	default => sub {},
 );
 
 has 'response' => (
@@ -1266,13 +1306,66 @@ sub new_request {
 	if (defined($env) && ref ($env) eq "HASH") {
 		$self->mode("psgi");
 		#load Nile::HTTP::PSGI;
-		$self->request($self->object("Nile::HTTP::RequestPSGI", $env));
+		$self->request($self->object("Nile::HTTP::Request::PSGI", $env));
 	}
 	else {
 		$self->request($self->object("Nile::HTTP::Request"));
 	}
 	
 	$self->request;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub object {
+
+	my ($self, $class, @args) = @_;
+	my ($object, $me);
+	
+	#if (@args == 1 && ref($args[0]) eq "HASH") {
+	#	# Moose single arguments must be hash ref
+	#	$object = $class->new(@args);
+	#}
+
+	if (@args && @args % 2) {
+		# Moose needs args as hash, so convert odd size arrays to even for hashing
+		$object = $class->new(@args, undef);
+	}
+	else {
+		$object = $class->new(@args);
+	}
+
+	my $meta = $object->meta;
+
+	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
+	#$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
+	#$meta->add_class_attribute( 'cash', ());
+
+	# add method "me" or one of its alt
+	$self->add_object_context($object, $meta);
+
+	# if class has defined "main" method, then call it
+	if ($object->can("main")) {
+		$object->main(@args);
+	}
+		
+	#no strict 'refs';
+	#*{"$object"."::me"} = \&me;
+	#${"${package}::$var_name"} = 1;
+	
+	return $object;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub add_object_context {
+	my ($self, $object, $meta) = @_;
+	$meta ||= $object->meta;
+	# add method "me" or one of its alt
+	#foreach (qw(me ME _me self)) {
+	foreach (qw(me)) {
+		unless ($object->can($_)) {
+			$meta->add_attribute($_ => (is => 'rw', default => sub{$self}));
+			$object->$_($self);
+			last;
+		}
+	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub paginate {
@@ -1288,52 +1381,6 @@ sub view {
 sub database {
 	my ($self) = shift;
 	return $self->object("Nile::Database", @_);
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-
-	my ($self, $class, @args) = @_;
-	my ($obj, $me);
-	
-	#if (@args == 1 && ref($args[0]) eq "HASH") {
-	#	# Moose single arguments must be hash ref
-	#	$obj = $class->new(@args);
-	#}
-
-	if (@args && @args % 2) {
-		# Moose needs args as hash, so convert odd size arrays to even for hashing
-		$obj = $class->new(@args, undef);
-	}
-	else {
-		$obj = $class->new(@args);
-	}
-
-	my $meta = $obj->meta;
-
-	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
-	#$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
-	#$meta->add_class_attribute( 'cash', ());
-
-	# add method "me" or one of its alt
-	foreach (qw(me ME _me self)) {
-		unless ($obj->can($_)) {
-			$me = $_; last;
-		}
-	}
-
-	$meta->add_attribute($me => (is => 'rw', default => sub{$self}));
-	$obj->$me($self);
-
-	# if class has defined "main" method, then call it
-	if ($obj->can("main")) {
-		$obj->main(@args);
-	}
-		
-	#no strict 'refs';
-	#*{"$obj"."::me"} = \&me;
-	#${"${package}::$var_name"} = 1;
-	
-	return $obj;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub theme_list {
@@ -1368,6 +1415,42 @@ sub dump {
 	my $self = shift;
 	say Dumper (@_);
 	return "";
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub is_loaded {
+    my ($self, $module) = @_;
+    (my $file = $module) =~ s/::/\//g;
+    $file .= '.pm';
+	#note: do() does unconditional loading -- no lookup in the %INC hash is made.
+	exists $INC{$file};
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub is_cli {
+	# return 1 if called from browser, 0 if called from command line
+	if  (exists $ENV{REQUEST_METHOD} || defined $ENV{GATEWAY_INTERFACE} ||  exists $ENV{HTTP_HOST}){
+		return 0;
+	}
+	return 1;
+	#if (-t STDIN) { }
+	#use IO::Interactive qw(is_interactive interactive busy);if ( is_interactive() ) {print "Running interactively\n";}
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub utf8_safe {
+	my ($self, $str) = @_;
+	if (utf8::is_utf8($str)) {
+		utf8::encode($str);
+	}
+	$str;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub encode {
+	my ($self, $data) = @_;
+	return Encode::encode($self->charset, $data);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub decode {
+	my ($self, $data) = @_;
+	return Encode::decode($self->charset, $data);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub trim {
@@ -1477,7 +1560,7 @@ Langauge	L<Nile::Lang>.
 
 Request	L<Nile::HTTP::Request>.
 
-Request	L<Nile::HTTP::RequestPSGI>.
+Request	L<Nile::HTTP::Request::PSGI>.
 
 Request	L<Nile::HTTP::PSGI>.
 

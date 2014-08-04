@@ -25,7 +25,7 @@
 	my $app = Nile->new();
 	
 	# initialize the application with the shared and safe sessions settings
-	$app->init(
+	$app->init({
 		# base application path, auto detected if not set
 		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
 
@@ -46,7 +46,7 @@
 		
 		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
 		#mode	=>	"fcgi", # psgi, cgi, fcgi
-	);
+	});
 	
 	# set the application per single user session settings
 	$app->start_setting({
@@ -99,27 +99,4 @@
 	# run the application and return the PSGI response or print to the output
 	# the run process will also run plugins with matched routes files loaded
 	$app->run();
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub test_paginate {
-
-	my $paginate = $app->paginate(
-			total_entries       => 100,
-			entries_per_page    => 10, 
-			current_page        => 4,
-			pages_per_set       => 7,
-			mode => "slide", #modes are 'slide', 'fixed', default is 'slide'
-		);
-
-	# Print the page numbers of the current set (visible pages)
-	foreach my $page (@{$paginate->pages_in_set()}) {
-		($page == $paginate->current_page())? print "[$page] " : print "$page ";
-	}
-
-	say "\n";
-	# rendering
-	say "out: " . $paginate->out, "\n";
-	say "showing: " . $paginate->showing, "\n";
-	say "showing list: " . $paginate->showing_list, "\n";
-}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

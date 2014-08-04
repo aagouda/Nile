@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -171,19 +171,10 @@ sub dispatch_action {
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
 		$self->me->abort("Dispatcher error. Plugin '$class' action '$action' request method '$request_method' is not allowed.");
 	}
+	
+	# add method "me" or one of its alt
+	$self->me->add_object_context($object, $meta);
 
-	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
-	
-	# add method "me" to module, if module has method "me" then add "nile" instead.
-	if (!$object->can("me")) {
-		$meta->add_attribute( 'me' => ( is => 'rw', default => sub{$self->me}) );
-		$object->me($self->me);
-	}
-	else {
-		$meta->add_attribute( 'nile' => ( is => 'rw', default => sub{$self->me}) );
-		$object->nile($self->me);
-	}
-	
 	if (grep(/^(capture)$/i, @$attrs)) {
 		# run the action and capture output of print statements. sub home: Capture {...}
 		($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action($self->me)}};
@@ -279,20 +270,7 @@ sub route {
 	}
 	
 	# if no route, get the route from the query string in the REQUEST_URI
-	if (!$route) {
-		my ($path, $script_name) = $self->me->request->script_name =~ m#(.*)/(.*)$#;
-		my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
-		if ($request_uri) {
-			$route = $request_uri;
-		
-			# remove path part from the route
-			$route =~ s/^$path//;
-
-			#remove script name from route
-			$route =~ s/$script_name\/?$//;
-		}
-		#say "($path, $script_name)($request_uri, $params)$ENV{REQUEST_URI}";
-	}
+	$route ||= $self->me->request->url_path;
 	
 	if ($route) {
 		$route =~ s!^/!!g;

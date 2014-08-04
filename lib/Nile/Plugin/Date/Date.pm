@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Date::Date;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 use Nile::Base;
 use DateTime qw();

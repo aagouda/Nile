@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -44,8 +44,6 @@ sub run {
 
 		my $me = $self->me;
 		
-		$me->start;
-
 		#$me->start_logger;
 		#$me->log->debug("PSGI request start");
 
@@ -54,10 +52,13 @@ sub run {
 		#*ENV = $env;
 		 #%ENV = %$env;
 		#----------------------------------------------
+		$me->new_request($env);
+		my $request = $me->request;
+
 		$me->response($me->object("Nile::HTTP::Response"));
 		my $response = $me->response;
-		my $request = $me->new_request($env);
-		#$me->dump($env);
+
+		$me->start;
 		#----------------------------------------------
 		my $path = $me->env->{PATH_INFO} || $me->env->{REQUEST_URI};
 		
@@ -70,6 +71,7 @@ sub run {
 			return $response->finalize;
 		}
 		#--------------------------------------------------
+		# dispatch the action
 		my $content = $me->dispatcher->dispatch;
 		#--------------------------------------------------
 		my $ctype = $response->header('Content-Type');

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request;
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 =pod
 
@@ -55,7 +55,10 @@ extends 'CGI::Simple';
 #Methods: HEAD, POST, GET, PUT, DELETE, PATCH
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_ajax {
-	(exists $ENV{HTTP_X_REQUESTED_WITH} && lc($ENV{HTTP_X_REQUESTED_WITH}) eq 'xmlhttprequest')? 1 : 0;
+	if (exists $ENV{HTTP_X_REQUESTED_WITH} && lc($ENV{HTTP_X_REQUESTED_WITH}) eq 'xmlhttprequest') {
+		return 1;
+	}
+	return 0;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_post {lc(shift->request_method) eq "post";}
@@ -64,6 +67,42 @@ sub is_head {lc(shift->request_method) eq "head";}
 sub is_put {lc(shift->request_method) eq "put";}
 sub is_delete {lc(shift->request_method) eq "delete";}
 sub is_patch {lc(shift->request_method) eq "patch";}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub base_url {
+	my $self = shift;
+	my $url =  $self->url();
+	my $script =  $self->url(-relative=>1);
+	$url =~ s/$script//;
+	$url = "$url/" if $url !~ m|/$|;
+	return $url;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub abs_url {
+	my $self = shift;
+	my $url =  $self->url(-absolute=>1);
+	my $script =  $self->url(-relative=>1);
+	$url =~ s/$script//;
+	$url = "$url/" if $url !~ m|/$|;
+	return $url;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub url_path {
+	my $self = shift;
+	my $route = "";
+	my ($path, $script_name) = $self->script_name =~ m#(.*)/(.*)$#;
+	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
+	if ($request_uri) {
+		$route = $request_uri;
+	
+		# remove path part from the route
+		$route =~ s/^$path//;
+
+		#remove script name from route
+		$route =~ s/$script_name\/?$//;
+	}
+	$route = "$route/" if $route !~ m|/$|;
+	return $route;
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {
 	my $self = shift;
