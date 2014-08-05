@@ -7,9 +7,9 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
-use Nile::Base;
+use Nile::Plugin; # automatically extends Nile::Plugin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
@@ -42,6 +42,14 @@ sub home : GET Action {
 
 	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
+	# helper class
+	my $email = $me->helper->email;
+	#$email->send();
+
+	# plugin settings from config files
+	my $setting = $self->setting;
+
+
 	return $view->out;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

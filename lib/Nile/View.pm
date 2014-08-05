@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 =pod
 
@@ -670,34 +670,10 @@ This method can be chained.
 
 sub translate {
 	my ($self, $passes) = @_;
-	
 	$passes += 0;
 	$passes ||= 2;
-	
-	my $vars = $self->me->lang->vars($self->{lang});
-
-	while ($passes--) {
-		# If you knew ahead of time the string was a word character for example you might try \w{1,} instead 
-		# of .+? to squeeze a tiny bit more speed out of this
-		$self->{content} =~ s/\{(.+?)\}/exists $vars->{$1} ? $vars->{$1} : "\{$1\}"/gex;
-	}
-
+	$self->me->lang->translate(\$self->{content}, $self->{lang}, $passes);
 	$self;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub translate_text {
-	my ($self, $content, $passes) = @_;
-	
-	$passes += 0;
-	$passes ||= 1;
-	
-	my $vars = $self->me->lang->vars($self->{lang});
-
-	while ($passes--) {
-		$content =~ s/\{(.+?)\}/exists $vars->{$1} ? $vars->{$1} : "\{$1\}"/gex;
-	}
-
-	$content;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 process_vars()

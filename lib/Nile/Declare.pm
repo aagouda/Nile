@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Declare;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 use Moose;
 extends 'MooseX::Declare';

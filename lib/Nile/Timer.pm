@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Timer;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 =pod
 
@@ -51,7 +51,6 @@ Nile::Timer - Timer to clock operations.
 
 use Nile::Base;
 use Time::HiRes qw(gettimeofday tv_interval);
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
 	my ($self, $args) = @_;

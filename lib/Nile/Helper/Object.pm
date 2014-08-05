@@ -5,7 +5,7 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Say;
+package Nile::Helper::Object;
 
 our $VERSION = '0.34';
 
@@ -15,69 +15,40 @@ our $VERSION = '0.34';
 
 =head1 NAME
 
-Nile::Say -  Compatibility layer to use say().
+Nile::Helper::Object - Helper base class for the Nile framework.
 
 =head1 SYNOPSIS
 		
-	package Nile::Plugin::Home::Home;
-
-	use Nile::Base;
-
-	sub home  : GET Action {
-		my ($self) = @_;
-	}
-	
-	1;
-
 =head1 DESCRIPTION
 
-Nile::Say -  Compatibility layer to use say().
+Nile::Helper::Object - Helper base class for the Nile framework.
 
 =cut
 
-use strict;
-use warnings;
-use IO::Handle;
-use Scalar::Util 'openhandle';
-use Carp;
+use Nile::Base;
 
-# modified code from Say::Compat
-sub import {
-    my $class = shift;
-    my $caller = caller;
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub AUTOLOAD {
+	
+	my ($self) = shift;
 
-    if( $] < 5.010 ) {
-        no strict 'refs';
-		*{caller() . '::say'} = \&say; 
-		use strict 'refs';
-    }
-    else {
-        require feature;
-        feature->import("say");
-    }
+    my ($class, $helper) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
+	
+	return $self->{$helper} if ($self->{$helper});
+
+	my $name = "Nile::Helper::" . ucfirst($helper);
+
+	eval "use $name";
+	
+	if ($@) {
+		$self->me->abort("Helper Module Error: $name $@");
+	}
+
+	$self->{$helper} = $self->me->object($name, @_);
+
+	return $self->{$helper};
 }
-
-# code from Perl6::Say
-sub say {
-    my $currfh = select();
-    my $handle;
-    {
-        no strict 'refs';
-        $handle = openhandle($_[0]) ? shift : \*$currfh;
-        use strict 'refs';
-    }
-    @_ = $_ unless @_;
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = join q{}, @_ };
-    my $res = print {$handle} @_, "\n";
-    return $res if $res;
-    $warning =~ s/[ ]at[ ].*//xms;
-    croak $warning;
-}
-
-# Handle OO calls:
-*IO::Handle::say = \&say if ! defined &IO::Handle::say;
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

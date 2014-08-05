@@ -6,3 +6,5 @@ perldocs.bat
 build.sh
 ^blib
 ^pm_to_blib
+\.tar.gz
+.*\.tmp$

@@ -38,6 +38,9 @@ lib/Nile/File.pm
 lib/Nile/Handler/CGI.pm
 lib/Nile/Handler/FCGI.pm
 lib/Nile/Handler/PSGI.pm
+lib/Nile/Helper.pm
+lib/Nile/Helper/Email.pm
+lib/Nile/Helper/Object.pm
 lib/Nile/HTTP/PSGI.pm
 lib/Nile/HTTP/Request.pm
 lib/Nile/HTTP/Request/PSGI.pm
@@ -46,6 +49,7 @@ lib/Nile/HTTP/SendFile.pm
 lib/Nile/Lang.pm
 lib/Nile/MIME.pm
 lib/Nile/Paginate.pm
+lib/Nile/Plugin.pm
 lib/Nile/Plugin/Date/Date.pm
 lib/Nile/Router.pm
 lib/Nile/Say.pm

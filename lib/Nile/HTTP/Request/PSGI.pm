@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request::PSGI;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 =pod
 
@@ -55,6 +55,7 @@ extends 'Nile::HTTP::PSGI';
 #Methods: HEAD, POST, GET, PUT, DELETE, PATCH
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_ajax {
+	my $self = shift;
 	if (exists $ENV{HTTP_X_REQUESTED_WITH} && lc($ENV{HTTP_X_REQUESTED_WITH}) eq 'xmlhttprequest') {
 		return 1;
 	}
@@ -74,9 +75,10 @@ sub is_patch {lc(shift->request_method) eq "patch";}
 sub base_url {
 	my $self = shift;
 	my $url =  $self->url();
+	say "url: $url";
 	my $script =  $self->url(-relative=>1);
-	$url =~ s/$script//;
-	$url = "$url/" if $url !~ m|/$|;
+	$url =~ s/\Q$script\E//;
+	$url = "$url/" if $url !~ m{/$};
 	return $url;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,7 +86,7 @@ sub abs_url {
 	my $self = shift;
 	my $url =  $self->url(-absolute=>1);
 	my $script =  $self->url(-relative=>1);
-	$url =~ s/$script//;
+	$url =~ s/\Q$script\E//;
 	$url = "$url/" if $url !~ m|/$|;
 	return $url;
 }

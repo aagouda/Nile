@@ -7,9 +7,10 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Date::Date;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
-use Nile::Base;
+use Nile::Plugin; # automatically extends Nile::Plugin
+
 use DateTime qw();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub index {

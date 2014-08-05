@@ -7,12 +7,12 @@
 <br>
 
 global variables:<br>
-language: <vars type="var" name='lang' /><br>
-theme: <vars type="var" name="theme" /><br>
-base url: <vars type="var" name="base_url" /><br>
+language: <vars  name='lang' /><br>
+theme: <vars name="theme" /><br>
+base url: <vars name="base_url" /><br>
 image url: <vars name="image_url" /><br>
-css url: <vars type="var" name="css_url" /><br>
-new url: <a href='<vars name="base_url" />comments' >comments</a><br>
+css url: <vars name="css_url" /><br>
+new url: <a href="<vars name="base_url" />comments" >comments</a><br>
 image: <img src="<vars name="image_url" />logo.png" /><br>
 <br>
 
@@ -47,8 +47,8 @@ cdata start here is may have html tags and 'single' and "double" qoutes
 	say "<br>app path: " . $self->me->var->get("path");
 	say "<br>";
 ]]></vars>
-<br>
-<br>
+<br><br>
+
 html content 1-5 top
 <!--block:first-->
     <table border="1" style="color:red;">

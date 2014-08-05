@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Lang;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 =pod
 
@@ -399,6 +399,73 @@ sub save {
 	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $self->{lang}, $file);
 	$self->me->xml->writefile($filename, $self->{vars}->{$self->{lang}}, $self->encoding);
 	$self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 translate()
+	
+	# scan and replace the language variables $passes times in language $lang
+	$content = $lang->translate($content, $lang, $passes) 
+	
+	# pass content by ref for better speed
+	$lang->translate(\$content, $lang, $passes) 
+	
+	# use current language and default passes
+	$content = $lang->translate($content);
+	$lang->translate(\$content);
+
+	# use specific language and passes
+	$lang->translate($content, "en-US", 3);
+
+Translate language variables inside contents to their language values. It scans the content for the langauge variables
+surrounded by the curly braces B<{var_name}> and replaces them with their values from the loaded language files.
+
+=cut
+
+sub translate {
+	
+	my ($self, $text, $lang, $passes) = @_;
+	
+	my $content = ref($text) ? $text: \$text;
+	
+	#	at least should be 2 passes for variables inside variables
+	$passes += 0;
+	$passes ||= 2;
+	
+	if (!defined ($lang) and $lang ne "") {
+		$lang = $self->{lang};
+	}
+	
+	my $vars = $self->{vars}->{$lang};
+
+	while ($passes--) {
+		# If you knew ahead of time the string was a word character for example you might try \w{1,} instead 
+		# of .+? to squeeze a tiny bit more speed out of this
+		$$content =~ s/\{(.+?)\}/exists $vars->{$1} ? $vars->{$1} : "\{$1\}"/gex;
+		#$self->{content} =~ s{\{(.+?)\}(?(?{exists $vars->{$1}})(*SKIP)(*FAIL))}{$vars->{$1}}gx; # Perl 5.10, slower 11%
+	}
+
+	if (!ref($text)) {
+		return $$content;
+	}
+
+	$self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 translate_file()
+	
+	$content = $lang->translate_file($file, $lang, $passes);
+	
+	# use current langauge and default passes
+	$content = $lang->translate_file($file);
+	$content = $lang->translate_file($file, $lang);
+
+Loads and translates a file. The $file argument must be the full system file path.
+
+=cut
+
+sub translate_file {
+	my ($self, $file, $lang, $passes) = @_;
+	return $self->translate($self->me->file->get($file), $lang, $passes);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()

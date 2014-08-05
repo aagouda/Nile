@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 =pod
 
@@ -173,7 +173,7 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 
 	package Nile::Plugin::Home::Home;
 
-	our $VERSION = '0.33';
+	our $VERSION = '0.34';
 
 	use Nile::Base;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -369,6 +369,7 @@ with the iso name of the langauge under the folder path/lang.
 Example langauge file B<'general.xml'>:
 
 	<?xml version="1.0" encoding="UTF-8" ?>
+
 	<site_name>Site Name</site_name>
 	<home>Home</home>
 	<register>Register</register>
@@ -395,6 +396,7 @@ The framework supports url routing, route specific short name actions like 'regi
 Below is B<route.xml> file example should be created under the path/route folder.
 
 	<?xml version="1.0" encoding="UTF-8" ?>
+
 	<home route="/home" action="/Home/Home/home" method="get" />
 	<register route="/register" action="/Accounts/Register/register" method="get" defaults="year=1900|month=1|day=23" />
 	<post route="/blog/post/{cid:\d+}/{id:\d+}" action="/Blog/Article/Post" method="post" />
@@ -409,23 +411,40 @@ The framework supports loading and working with config files in xml formate loca
 Example config file path/config/config.xml:
 
 	<?xml version="1.0" encoding="UTF-8" ?>
+
 	<admin>
 		<user>admin_user</user>
 		<password>admin_pass</password>
 	</admin>
+
 	<database>
 		<driver>mysql</driver>
 		<host>localhost</host>
 		<dsn></dsn>
 		<port>3306</port>
-		<name>blog</name>
-		<user>blog</user>
-		<pass>pass1234</pass>
+		<name>auctions</name>
+		<user>auctions</user>
+		<pass>auctions</pass>
 		<attribute>
 		</attribute>
 		<encoding>utf8</encoding>
 	</database>
 
+	<plugin>
+		<home>
+			<smtp>localhost</smtp>
+			<user>webmaster</user>
+			<pass>1234</pass>
+		</home>
+	</plugin>
+
+	<helper>
+		<email>
+			<smtp>localhost</smtp>
+			<user>webmaster</user>
+			<pass>1234</pass>
+		</email>
+	</helper>
 
 =head1 APPLICATION INSTANCE SHARED DATA
 
@@ -627,6 +646,8 @@ use HTTP::AcceptLanguage;
 #no warnings qw(void once uninitialized numeric);
 
 use Nile::Say;
+use Nile::Helper;
+use Nile::Plugin;
 use Nile::View;
 use Nile::XML;
 use Nile::Var;
@@ -741,6 +762,7 @@ sub init {
 	my ($package, $script) = caller;
 	
 	$arg->{path} ||= $self->detect_app_path($script);
+
 	my $file = $self->file;
 
 	# setup the path for the app folders
@@ -1163,7 +1185,6 @@ has 'xml' => (
 
 has 'config' => (
       is      => 'rw',
-	  isa    => 'Nile::Config',
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
@@ -1173,7 +1194,6 @@ has 'config' => (
 
 has 'var' => (
       is      => 'rw',
-	  isa    => 'Nile::Var',
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
@@ -1247,6 +1267,16 @@ has 'dispatcher' => (
 	  lazy	=> 1,
 	  default => sub {
 			shift->object("Nile::Dispatcher", @_);
+		}
+  );
+
+has 'helper' => (
+      is      => 'rw',
+	  lazy	=> 1,
+	  default => sub {
+			my $self = shift;
+			load Nile::Helper::Object;
+			$self->object("Nile::Helper::Object", @_);
 		}
   );
 
@@ -1595,6 +1625,14 @@ Serialization L<Nile::Serialization>.
 MIME L<Nile::MIME>.
 
 Timer	L<Nile::Timer>.
+
+Plugin	L<Nile::Plugin>.
+
+Helper L<Nile::Helper>.
+
+Base L<Nile::Base>.
+
+Object L<Nile::Object>.
 
 Abort L<Nile::Abort>.
 

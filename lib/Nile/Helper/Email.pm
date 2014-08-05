@@ -5,7 +5,7 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Say;
+package Nile::Helper::Email;
 
 our $VERSION = '0.34';
 
@@ -15,69 +15,45 @@ our $VERSION = '0.34';
 
 =head1 NAME
 
-Nile::Say -  Compatibility layer to use say().
+Nile::Helper::Email - Email helper class for the Nile framework.
 
 =head1 SYNOPSIS
 		
-	package Nile::Plugin::Home::Home;
-
-	use Nile::Base;
-
-	sub home  : GET Action {
-		my ($self) = @_;
-	}
-	
-	1;
-
 =head1 DESCRIPTION
 
-Nile::Say -  Compatibility layer to use say().
+Nile::Helper::Email - Email helper class for the Nile framework.
 
 =cut
 
-use strict;
-use warnings;
-use IO::Handle;
-use Scalar::Util 'openhandle';
-use Carp;
+use Nile::Helper; # also extends Nile::Helper
 
-# modified code from Say::Compat
-sub import {
-    my $class = shift;
-    my $caller = caller;
+#use MIME::Lite;
+use MIME::Entity;
+use Email::Sender::Simple qw(sendmail);
+use Email::Date::Format qw(email_date);
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 send()
+	
+	# TODO
+	$email = $me->helper->email;
+	$email->send(...);
 
-    if( $] < 5.010 ) {
-        no strict 'refs';
-		*{caller() . '::say'} = \&say; 
-		use strict 'refs';
-    }
-    else {
-        require feature;
-        feature->import("say");
-    }
+TODO
+
+=cut
+
+sub send {
+	my ($self, $arg) = @_;
+	
+	# get helper setting from config files.  same as $self->setting("email");
+	# setting method is inherited from Nile::Helper the base class
+	my $setting = $self->setting();
+	
+	$self->me->dump($setting);
+
+	# TODO
 }
-
-# code from Perl6::Say
-sub say {
-    my $currfh = select();
-    my $handle;
-    {
-        no strict 'refs';
-        $handle = openhandle($_[0]) ? shift : \*$currfh;
-        use strict 'refs';
-    }
-    @_ = $_ unless @_;
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = join q{}, @_ };
-    my $res = print {$handle} @_, "\n";
-    return $res if $res;
-    $warning =~ s/[ ]at[ ].*//xms;
-    croak $warning;
-}
-
-# Handle OO calls:
-*IO::Handle::say = \&say if ! defined &IO::Handle::say;
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 
