@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 =pod
 
@@ -173,7 +173,7 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 
 	package Nile::Plugin::Home::Home;
 
-	our $VERSION = '0.34';
+	our $VERSION = '0.35';
 
 	use Nile::Base;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

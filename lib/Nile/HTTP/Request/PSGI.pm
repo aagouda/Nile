@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request::PSGI;
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 =pod
 
@@ -75,7 +75,6 @@ sub is_patch {lc(shift->request_method) eq "patch";}
 sub base_url {
 	my $self = shift;
 	my $url =  $self->url();
-	say "url: $url";
 	my $script =  $self->url(-relative=>1);
 	$url =~ s/\Q$script\E//;
 	$url = "$url/" if $url !~ m{/$};
@@ -95,6 +94,8 @@ sub url_path {
 	my $self = shift;
 	my $route = "";
 	my ($path, $script_name) = $self->script_name =~ m#(.*)/(.*)$#;
+	$path ||= "";
+	$script_name ||= "";
 	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
 	if ($request_uri) {
 		$route = $request_uri;
@@ -107,6 +108,11 @@ sub url_path {
 	}
 	$route = "$route/" if $route !~ m|/$|;
 	return $route;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub request_base {
+	my  $self = shift;
+	 return $self->env->{REQUEST_BASE} ||  $self->env->{HTTP_REQUEST_BASE} || "";
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub object {

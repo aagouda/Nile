@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 =pod
 
@@ -29,6 +29,7 @@ Nile::Handler::PSGI - PSGI Handler.
 =cut
 
 use Nile::Base;
+use Plack::Builder;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
 	
@@ -60,16 +61,14 @@ sub run {
 
 		$me->start;
 		#----------------------------------------------
-		my $path = $me->env->{PATH_INFO} || $me->env->{REQUEST_URI};
-		
-		$path = $me->file->catfile($me->var->get("path"), $path);
-
-		if (-f $path) {
-			# file response: /favicon.ico
-			$response->file_response($path);
-			$me->stop_logger;
-			return $response->finalize;
-		}
+		#my $path = $me->env->{PATH_INFO} || $me->env->{REQUEST_URI};
+		#$path = $me->file->catfile($me->var->get("path"), $path);
+		#if (-f $path) {
+		#	# file response: /favicon.ico
+		#	$response->file_response($path);
+		#	$me->stop_logger;
+		#	return $response->finalize;
+		#}
 		#--------------------------------------------------
 		# dispatch the action
 		my $content = $me->dispatcher->dispatch;
@@ -111,7 +110,27 @@ sub run {
 	
 	#$me->log->debug("PSGI app handler return");
 	$me->stop_logger;
-	return $psgi;
+
+	#return $psgi;
+
+	# support Middleware
+	return builder {
+		# serve static files with Plack
+		#enable "Static", path => qr{^/(web|file|theme)/}, root => './';
+		enable "Static", 
+			path => sub {
+				my $path = $_;
+				if ( $path =~ m/^\/(web|file|theme|favicon\.)/ ) {
+					# if matched, the value of $_ is being used as a request path, modify it to your needs
+					$_ = $path;
+					return 1;
+				}
+				return 0;
+			},
+			root => './';
+
+		$psgi;
+	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

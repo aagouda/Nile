@@ -43,6 +43,7 @@ WriteMakefile(
 			Devel::StackTrace::AsHTML => 0,
 			PadWalker => 0,
 			Devel::StackTrace::WithLexicals => 0,
+			Plack::Builder => 0,
 
 	}, # e.g., Module::Name => 1.1
 
