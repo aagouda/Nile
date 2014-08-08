@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::SendFile;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 =pod
 
@@ -63,6 +63,13 @@ sub send_file  {
     my $len = ref($file) ? length(${$file}) : -s $file;
 
 	my ($start, $end) = (0, $len-1);
+	
+	#if ($options{range}) {
+	#	($start, $end) = $self->parse_range($ENV{HTTP_RANGE}, $len);
+	#}
+	#require PerlIO::subfile;
+	#open my $fh, "<:raw:subfile(start=$start,end=".($end+1).")", $file or return $self->return_403;
+
 
 	if ($options{range} && defined $ENV{HTTP_RANGE} && $ENV{HTTP_RANGE} =~ /\Abytes=(\d*)-(\d*)\z/ixms) {
 		my ($from, $to) = ($1, $2);
@@ -100,6 +107,31 @@ sub send_file  {
     return _read_block($file, $start, $size);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub parse_range {
+
+    my ($self, $range, $len) = @_;
+
+    $range =~ /^(\d*)-(\d*)$/ or return;
+
+    my ($start, $end) = ($1, $2);
+
+    if (length $start and length $end) {
+        return if $start > $end; # "200-100"
+        return if $end >= $len;  # "0-0" on a 0-length file
+        return ($start, $end);
+    }
+    elsif (length $start) {
+        return if $start >= $len;  # "0-" on a 0-length file
+        return ($start, $len-1);
+    }
+    elsif (length $end) {
+        return if $end > $len;  # "-1" on a 0-length file
+        return ($len-$end, $len-1);
+    }
+
+    return;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub _read_block {
 
     my ($file, $start, $size) = @_;
@@ -135,10 +167,6 @@ Please visit the project's homepage at L<https://metacpan.org/release/Nile>.
 =head1 SOURCE
 
 Source repository is at L<https://github.com/mewsoft/Nile>.
-
-=head1 ACKNOWLEDGMENT
-
-This module is based on L<CGI::Easy::SendFile>
 
 =head1 SEE ALSO
 

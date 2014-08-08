@@ -11,9 +11,12 @@ app/file/.exists
 app/index.cgi
 app/lang/ar/general.xml
 app/lang/en-US/general.xml
+app/lib/Nile/Helper/.exists
+app/lib/Nile/Plugin/Date/Date.pm
 app/lib/Nile/Plugin/Home/Home.pm
 app/log/log.pm
 app/route/route.xml
+app/run.bat
 app/temp/.exists
 app/theme/default/css/.exists
 app/theme/default/icon/.exists
@@ -41,6 +44,7 @@ lib/Nile/Handler/PSGI.pm
 lib/Nile/Helper.pm
 lib/Nile/Helper/Email.pm
 lib/Nile/Helper/Object.pm
+lib/Nile/Hook.pm
 lib/Nile/HTTP/PSGI.pm
 lib/Nile/HTTP/Request.pm
 lib/Nile/HTTP/Request/PSGI.pm
@@ -50,7 +54,7 @@ lib/Nile/Lang.pm
 lib/Nile/MIME.pm
 lib/Nile/Paginate.pm
 lib/Nile/Plugin.pm
-lib/Nile/Plugin/Date/Date.pm
+lib/Nile/Plugin/.exists
 lib/Nile/Router.pm
 lib/Nile/Say.pm
 lib/Nile/Serialization.pm

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 =pod
 
@@ -173,7 +173,7 @@ C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home
 
 	package Nile::Plugin::Home::Home;
 
-	our $VERSION = '0.35';
+	our $VERSION = '0.36';
 
 	use Nile::Base;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -848,6 +848,9 @@ sub start {
 	# start the app page load timer
 	$self->run_time->start;
 	
+	my $var = "inside start";
+	$self->hook->on_start;
+
 	my $req = $self->request;
 	my $file = $self->file;
 	
@@ -904,6 +907,8 @@ sub start {
 	foreach (@{$arg->{langs}}) {
 		$self->lang->load($_);
 	}
+
+	$self->hook->off_start;
 	
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1280,6 +1285,16 @@ has 'helper' => (
 		}
   );
 
+has 'hook' => (
+      is      => 'rw',
+	  lazy	=> 1,
+	  default => sub {
+			my $self = shift;
+			load Nile::Hook;
+			$self->object("Nile::Hook", @_);
+		}
+  );
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'logger' => (
       is      => 'rw',
@@ -1629,6 +1644,8 @@ Timer	L<Nile::Timer>.
 Plugin	L<Nile::Plugin>.
 
 Helper L<Nile::Helper>.
+
+Hook L<Nile::Hook>.
 
 Base L<Nile::Base>.
 

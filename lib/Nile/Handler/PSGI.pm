@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 =pod
 
@@ -30,6 +30,7 @@ Nile::Handler::PSGI - PSGI Handler.
 
 use Nile::Base;
 use Plack::Builder;
+use Plack::Middleware::Deflater;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
 	
@@ -117,6 +118,7 @@ sub run {
 	return builder {
 		# serve static files with Plack
 		#enable "Static", path => qr{^/(web|file|theme)/}, root => './';
+		#Plack::Middleware::Deflater
 		enable "Static", 
 			path => sub {
 				my $path = $_;
@@ -128,6 +130,8 @@ sub run {
 				return 0;
 			},
 			root => './';
+		
+		#enable "Deflater", content_type => ['text/css','text/html','text/javascript','application/javascript'], vary_user_agent => 1;
 
 		$psgi;
 	}

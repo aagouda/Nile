@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request::PSGI;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 =pod
 

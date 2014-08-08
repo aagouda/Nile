@@ -1,5 +1,5 @@
-#!/usr/bin/perl
 #!C:\perl\bin\perl.exe
+#!/usr/bin/perl
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -98,6 +98,10 @@
 	# disconnect from database
 	#$app->disconnect();
 	
+	
+	# in progress
+	#$app->hook->before_start(sub {my ($me, @args) = @_; say "before start hook: $me, @args";});
+
 	# run the application and return the PSGI response or print to the output
 	# the run process will also run plugins with matched routes files loaded
 	$app->run();

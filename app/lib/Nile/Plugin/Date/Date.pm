@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Date::Date;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 use Nile::Plugin; # automatically extends Nile::Plugin
 

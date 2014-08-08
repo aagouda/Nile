@@ -5,7 +5,7 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Handler::FCGI;
+package Nile::Hook;
 
 our $VERSION = '0.36';
 
@@ -15,80 +15,101 @@ our $VERSION = '0.36';
 
 =head1 NAME
 
-Nile::Handler::FCGI - FCGI Handler.
+Nile::Hook - Hook class for the Nile framework.
 
 =head1 SYNOPSIS
 	
-	# run the app in FCGI standalone mode
-	$app->object("Nile::Handler::FCGI")->run();
+	# run this hook before start
+	$app->hook->before_start( sub {
+		my ($me, @args) = @_; 
+	});
+	
+	# run this hook after start
+	$app->hook->after_start( sub { 
+		my ($me, @args) = @_;
+	});
 
 =head1 DESCRIPTION
 
-Nile::Handler::FCGI - FCGI Handler.
+Nile::Hook - Hook class for the Nile framework.
 
 =cut
 
 use Nile::Base;
-use FCGI;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	our $fcgi_request_count = 0; # the number of requests this fcgi process handled.
-	our $handling_request = 0;
-	our $exit_requested = 0;
-	our $app_quit_request = 0; # End the application but not the FCGI process
-
-	# workaround for known bug in libfcgi
-	while ((our $ignore) = each %ENV) { }
-
-	our $fcgi_request = FCGI::Request();
-	#$fcgi_request = FCGI::Request(\*STDIN, \*STDOUT, \*STDERR, \%ENV, $socket);
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub run {
-
+sub AUTOLOAD {
+	
 	my ($self) = shift;
 
-	my $me = $self->me;
+    my ($class, $method) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
 
-	# The goal of fast cgi is to load the program once, and iterate in a loop for every request.
+	if ($self->can($method)) {
+		return $self->$method(@_);
+    }
+	
+	# $me->hook->before_start(sub {});
+	my ($action, $name) = $method =~ /^(before|after|on|off)_(.*)/;
 
-	while ($handling_request = ($fcgi_request->Accept() >= 0)) {
-		
-		#$me->log->debug("FCGI request start");
-
-		# handle it as the normal CGI request
-		$me->object("Nile::Handler::CGI")->run();
-
-		$handling_request = 0;
-		last if $exit_requested;
-		#exit if -M $ENV{SCRIPT_FILENAME} < 0; # Autorestart
-		
-		#$me->log->debug("FCGI request end");
-		#$me->stop_logger;
+	if ($action && $name) {
+		$action = "hook_$action";
+		$self->$action($name, @_);
 	}
 
-	$fcgi_request->Finish();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub request {
-	$fcgi_request;
+sub BUILD {
+	my ($self, $arg) = @_;
+	$self->{hooks}->{before} = {};
+	$self->{hooks}->{after} = {};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub is_fcgi {
-	my ($self) = shift;
-	if (defined($fcgi_request) && ref($fcgi_request) && $fcgi_request->IsFastCGI()) {
-		return 1;
-	} else {
-		return 0;
+sub hook_before {
+	my ($self, $name, @args) = @_;
+	#say "hook_before $name, @args";
+	push @{$self->{hooks}->{before}->{$name}}, [@args];
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub hook_after {
+	my ($self, $name, @args) = @_;
+	push @{$self->{hooks}->{after}->{$name}}, [@args];
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub hook_on {
+	
+	my ($self, $name, @args) = @_;
+
+	exists $self->{hooks}->{before}->{$name} || return sub {};
+
+	my @hooks = @{$self->{hooks}->{before}->{$name}};
+
+	@hooks || return sub {};
+	
+	my ($code, @hook_args);
+
+	foreach my $hook (@hooks) {
+		($code, @hook_args) = @{$hook};
+		#say "hook: $code " . $self;
+		$code->($self->me, @args, @hook_args);
 	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub accept {
-	my ($self) = shift;
-	$fcgi_request->Accept() >= 0;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub finish {
-	my ($self) = shift;
-	$exit_requested = 1;
+sub hook_off {
+	
+	my ($self, $name, @args) = @_;
+	
+	exists $self->{hooks}->{after}->{$name} || return sub {};
+
+	my @hooks = @{$self->{hooks}->{after}->{$name}};
+
+	@hooks || return sub {};
+	
+	my ($code, @hook_args);
+
+	foreach my $hook (@hooks) {
+		($code, @hook_args) = @{$hook};
+		say "hook: $code " . $self;
+		$code->(@args, @hook_args);
+	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

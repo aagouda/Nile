@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Home::Home;
 
-our $VERSION = '0.35';
+our $VERSION = '0.36';
 
 use Nile::Plugin; # automatically extends Nile::Plugin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,8 +19,6 @@ sub home : GET Action {
 	# $me is set to the application context object, same as $self->me inside any method
 	#my $me = $self->me;
 	
-	#return "Home plugin index is ok";
-
 	my $view = $me->view("home");
 	
 	$view->var(
@@ -48,8 +46,7 @@ sub home : GET Action {
 
 	# plugin settings from config files
 	my $setting = $self->setting;
-
-
+	
 	return $view->out;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
