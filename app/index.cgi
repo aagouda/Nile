@@ -37,6 +37,9 @@
 		# load route files, default extension is xml
 		route		=> [ qw(route) ],
 
+		# load hooks, app hooks loaded automatically
+		#hook		=> [ qw() ],
+
 		# log file name
 		log_file	=>	"log.pm",
 
@@ -64,6 +67,9 @@
 		# charset for encoding/decoding and output
 		charset => "utf-8",
 	});
+
+	# inline hook
+	#$app->hook->before_start(sub {my ($me, @args) = @_;});
 	
 	# inline actions, return content. url: /forum/home
 	$app->action("get", "/forum/home", sub {
@@ -98,10 +104,6 @@
 	# disconnect from database
 	#$app->disconnect();
 	
-	
-	# in progress
-	#$app->hook->before_start(sub {my ($me, @args) = @_; say "before start hook: $me, @args";});
-
 	# run the application and return the PSGI response or print to the output
 	# the run process will also run plugins with matched routes files loaded
 	$app->run();

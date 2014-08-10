@@ -5,9 +5,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Helper;
+package Nile::Module;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -15,25 +15,34 @@ our $VERSION = '0.36';
 
 =head1 NAME
 
-Nile::Helper - Helpers base class for the Nile framework.
+Nile::Module - Module base class for the Nile framework.
 
 =head1 SYNOPSIS
-		
+
+	package Nile::Module::Home::Home;
+
+	use Nile::Module; # automatically extends Nile::Module
+	
 =head1 DESCRIPTION
 
-Nile::Helper - Helpers base class for the Nile framework.
+Nile::Module - Module base class for the Nile framework.
 
 =cut
 
-use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+use utf8;
 use Moose;
+use Nile::Say;
 
 use Import::Into;
 use Module::Runtime qw(use_module);
+use MooseX::MethodAttributes;
 
 our @EXPORT_MODULES = (
 		Moose => [],
+		utf8 => [],
+		'Nile::Say' => [],
+		'MooseX::MethodAttributes' => [],
 	);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
@@ -64,39 +73,37 @@ sub import {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 setting()
 	
-	# inside helper classes, return current helper class config settings
+	# inside modules, return current modules config settings
 	my $setting = $self->setting();
 	my %setting = $self->setting();
 
-	# 
-	# inside helper classes, return specific helper class config settings
-	my $setting = $self->setting("email");
-	my %setting = $self->setting("email");
+	# inside modules, return specific modules config settings
+	my $setting = $self->setting("payment");
+	my %setting = $self->setting("payment");
 
-Returns helper class settings from configuration files loaded.
+Returns module settings from configuration files loaded.
+Module settings in config files must be in inside the module tag. The module name must be lower case tag, so module C<Payment> should be C<payment>.
 
-Helper class settings in config files must be in inside the helper tag. The helper class name must be lower case tag, so class C<Email> should be C<email>.
+Exampler settings for C<payment> module below:
 
-Exampler settings for C<email> helper class below:
-
-	<helper>
-		<email>
-			<smtp>localhost</smtp>
-			<user>webmaster</user>
+	<module>
+		<payment>
+			<url>localhost</url>
+			<user>merchant</user>
 			<pass>1234</pass>
-		</email>
-	</helper>
+		</payment>
+	</module>
 
 =cut
 
 sub setting {
-	my ($self, $helper) = @_;
+	my ($self, $module) = @_;
 
-	$helper ||= caller();
-	$helper =~ s/^(.*):://;
-	$helper = lc($helper);
+	$module ||= caller();
+	$module =~ s/^(.*):://;
+	$module = lc($module);
 
-	return wantarray ? %{ $self->me->config->var->{helper}->{$helper} } : $self->me->config->var->{helper}->{$helper};
+	return wantarray ? %{ $self->me->config->var->{module}->{$module} } : $self->me->config->var->{module}->{$module};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -54,7 +54,12 @@ sub run {
 		#*ENV = $env;
 		 #%ENV = %$env;
 		#----------------------------------------------
-		$me->new_request($env);
+		$me->hook->on_request;
+
+		$me->new_request($me->env);
+
+		$me->hook->off_request;
+
 		my $request = $me->request;
 
 		$me->response($me->object("Nile::HTTP::Response"));

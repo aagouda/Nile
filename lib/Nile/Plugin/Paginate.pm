@@ -5,9 +5,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Paginate;
+package Nile::Plugin::Paginate;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -21,7 +21,7 @@ use Nile::Base;
 
 =head1 NAME
 
-Nile::Paginate - Efficient Data Pagination
+Nile::Plugin::Paginate - Efficient Data Pagination
 
 =head1 SYNOPSIS
 

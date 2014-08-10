@@ -5,30 +5,49 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Plugin::Date::Date;
+package Nile::Hook::Hooks;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
-use Nile::Plugin; # automatically extends Nile::Plugin
+=pod
 
-use DateTime qw();
+=encoding utf8
+
+=head1 NAME
+
+Nile::Hook::Hooks - Hook example class for the Nile framework.
+
+=head1 SYNOPSIS
+			
+=head1 DESCRIPTION
+
+Nile::Hook::Hooks - Hook example class for the Nile framework.
+
+=cut
+
+use Nile::Base;
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub index {
-my ($self, %args) = @_;
-	my $dt = DateTime->now;
-	print $dt->strftime($args{format});
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub date {
-	my ($self, %args) = @_;
-	my $dt = DateTime->now;
-	print $dt->strftime($args{format});
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub now {
-	my ($self, %args) = @_;
-	my $dt = DateTime->now;
-	print $dt->strftime($args{format});
+sub hooks {
+
+	my ($self) = @_;
+	
+	my $me = $self->me;
+	
+	# add the hooks you want here
+
+	$me->hook->before_start(sub {
+		my ($me, @args) = @_;
+	});
+
+	$me->hook->after_start(sub {
+		my ($me, @args) = @_;
+	});
+
+	$me->hook->before_request(sub {
+		my ($me, @args) = @_;
+	});
+
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

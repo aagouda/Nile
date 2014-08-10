@@ -5,11 +5,11 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Plugin::Home::Home;
+package Nile::Module::Home::Home;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
-use Nile::Plugin; # automatically extends Nile::Plugin
+use Nile::Module; # automatically extends Nile::Module
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
@@ -40,11 +40,11 @@ sub home : GET Action {
 
 	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
-	# helper class
-	my $email = $me->helper->email;
+	# plugin class
+	my $email = $me->plugin->email;
 	#$email->send();
 
-	# plugin settings from config files
+	# module settings from config files
 	my $setting = $self->setting;
 	
 	return $view->out;
@@ -58,6 +58,17 @@ sub news: GET Capture {
 	say qq{Hello world. This content is captured from print statements.
 		The action must be marked by 'Capture' attribute. No returns.};
 
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# regular method, can be invoked by views:
+# <vars type="module" method="Home::Home->welcome" message="Welcome back!" />
+sub welcome {
+
+	my ($self, %args) = @_;
+	
+	my $me = $self->me;
+
+	return "Nice to see you, " . $args{message};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

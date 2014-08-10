@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -15,34 +15,25 @@ our $VERSION = '0.36';
 
 =head1 NAME
 
-Nile::Plugin - Plugins base class for the Nile framework.
+Nile::Plugin - Plugin base class for the Nile framework.
 
 =head1 SYNOPSIS
-
-	package Nile::Plugin::Home::Home;
-
-	use Nile::Plugin; # automatically extends Nile::Plugin
-	
+		
 =head1 DESCRIPTION
 
-Nile::Plugin - Plugins base class for the Nile framework.
+Nile::Plugin - Plugin base class for the Nile framework.
 
 =cut
 
+use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-use utf8;
 use Moose;
-use Nile::Say;
 
 use Import::Into;
 use Module::Runtime qw(use_module);
-use MooseX::MethodAttributes;
 
 our @EXPORT_MODULES = (
 		Moose => [],
-		utf8 => [],
-		'Nile::Say' => [],
-		'MooseX::MethodAttributes' => [],
 	);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
@@ -73,25 +64,27 @@ sub import {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 setting()
 	
-	# inside plugins, return current plugin config settings
+	# inside plugin classes, return current plugin class config settings
 	my $setting = $self->setting();
 	my %setting = $self->setting();
 
-	# inside plugins, return specific plugin config settings
-	my $setting = $self->setting("payment");
-	my %setting = $self->setting("payment");
+	# 
+	# inside plugin classes, return specific plugin class config settings
+	my $setting = $self->setting("email");
+	my %setting = $self->setting("email");
 
 Returns plugin class settings from configuration files loaded.
-Plugin class settings in config files must be in inside the plugin tag. The plugin class name must be lower case tag, so class C<Payment> should be C<payment>.
 
-Exampler settings for C<payment> plugin class below:
+Helper plugin settings in config files must be in inside the plugin tag. The plugin class name must be lower case tag, so class C<Email> should be C<email>.
+
+Exampler settings for C<email> plugin class below:
 
 	<plugin>
-		<payment>
-			<url>localhost</url>
-			<user>merchant</user>
+		<email>
+			<smtp>localhost</smtp>
+			<user>webmaster</user>
 			<pass>1234</pass>
-		</payment>
+		</email>
 	</plugin>
 
 =cut

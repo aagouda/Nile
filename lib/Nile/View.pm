@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -53,8 +53,8 @@ Nile::View - The template processing system.
 	# process variables and blocks and text language variables
 	$view->process;
 
-	# send the output to the browser
-	$view->render;
+	# get the output
+	$content = $view->out;
 
 =head1 DESCRIPTION
 
@@ -92,13 +92,14 @@ you can add it to the correct language file.
 
 =head1 TEMPLATE VARS TAGS
 
-The template xml tag used to insert dynamic output and to pass parameters to the plugin has
+The template xml tag used to insert dynamic output and to pass parameters to the plugin or module has
 the following format:
 
-	<vars type="plugin" name="plugin_name" arg1="value_1" arg2="value_2" argxx="value_xx" />
+	<vars type="plugin" method="Plugin->method" arg1="value_1" arg2="value_2" argxx="value_xx" />
+	<vars type="module" method="Module->method" arg1="value_1" arg2="value_2" argxx="value_xx" />
 
 The xml tag name is fixed `vars`. The attribute C<type> defines the type of the action to be called to handle
-this tag. The attribute C<name> specifies the name of the action, route, or variable to be called or used.
+this tag.
 
 The rest of the attributes is optional parameters which will be passed to the action called.
 
@@ -122,22 +123,25 @@ To replace these variables when working with the view, just do it like this:
 
 Then when processing the template, these variables will replace the vars xml tags.
 
-The second type or the C<vars> tags is the B<plugin> in the form C<type="plugin">.
-Use these tags to call plugins methods and insert their output to the template. You can also
-pass any number of optional parameters to the plugin method through these tags
+The second type or the C<vars> tags is the C<plugin> and C<module> in the form C<type="plugin"> and <type="module">.
 
-Example to insert dynamic plugins output when processing the view:
+Use these tags to call plugins and modules methods and insert their output to the template. You can also
+pass any number of optional parameters to the plugin and module method through these tags
 
-	<vars type="plugin" name="Date::Date->date" format="%Y %M %D" />
-	<vars type="plugin" name="Date->now" format="%M %Y  %D" />
-	<vars type="plugin" name="date" format="%M %Y  %D" />
+Example to insert dynamic plugins and modules output when processing the view:
 
-these vars tags of type C<plugin> is used to call the plugins in the C<name> attribute and will pass the
-parameter C<format> to the plugin method.
+	<vars type="plugin" method="Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
+	<vars type="plugin" method="Date->time" format="%A %d, %B %Y  %T %p" /><br>
+	<vars type="plugin" method="Date::now" capture="1" format="%B %d, %Y  %r" /><br>
 
-The first vars tag will call the plugin C<Date>, controller C<Date>, method C<date>.
-The second vars tag will call the plugin C<Date>, controller C<Date>, method C<now>.
-The second vars tag will call the plugin C<Date>, controller C<Date>, method C<index> or C<date>.
+	<vars type="module" method="Home::Home->welcome" message="Welcome back!" />
+
+These vars tags of type C<plugin> is used to call the plugins in the C<method> attribute and will pass the
+parameter C<format> to the plugin method, the vars of the type module will pass the parameter c<message>
+to the module c<Home::Home> method c<welcome>.
+
+If the attribute C<capture> is set to any value, the output of the print statements of the method
+will be captured and will ignore any returns.
 
 The third type or the C<vars> tags is the C<Perl> tags which is used to execute Perl code and capture
 the output and insert it in the template.
@@ -487,11 +491,12 @@ sub parse_vars {
 			$self->{tag}->{$type}->{$attr{name}} = {attr=>{%attr}, match=>$match, content=>$content};
 		}
 		elsif (exists $attr{type} and $attr{type} ne "") {
-			# handle <vars type="perl">print "Hello world";</vars>
-			#print "\nno name: $attr{type}\n";
+			# handle	<vars type="perl">print "Hello world";</vars>
+			#				<vars type="plugin" method="Date->date" />
 			$counter++;
 			$attr{name} = $tag."_".$counter;
 			$type = $attr{type};
+			#say "$attr{name}: $attr{method}, $attr{type}";
 			$self->{tag}->{$type}->{$attr{name}} = {attr=>{%attr}, match=>$match, content=>$content};
 		}
 
@@ -730,20 +735,23 @@ sub process_perl {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 capture()
 	
-	$view->capture($perl_code);
+	$result = $view->capture($perl_code);
 
 This method normally used internally when processing the template.
 
 =cut
 
 sub capture {
+
 	my ($self, $code) = @_;
 	
+	undef $@;
 	my ($merged, @result) = Capture::Tiny::capture_merged {eval $code};
 	#$merged .= join "", @result;
 	if ($@) {
 		$merged  = "Embeded Perl code error: $@\n $code\n $merged\n";
 	}
+
 	return $merged;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -809,74 +817,84 @@ This method normally used internally when processing the template. This method c
 sub process_plugins {
 
 	my ($self) = $_[0];
-	my ($me, $name, $var, $match, $content, $k, $v, $class, $plugin);
-	my (%attr, $op, $sub, $object, $meta);
+
+	my ($me, $name, $var, $match, $content, $k, $v, $class, $plugin, $vars, %attr);
+	my ($tags, $type, $method, $object, $meta, $capture, $merged, @result);
 
 	$me = $self->me;
+	
+	$self->{tag}->{plugin} ||= +{};
+	$self->{tag}->{module} ||= +{};
+	
+	foreach $tags($self->{tag}->{plugin}, $self->{tag}->{module}) {
 
-	while (($name, $var) = each %{$self->{tag}->{plugin}}) {
-		#$self->{tag}->{$type}->{$attr{name}} = {attr=>{%attr}, match=>$match, content=>$content};
-		$content = "";
-		$match = $var->{match};
-		
-		#supports: name="Plugin::Controller->Action", name="Plugin->Action", name="plugin" >=> Plugin/Plugin/index
-		#($plugin, $op, $sub) = $name =~ /^(.*)(::|->)(\w+)?$/;
-		($plugin, $op, $sub) = $name =~ /^(.*)(->)(\w+)?$/;
-		$plugin ||= $name;
-		my $action = $sub || lc($plugin);
-		
-		$plugin = ucfirst($plugin);
-		if ($plugin && $plugin !~ /::/) {
-			$plugin = "$plugin:\:$plugin";
-		}
+		while (($vars, $var) = each %$tags ) {
+			
+			%attr = %{$var->{attr}};
+			#$self->{tag}->{$type}->{$attr{name}} = {attr=>{%attr}, match=>$match, content=>$content};
+			
+			$content = "";
+			$name = $attr{method};
+			$match = $var->{match};
+			$type = lc($attr{type});
 
-		$op ||= "->";
-		$sub ||= "index";
-		
-		$class = "Nile::Plugin:\:$plugin";
-		
-		if (!$self->me->is_loaded($class)) {
-			eval "use $class;";
-			if ($@) {
-				$content = " View Error: plugin $plugin$op$sub does not exist name=\"$name\". ";
-				$self->{content} =~ s/\Q$match\E/$content/gex;
-				next;
+			# delete the attr keys used by the vars tag itself
+			delete $attr{$_} for (qw(type method));
+			$capture = delete $attr{capture};
+			
+			$name =~ s/->/::/;
+			my ($plugin, $method) = $name =~ /^(.*)::(\w+)$/;
+
+			$plugin = ucfirst($plugin);
+
+			$class = "Nile::" .ucfirst($type) ."::".$plugin;
+
+			if (exists $self->{class_object}->{$class}) {
+				$object = $self->{class_object}->{$class};
 			}
-		}
+			else {
+				if (!$me->is_loaded($class)) {
+					eval "use $class;";
+					if ($@) {
+						$content = " View Error: $type $plugin\->$method does not exist method $name";
+						$self->{content} =~ s/\Q$match\E/$content/gex;
+						undef $@;
+						next;
+					}
+				}
 
-		%attr = %{$var->{attr}};
+				$object = $class->new();
+				$self->{class_object}->{$class} = $object;
+				$meta = $object->meta;
 
-		# delete the attr keys used by the vars tag itself
-		delete $attr{$_} for (qw(type name));
+				# add method "me" or one of its alt
+				$self->me->add_object_context($object, $meta);
+			}
 		
-		$object = $class->new(%attr);
-		$meta = $object->meta;
-
-		# add method "me" or one of its alt
-		$self->me->add_object_context($object, $meta);
-		
-		my $found = 0;
-		foreach my $method ($sub, "index", $action) {
 			if ($object->can($method)) {
-				my ($merged, @result) = Capture::Tiny::capture_merged {eval $object->$method(%attr)};
-				#$merged .= join "", @result;
+				if ($capture) {
+					($merged, @result) = Capture::Tiny::capture_merged {eval {$object->$method(%attr)}};
+					#$merged .= join "", @result;
+				}
+				else {
+					$merged = eval {$object->$method(%attr)};
+				}
+				
 				if ($@) {
-					$content  = "View error: plugin name='$name' $@\n $class->$method. $merged\n";
+					$content  = "View error: $type method='$name' $@\n $class->$method. $merged\n";
 				}
 				else {
 					$content = $merged; 
 				}
-				$found = 1;
-				last;
 			}
-		}
+			else {
+				$content = " View error: $type '$class' does not have subroutine '$method' method='$name'. ";
+			}
 
-		if (!$found) {
-			$content = " View error: plugin '$class' does not have subroutine '$sub' in type=\"plugin\" name='$name'. ";
-		}
+			$self->{content} =~ s/\Q$match\E/$content/gex;
+		} # while
+	}# for
 
-		$self->{content} =~ s/\Q$match\E/$content/gex;
-	}
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

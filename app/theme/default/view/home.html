@@ -7,7 +7,7 @@
 <br>
 
 global variables:<br>
-language: <vars  name='lang' /><br>
+language: <vars name='lang' /><br>
 theme: <vars name="theme" /><br>
 base url: <vars name="base_url" /><br>
 image url: <vars name="image_url" /><br>
@@ -16,9 +16,11 @@ new url: <a href="<vars name="base_url" />comments" >comments</a><br>
 image: <img src="<vars name="image_url" />logo.png" /><br>
 <br>
 
-{date_now} <vars type="plugin" name="Date::Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
-{time_now} <vars type="plugin" name="Date->now" format="%A %d, %B %Y  %T %p" /><br>
-{date_time} <vars type="plugin" name="date" format="%B %d, %Y  %r" /><br>
+{date_now} <vars type="plugin" method="Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
+{time_now} <vars type="plugin" method="Date->time" format="%A %d, %B %Y  %T %p" /><br>
+{date_time} <vars type="plugin" method="Date::now" capture="1" format="%B %d, %Y  %r" /><br>
+<br>
+<vars type="module" method="Home::Home->welcome" message="Welcome back!" /><br>
 <br>
 
 Our Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars><br>

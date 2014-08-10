@@ -5,9 +5,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Helper::Object;
+package Nile::Plugin::Object;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -15,13 +15,13 @@ our $VERSION = '0.36';
 
 =head1 NAME
 
-Nile::Helper::Object - Helper base class for the Nile framework.
+Nile::Plugin::Object - Plugin base class for the Nile framework.
 
 =head1 SYNOPSIS
 		
 =head1 DESCRIPTION
 
-Nile::Helper::Object - Helper base class for the Nile framework.
+Nile::Plugin::Object - Plugin base class for the Nile framework.
 
 =cut
 
@@ -32,21 +32,21 @@ sub AUTOLOAD {
 	
 	my ($self) = shift;
 
-    my ($class, $helper) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
+    my ($class, $plugin) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
 	
-	return $self->{$helper} if ($self->{$helper});
+	return $self->{$plugin} if ($self->{$plugin});
 
-	my $name = "Nile::Helper::" . ucfirst($helper);
+	my $name = "Nile::Plugin::" . ucfirst($plugin);
 
 	eval "use $name";
 	
 	if ($@) {
-		$self->me->abort("Helper Module Error: $name $@");
+		$self->me->abort("Plugin Error: $name. $@");
 	}
 
-	$self->{$helper} = $self->me->object($name, @_);
+	$self->{$plugin} = $self->me->object($name, @_);
 
-	return $self->{$helper};
+	return $self->{$plugin};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

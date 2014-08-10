@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -116,14 +116,14 @@ This framework support SEO friendly url's, routing specific urls and short urls 
 
 The url routing system works in the following formats:
 
-	http://domain.com/plugin/controller/action	# mapped from route file or to Plugin/Controller/action
-	http://domain.com/plugin/action			# mapped from route file or to Plugin/Plugin/action or Plugin/Plugin/index
-	http://domain.com/plugin			# mapped from route file or to Plugin/Plugin/plugin or Plugin/Plugin/index
-	http://domain.com/index.cgi?action=plugin/controller/action
-	http://domain.com/?action=plugin/controller/action
+	http://domain.com/module/controller/action	# mapped from route file or to Module/Controller/action
+	http://domain.com/module/action			# mapped from route file or to Module/Module/action or Module/Module/index
+	http://domain.com/module			# mapped from route file or to Module/Module/module or Module/Module/index
+	http://domain.com/index.cgi?action=module/controller/action
+	http://domain.com/?action=module/controller/action
 	http://domain.com/blog/2014/11/28	# route mapped from route file and args passed as request params
 
-The following urls formats are all the same and all are mapped to the route /Home/Home/index or /Home/Home/home (/Plugin/Controller/Action):
+The following urls formats are all the same and all are mapped to the route /Home/Home/index or /Home/Home/home (/Module/Controller/Action):
 	
 	# direct cgi call, you can use action=home, route=home, or cmd=home
 	http://domain.com/index.cgi?action=home
@@ -140,44 +140,46 @@ Applications built with this framework must have basic folder structure. Applica
 
 The following is the basic application folder tree that must be created manually before runing:
 
-		├───api
-		├───cash
-		├───cmd
-		├───config
-		├───cron
-		├───data
-		├───file
-		├───lang
-		│   └───en-US
-		├───lib
-		│   └───Nile
-		│       └───Plugin
-		│           └───Home
-		├───log
-		├───route
-		├───temp
-		├───theme
-		│   └───default
-		│       ├───css
-		│       ├───icon
-		│       ├───image
-		│       ├───js
-		│       ├───view
-		│       └───widget
-		└───web
+	├───api
+	├───cash
+	├───cmd
+	├───config
+	├───cron
+	├───data
+	├───file
+	├───lang
+	│   └───en-US
+	├───lib
+	│   └───Nile
+	│       ├───Hook
+	│       ├───Module
+	│       │   └───Home
+	│       └───Plugin
+	├───log
+	├───route
+	├───temp
+	├───theme
+	│   └───default
+	│       ├───css
+	│       ├───icon
+	│       ├───image
+	│       ├───js
+	│       ├───view
+	│       └───widget
+	└───web
 
-=head1 CREATING YOUR FIRST PLUGIN 'HOME' 
+=head1 CREATING YOUR FIRST MODULE 'HOME' 
 
-To create your first plugin called Home for your site home page, create a folder called B<Home> in your application path
-C</path/lib/Nile/Plugin/Home>, then create the plugin Controller file say B<Home.pm> and put the following code:
+To create your first module called Home for your site home page, create a folder called B<Home> in your application path
+C</path/lib/Nile/Plugin/Home>, then create the module Controller file say B<Home.pm> and put the following code:
 
-	package Nile::Plugin::Home::Home;
+	package Nile::Module::Home::Home;
 
-	our $VERSION = '0.36';
+	our $VERSION = '0.37';
 
-	use Nile::Base;
+	use Nile::Module;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	# plugin action, return content. url is routed direct or from routes files. url: /home
+	# module action, return content. url is routed direct or from routes files. url: /home
 	sub home : GET Action {
 		
 		my ($self, $me) = @_;
@@ -236,18 +238,20 @@ and put in this file the following code:
 	<br>
 
 	global variables:<br>
-	language: <vars type="var" name='lang' /><br>
-	theme: <vars type="var" name="theme" /><br>
-	base url: <vars type="var" name="base_url" /><br>
+	language: <vars name='lang' /><br>
+	theme: <vars name="theme" /><br>
+	base url: <vars name="base_url" /><br>
 	image url: <vars name="image_url" /><br>
-	css url: <vars type="var" name="css_url" /><br>
-	new url: <a href='<vars name="base_url" />comments' >comments</a><br>
+	css url: <vars name="css_url" /><br>
+	new url: <a href="<vars name="base_url" />comments" >comments</a><br>
 	image: <img src="<vars name="image_url" />logo.png" /><br>
 	<br>
 
-	{date_now} <vars type="plugin" name="Date::Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
-	{time_now} <vars type="plugin" name="Date->now" format="%A %d, %B %Y  %T %p" /><br>
-	{date_time} <vars type="plugin" name="date" format="%B %d, %Y  %r" /><br>
+	{date_now} <vars type="plugin" method="Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
+	{time_now} <vars type="plugin" method="Date->time" format="%A %d, %B %Y  %T %p" /><br>
+	{date_time} <vars type="plugin" method="Date::now" capture="1" format="%B %d, %Y  %r" /><br>
+	<br>
+	<vars type="module" method="Home::Home->welcome" message="Welcome back!" /><br>
 	<br>
 
 	Our Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars><br>
@@ -276,8 +280,8 @@ and put in this file the following code:
 		say "<br>app path: " . $self->me->var->get("path");
 		say "<br>";
 	]]></vars>
-	<br>
-	<br>
+	<br><br>
+
 	html content 1-5 top
 	<!--block:first-->
 		<table border="1" style="color:red;">
@@ -646,8 +650,9 @@ use HTTP::AcceptLanguage;
 #no warnings qw(void once uninitialized numeric);
 
 use Nile::Say;
-use Nile::Helper;
 use Nile::Plugin;
+use Nile::Plugin::Object;
+use Nile::Module;
 use Nile::View;
 use Nile::XML;
 use Nile::Var;
@@ -656,7 +661,6 @@ use Nile::Lang;
 use Nile::Config;
 use Nile::Router;
 use Nile::Dispatcher;
-use Nile::Paginate;
 use Nile::Database;
 use Nile::Setting;
 use Nile::Timer;
@@ -832,6 +836,22 @@ sub init {
 	foreach (@{$arg->{route}}) {
 		$self->router->load($_);
 	}
+	#------------------------------------------------------
+	# load module hooks  from perl/.../lib/Nile/Hook
+	foreach my $hook (@{$arg->{hook}}) {
+		$hook = "Nile::Hook::".ucfirst($hook);
+		load $hook;
+		$self->object($hook)->hooks();
+	}
+
+	# load app hooks from app/lib/Nile/Hook
+	foreach my $hook (sort $self->file->files($file->catdir($arg->{path}, "lib/Nile/Hook") , "*.pm", 1)) {
+		$hook =~ s/\.pm$//;
+		$hook = "Nile::Hook::$hook";
+		load $hook;
+		$self->object($hook)->hooks();
+	}
+	#------------------------------------------------------
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -848,7 +868,6 @@ sub start {
 	# start the app page load timer
 	$self->run_time->start;
 	
-	my $var = "inside start";
 	$self->hook->on_start;
 
 	my $req = $self->request;
@@ -1275,13 +1294,12 @@ has 'dispatcher' => (
 		}
   );
 
-has 'helper' => (
+has 'plugin' => (
       is      => 'rw',
 	  lazy	=> 1,
 	  default => sub {
 			my $self = shift;
-			load Nile::Helper::Object;
-			$self->object("Nile::Helper::Object", @_);
+			$self->object("Nile::Plugin::Object", @_);
 		}
   );
 
@@ -1411,11 +1429,6 @@ sub add_object_context {
 			last;
 		}
 	}
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub paginate {
-	my ($self) = shift;
-	return $self->object("Nile::Paginate", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub view {
@@ -1577,6 +1590,7 @@ sub commify {
 sub capture_output {
 my ($self, $code) = @_;
 	
+	undef $@;
 	my ($merged, @result) = Capture::Tiny::capture_merged {eval $code};
 	#$merged .= join "", @result;
 	if ($@) {
@@ -1605,9 +1619,9 @@ Langauge	L<Nile::Lang>.
 
 Request	L<Nile::HTTP::Request>.
 
-Request	L<Nile::HTTP::Request::PSGI>.
+PSGI Request	L<Nile::HTTP::Request::PSGI>.
 
-Request	L<Nile::HTTP::PSGI>.
+PSGI Request Base	L<Nile::HTTP::PSGI>.
 
 Response	L<Nile::HTTP::Response>.
 
@@ -1623,8 +1637,6 @@ Router L<Nile::Router>.
 
 File Utils L<Nile::File>.
 
-Paginatation L<Nile::Paginate>.
-
 Database L<Nile::Database>.
 
 XML L<Nile::XML>.
@@ -1635,7 +1647,7 @@ Serializer L<Nile::Serializer>.
 
 Deserializer L<Nile::Deserializer>.
 
-Serialization L<Nile::Serialization>.
+Serialization Base L<Nile::Serialization>.
 
 MIME L<Nile::MIME>.
 
@@ -1643,7 +1655,9 @@ Timer	L<Nile::Timer>.
 
 Plugin	L<Nile::Plugin>.
 
-Helper L<Nile::Helper>.
+Paginatation L<Nile::Plugin::Paginate>.
+
+Module L<Nile::Module>.
 
 Hook L<Nile::Hook>.
 

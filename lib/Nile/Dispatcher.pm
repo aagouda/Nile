@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -125,34 +125,34 @@ sub dispatch_action {
 
 	$route ||= $self->me->abort("Dispatcher error. No route defined.");
 	
-	my ($plugin, $controller, $action) = $self->action($route);
+	my ($module, $controller, $action) = $self->action($route);
 
-	my $class = "Nile::Plugin:\:$plugin:\:$controller";
+	my $class = "Nile::Module:\:$module:\:$controller";
 	
 	eval "use $class;";
 
 	if ($@) {
-		$self->me->abort("Dispatcher error. Plugin error for route '$route' class '$class'.\n\n$@");
+		$self->me->abort("Dispatcher error. Module error for route '$route' class '$class'.\n\n$@");
 	}
 	
 	my $object = $class->new();
 
 	if (!$object->can($action)) {
 		# try /Accounts => Accounts/Accounts/Accounts
-		if (($plugin eq $controller) && ($action eq "index")) {
+		if (($module eq $controller) && ($action eq "index")) {
 			# try /Accounts => Accounts/Accounts/Accounts
-			if ($object->can($plugin)) {
-				$action = $plugin;
+			if ($object->can($module)) {
+				$action = $module;
 			}
 			# try /Accounts => Accounts/Accounts/accounts
-			elsif ($object->can(lc($plugin))) {
-				$action = lc($plugin);
+			elsif ($object->can(lc($module))) {
+				$action = lc($module);
 			}
 		}
 		else {
-			$self->me->abort("Dispatcher error. Plugin '$class' action '$action' does not exist.");
+			$self->me->abort("Dispatcher error. Module '$class' action '$action' does not exist.");
 			#$@ , "
-			#return "Dispatcher error. Plugin '$class' action '$action' does not exist.";
+			#return "Dispatcher error. Module '$class' action '$action' does not exist.";
 		}
 	}
 	
@@ -163,13 +163,13 @@ sub dispatch_action {
 	
 	# sub home: Action/Capture/Public {...}
 	if (!grep(/^(action|public|capture)$/i, @$attrs)) {
-		$self->me->abort("Dispatcher error. Plugin '$class' method '$action' is not marked as 'Action' or 'Capture'.");
+		$self->me->abort("Dispatcher error. Module '$class' method '$action' is not marked as 'Action' or 'Capture'.");
 	}
 
 	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH, [ajax]
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
-		$self->me->abort("Dispatcher error. Plugin '$class' action '$action' request method '$request_method' is not allowed.");
+		$self->me->abort("Dispatcher error. Module '$class' action '$action' request method '$request_method' is not allowed.");
 	}
 	
 	# add method "me" or one of its alt
@@ -178,10 +178,8 @@ sub dispatch_action {
 	if (grep(/^(capture)$/i, @$attrs)) {
 		# run the action and capture output of print statements. sub home: Capture {...}
 		($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action($self->me)}};
-		#say "caputre plugin...";
 	}
 	else {
-		#say "not caputre plugin...";
 		# run the action and get the returned content sub home: Action {...}
 		$content = eval {$object->$action($self->me)};
 	}
@@ -189,7 +187,7 @@ sub dispatch_action {
 	#my ($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action()}};
 	#$content .= join "", @result;
 	if ($@) {
-		$content = "Plugin error: $@\n$content\n";
+		$content = "Module error: $@\n$content\n";
 	}
 
 	return $content;
@@ -197,12 +195,12 @@ sub dispatch_action {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 action()
 	
-	my ($plugin, $controller, $action) = $self->me->dispatcher->action($route);
-	#route /plugin/controller/action returns (Plugin, Controller, action)
-	#route /plugin/action returns (Plugin, Plugin, action)
-	#route /plugin returns (Plugin, Plugin, index)
+	my ($module, $controller, $action) = $self->me->dispatcher->action($route);
+	#route /module/controller/action returns (Module, Controller, action)
+	#route /module/action returns (Module, Module, action)
+	#route /module returns (Module, Module, index)
 
-Find the action plugin, controller and method name from the provided route.
+Find the action module, controller and method name from the provided route.
 
 =cut
 
@@ -211,30 +209,30 @@ sub action {
 	my ($self, $route) = @_;
 
 	$route || return;
-	my ($plugin, $controller, $action);
+	my ($module, $controller, $action);
 	
 	$route =~ s/^\/+//;
 	
 	my @parts = split(/\//, $route);
 
 	if (scalar @parts == 3) {
-		($plugin, $controller, $action) = @parts;
+		($module, $controller, $action) = @parts;
 	}
 	elsif (scalar @parts == 2) {
-		$plugin = $parts[0];
+		$module = $parts[0];
 		$controller = $parts[0];
 		$action = $parts[1];
 	}
 	elsif (scalar @parts == 1) {
-		$plugin = $parts[0];
+		$module = $parts[0];
 		$controller = $parts[0];
 		$action = "index";
 	}
 	
-	$plugin ||= "";
+	$module ||= "";
 	$controller ||= "";
 	
-	return (ucfirst($plugin), ucfirst($controller), $action);
+	return (ucfirst($module), ucfirst($controller), $action);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 route()

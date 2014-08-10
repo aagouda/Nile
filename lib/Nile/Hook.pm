@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Hook;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -107,7 +107,7 @@ sub hook_off {
 
 	foreach my $hook (@hooks) {
 		($code, @hook_args) = @{$hook};
-		say "hook: $code " . $self;
+		#say "hook: $code " . $self;
 		$code->(@args, @hook_args);
 	}
 }

@@ -5,9 +5,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Helper::Email;
+package Nile::Plugin::Email;
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 =pod
 
@@ -15,17 +15,17 @@ our $VERSION = '0.36';
 
 =head1 NAME
 
-Nile::Helper::Email - Email helper class for the Nile framework.
+Nile::Plugin::Email - Email plugin for the Nile framework.
 
 =head1 SYNOPSIS
 		
 =head1 DESCRIPTION
 
-Nile::Helper::Email - Email helper class for the Nile framework.
+Nile::Plugin::Email - Email plugin for the Nile framework.
 
 =cut
 
-use Nile::Helper; # also extends Nile::Helper
+use Nile::Plugin; # also extends Nile::Plugin
 
 #use MIME::Lite;
 use MIME::Entity;
@@ -35,7 +35,7 @@ use Email::Date::Format qw(email_date);
 =head2 send()
 	
 	# TODO
-	$email = $me->helper->email;
+	$email = $me->plugin->email;
 	$email->send(...);
 
 TODO
@@ -45,8 +45,8 @@ TODO
 sub send {
 	my ($self, $arg) = @_;
 	
-	# get helper setting from config files.  same as $self->setting("email");
-	# setting method is inherited from Nile::Helper the base class
+	# get plugin setting from config files.  same as $self->setting("email");
+	# setting method is inherited from Nile::Plugin the base class
 	my $setting = $self->setting();
 	
 	$self->me->dump($setting);

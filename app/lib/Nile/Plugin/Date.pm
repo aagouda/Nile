@@ -5,9 +5,33 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Autouse;
+package Nile::Plugin::Date;
 
 our $VERSION = '0.37';
+
+use Nile::Plugin; # automatically extends Nile::Plugin
+
+use DateTime qw();
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub time {
+my ($self, %args) = @_;
+	my $dt = DateTime->now;
+	return $dt->strftime($args{format});
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub date {
+	my ($self, %args) = @_;
+	my $dt = DateTime->now;
+	return $dt->strftime($args{format});
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub now {
+	my ($self, %args) = @_;
+	my $dt = DateTime->now;
+	print $dt->strftime($args{format});
+	return;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

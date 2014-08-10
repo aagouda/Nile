@@ -18,19 +18,23 @@
     <encoding>utf8</encoding>
 </database>
 
-<plugin>
+<module>
     <home>
-        <smtp>localhost</smtp>
-        <user>webmaster</user>
-        <pass>1234</pass>
+        <header>home</header>
+        <footer>footer</footer>
     </home>
-</plugin>
+</module>
 
-<helper>
+<plugin>
     <email>
+		<sendmail>/usr/bin/sendmail</sendmail>
         <smtp>localhost</smtp>
         <user>webmaster</user>
         <pass>1234</pass>
     </email>
-</helper>
+</plugin>
+
+<hook>
+        <example>enabled</example>
+</hook>
 
