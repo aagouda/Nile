@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -96,6 +96,7 @@ sub dispatch_action {
 	}
 	#------------------------------------------------------
 	my ($content, @result);
+	undef $@;
 	#------------------------------------------------------
 	# inline actions. $app->action("get", "/home", sub {...});
 	# inline actions. $app->capture("get", "/home", sub {...});
@@ -103,10 +104,8 @@ sub dispatch_action {
 		if (defined $match->{route}->{attributes} && $match->{route}->{attributes} =~ /capture/i) {
 			# run the action and capture output of print statements
 			($content, @result) = Capture::Tiny::capture_merged {eval {$route->($self->me)}};
-			#say "caputre code....";
 		}
 		else {
-			#say "not caputre code....";
 			# run the action and get the returned content
 			$content = eval {$route->($self->me)};
 		}
@@ -151,17 +150,14 @@ sub dispatch_action {
 		}
 		else {
 			$self->me->abort("Dispatcher error. Module '$class' action '$action' does not exist.");
-			#$@ , "
-			#return "Dispatcher error. Module '$class' action '$action' does not exist.";
 		}
 	}
 	
 	my $meta = $object->meta;
 
 	my $attrs = $meta->get_method($action)->attributes;
-	#say "attr: [$action], ". $self->me->dump($attrs);
 	
-	# sub home: Action/Capture/Public {...}
+	# sub home: Action Capture Public {...}
 	if (!grep(/^(action|public|capture)$/i, @$attrs)) {
 		$self->me->abort("Dispatcher error. Module '$class' method '$action' is not marked as 'Action' or 'Capture'.");
 	}
@@ -174,6 +170,8 @@ sub dispatch_action {
 	
 	# add method "me" or one of its alt
 	$self->me->add_object_context($object, $meta);
+	
+	undef $@;
 
 	if (grep(/^(capture)$/i, @$attrs)) {
 		# run the action and capture output of print statements. sub home: Capture {...}
@@ -184,10 +182,8 @@ sub dispatch_action {
 		$content = eval {$object->$action($self->me)};
 	}
 
-	#my ($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action()}};
-	#$content .= join "", @result;
 	if ($@) {
-		$content = "Module error: $@\n$content\n";
+		$content = "Module error: Module '$class' method '$action'. $@\n$content\n";
 	}
 
 	return $content;
@@ -195,7 +191,7 @@ sub dispatch_action {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 action()
 	
-	my ($module, $controller, $action) = $self->me->dispatcher->action($route);
+	my ($module, $controller, $action) = $app->dispatcher->action($route);
 	#route /module/controller/action returns (Module, Controller, action)
 	#route /module/action returns (Module, Module, action)
 	#route /module returns (Module, Module, index)
@@ -237,7 +233,7 @@ sub action {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 route()
 	
-	my $route = $self->me->dispatcher->route($route);
+	my $route = $app->dispatcher->route($route);
 	
 Detects the current request path if not provided from the request params named as
 'action', 'route', or 'cmd' in the post or get methods:

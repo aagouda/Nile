@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -171,11 +171,11 @@ The following is the basic application folder tree that must be created manually
 =head1 CREATING YOUR FIRST MODULE 'HOME' 
 
 To create your first module called Home for your site home page, create a folder called B<Home> in your application path
-C</path/lib/Nile/Plugin/Home>, then create the module Controller file say B<Home.pm> and put the following code:
+C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home.pm> and put the following code:
 
 	package Nile::Module::Home::Home;
 
-	our $VERSION = '0.37';
+	our $VERSION = '0.38';
 
 	use Nile::Module;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -219,6 +219,17 @@ C</path/lib/Nile/Plugin/Home>, then create the module Controller file say B<Home
 		say qq{Hello world. This content is captured from print statements.
 					The action must be marked by 'Capture' attribute. No returns.};
 
+	}
+	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	# regular method, can be invoked by views:
+	# <vars type="module" method="Home::Home->welcome" message="Welcome back!" />
+	sub welcome {
+
+		my ($self, %args) = @_;
+		
+		my $me = $self->me;
+
+		return "Nice to see you, " . $args{message};
 	}
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -434,21 +445,25 @@ Example config file path/config/config.xml:
 		<encoding>utf8</encoding>
 	</database>
 
-	<plugin>
+	<module>
 		<home>
-			<smtp>localhost</smtp>
-			<user>webmaster</user>
-			<pass>1234</pass>
+			<header>home</header>
+			<footer>footer</footer>
 		</home>
-	</plugin>
+	</module>
 
-	<helper>
+	<plugin>
 		<email>
+			<sendmail>/usr/bin/sendmail</sendmail>
 			<smtp>localhost</smtp>
 			<user>webmaster</user>
 			<pass>1234</pass>
 		</email>
-	</helper>
+	</plugin>
+
+	<hook>
+			<example>enabled</example>
+	</hook>
 
 =head1 APPLICATION INSTANCE SHARED DATA
 
@@ -602,16 +617,19 @@ Loads xml files into hash tree using L<XML::TreePP>
 
 The database class provides methods for connecting to the sql database and easy methods for sql operations.
 
+=head1 METHODS
+
 =cut
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # the first thing to do, catch and show errors nicely
 BEGIN {
 	$|=1;
-	use CGI::Carp qw(fatalsToBrowser set_message);
+	use CGI::Carp qw(fatalsToBrowser warningsToBrowser set_message);
 	use Devel::StackTrace;
 	use Devel::StackTrace::AsHTML;
 	use PadWalker;
 	use Devel::StackTrace::WithLexicals;
+
 	sub handle_errors {
 		my $msg = shift;
 		#my $trace = Devel::StackTrace->new(indent => 1, message => $msg, ignore_package => [qw(Carp CGI::Carp)]);
@@ -640,7 +658,7 @@ use Capture::Tiny ();
 use Time::Local;
 use File::Slurp;
 use Time::HiRes qw(gettimeofday tv_interval);
-use MIME::Base64 3.11 qw(encode_base64 decode_base64 decode_base64url encode_base64url) ; #3.11
+use MIME::Base64 3.11 qw(encode_base64 decode_base64 decode_base64url encode_base64url);
 
 use Data::Dumper;
 $Data::Dumper::Deparse = 1; #stringify coderefs
@@ -686,10 +704,11 @@ our @EXPORT_MODULES = (
 use base 'Exporter';
 our @EXPORT = qw();
 our @EXPORT_OK = qw();
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
+
 	my ($class, @args) = @_;
+
 	my ($package, $script) = caller;
 	
 	# import list of modules to the calling package
@@ -719,6 +738,7 @@ sub import {
 sub detect_app_path {
 
 	my ($self, $script) = @_;
+
 	$script ||= (caller)[1];
 
 	my ($vol, $dirs, $name) =	File::Spec->splitpath(File::Spec->rel2abs($script));
@@ -730,25 +750,70 @@ sub detect_app_path {
 
 	my $path = $vol? File::Spec->catpath($vol, $dirs) : File::Spec->catdir($dirs);
 	
-	#print "\n vol=$vol\n dirs=$dirs\n name=$name\n path=$path \n";
 	$ENV{NILE_APP_DIR} = $path;
+
 	return ($path);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 error()
+	
+	$app->error("error message");
+
+Fatal errors with custom error message. This is the same as C<croak> in L<CGI::Carp|CGI::Carp/croak>.
+
+=cut
+
 sub error {
 	my $self = shift;
 	goto &CGI::Carp::croak;
 }
+
+=head2 errors()
+	
+	$app->errors("error message");
+
+Fatal errors with custom error message and full starcktrace. This is the same as C<confess> in L<CGI::Carp|CGI::Carp/confess>.
+
+=cut
+
 sub errors {
 	my $self = shift;
 	goto &CGI::Carp::confess;
 }
+
+=head2 warn()
+	
+	$app->warn("warning  message");
+
+Display warning message. This is the same as C<carp> in L<CGI::Carp|CGI::Carp/carp>.
+
+To view warnings in the browser, switch to the view source mode since warnings appear as
+a comment at the top of the page.
+
+=cut
+
 sub warn {
 	my $self = shift;
+	# warnings appear commented at the top of the page, use view source
+	warningsToBrowser(1) unless ($self->cli_mode);
 	goto &CGI::Carp::carp;
 }
+
+=head2 warns()
+	
+	$app->warns("warning  message");
+
+Display warning message and full starcktrace. This is the same as C<cluck> in L<CGI::Carp|CGI::Carp/cluck>.
+
+To view warnings in the browser, switch to the view source mode since warnings appear as
+a comment at the top of the page.
+
+=cut
+
 sub warns {
 	my $self = shift;
+	# warnings appear commented at the top of the page, use view source
+	warningsToBrowser(1) unless ($self->cli_mode);
 	goto &CGI::Carp::cluck;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -759,6 +824,38 @@ sub BUILD { # our sub new {..}
 	#$self->warn(" ...  warn   ...  ");
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 init()
+	
+	$app->init({
+		# base application path, auto detected if not set
+		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
+
+		# load config files, default extension is xml
+		config		=> [ qw(config) ],
+
+		# load route files, default extension is xml
+		route		=> [ qw(route) ],
+
+		# load hooks, app hooks loaded automatically
+		#hook		=> [ qw() ],
+
+		# log file name
+		log_file	=>	"log.pm",
+
+		# url action name i.e. index.cgi?action=register
+		action_name	=>	"action,route,cmd",
+
+		# app home page Plugin/Controller/method
+		default_route	=>	"/Home/Home/home",
+		
+		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
+		#mode	=>	"fcgi", # psgi, cgi, fcgi
+	});
+
+Initialize the application with the shared and safe sessions settings.
+
+=cut
+
 sub init {
 
 	my ($self, $arg) = @_;
@@ -861,6 +958,14 @@ has 'start_setting' => (
 	default => sub { +{} }
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 start()
+	
+	$app->start;
+
+Set the application startup variables.
+
+=cut
+
 sub start {
 
 	my ($self, $arg) = @_;
@@ -931,10 +1036,27 @@ sub start {
 	
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 uri_mode()
+	
+	# uri mode: 0=full, 1=absolute, 2=relative
+	$app->uri_mode(1);
+
+Set the uri mode. The values allowed are: 0= full, 1=absolute, 2=relative
+
+=cut
+
 has 'uri_mode' => (
 	is => 'rw',
 	default => 0, # 0= full, 1=absolute, 2=relative
 );
+
+=head2 uri_for()
+	
+	$url = $app->uri_for("/users", [$mode]);
+
+Returns the uri for specific action or route. The mode parameter is optional. The mode values allowed are: 0= full, 1=absolute, 2=relative.
+
+=cut
 
 sub uri_for {
 	my ($self, $uri, $mode) = @_;
@@ -951,9 +1073,17 @@ sub uri_for {
 	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 run()
+	
+	$app->run();
+
+Run the application and dispatch the command.
+
+=cut
+
 sub run {
 
-	my ($self, %arg) = @_;
+	my ($self, $arg) = @_;
 	
 	#$self->log->info("application run start in mode: ".$self->mode);
 	
@@ -992,6 +1122,26 @@ sub content_type_text {
 	return $content_type =~ /(\bx(?:ht)?ml\b|text|json|javascript)/;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 action()
+	
+	# inline actions, return content. url: /forum/home
+	$app->action("get", "/forum/home", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		my $content = "Host: " . ($self->request->virtual_host || "") ."<br>\n";
+		$content .= "Request method: " . ($self->request->request_method || "") . "<br>\n";
+		$content .= "App Mode: " . $self->mode . "<br>\n";
+		$content .= "Time: ". time . "<br>\n";
+		$content .= "Hello world from inline action /forum/home" ."<br>\n";
+		$content .= "أحمد الششتاوى" ."<br>\n";
+		$self->response->encoded(0); # encode content
+		return $content;
+	});
+
+Add inline action, return content to the dispatcher.
+
+=cut
+
 sub action {
 	my $self = shift;
 	my ($method, $route, $action) = $self->action_args(@_);
@@ -1007,6 +1157,25 @@ sub action {
 						);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 capture()
+	
+	# inline actions, capture print statements, no returns. url: /accounts/login
+	$app->capture("get", "/accounts/login", sub {
+		my ($self) = @_;
+		# $self is set to the application context object same as $self->me in plugins
+		say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
+		say "Request method: " . ($self->request->request_method || "") . "<br>\n";
+		say "App Mode: " . $self->mode . "<br>\n";
+		say "Time: ". time . "<br>\n";
+		say "Hello world from inline action with capture /accounts/login", "<br>\n";
+		say $self->encode("أحمد الششتاوى ") ."<br>\n";
+		$self->response->encoded(1); # content already encoded
+	});
+
+Add inline action, capture print statements, no returns to the dispatcher.
+
+=cut
+
 sub capture {
 	my $self = shift;
 	my ($method, $route, $action) = $self->action_args(@_);
@@ -1057,6 +1226,21 @@ sub action_args {
 	return ($method, $route, $action);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 debug()
+	
+	# 1=enabled, 0=disabled
+	$app->debug(1);
+
+Enable or disable debugging flag.
+
+=cut
+
+has 'debug' => (
+      is      => 'rw',
+      isa     => 'Bool',
+      default => 0,
+  );
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 bm()
 	
 	$app->bm->lap("start task");
@@ -1076,12 +1260,6 @@ Benchmark specific parts of your code. This is a L<Benchmark::Stopwatch> object.
 
 =cut
 
-has 'debug' => (
-      is      => 'rw',
-      isa     => 'Bool',
-      default => 0,
-  );
-
 has 'bm' => (
       is      => 'rw',
       isa    => 'Benchmark::Stopwatch',
@@ -1093,6 +1271,33 @@ has 'bm' => (
 	  }
   );
 
+=head2 timer()
+	
+	# start the timer
+	$app->timer->start;
+	
+	# do some operations...
+	
+	# get time elapsed since start called
+	say $app->timer->lap;
+
+	# do some other operations...
+
+	# get time elapsed since last lap called
+	say $app->timer->lap;
+
+	# get another timer object, timer automatically starts
+	my $timer = $app->timer->new;
+	say $timer->lap;
+	#...
+	say $timer->lap;
+	#...
+	say $timer->total;
+
+Returns L<Nile::Timer> object. See L<Nile::Timer> for more details.
+
+=cut
+
 has 'timer' => (
       is      => 'rw',
 	  #lazy	=> 1,
@@ -1101,16 +1306,22 @@ has 'timer' => (
 	  }
   );
 
-# app timer since load
-has 'app_time' => (
-      is      => 'rw',
-	  #lazy	=> 1,
-	  default => sub{
-		  Nile::Timer->new;
-	  }
-  );
-
 # page load timer, run time
+
+=head2 run_time()
+	
+	# get time elapsed since app started
+	say $app->run_time->lap;
+
+	# do some other operations...
+
+	# get time elapsed since last lap called
+	say $app->run_time->lap;
+
+Returns L<Nile::Timer> object. Timer automatically starts with the application.
+
+=cut
+
 has 'run_time' => (
       is      => 'rw',
 	  #lazy	=> 1,
@@ -1119,12 +1330,20 @@ has 'run_time' => (
 	  }
   );
 
+=head2 mode()
+	
+	my $mode = $app->mode;
+
+Returns the current application mode PSGI, FCGI or CGI.
+
+=cut
+
 has 'mode' => (
       is      => 'rw',
       isa     => 'Str',
       default => "cgi",
   );
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 ua()
 	
 	my $response = $app->ua->get('http://example.com/');
@@ -1151,6 +1370,14 @@ has 'ua' => (
 	  }
   );
 
+=head2 uri()
+	
+	my $uri = $app->uri('http://mewsoft.com/');
+
+Returns L<URI> object.
+
+=cut
+
 has 'uri' => (
       is      => 'rw',
       isa    => 'URI',
@@ -1161,11 +1388,26 @@ has 'uri' => (
 	  }
   );
 
+=head2 charset()
+	
+	$app->charset('utf8');
+	$charset = $app->charset;
+
+Set or return the charset for encoding and decoding. Default is C<utf8>.
+
+=cut
+
 has 'charset' => (
       is      => 'rw',
 	  lazy	=> 1,
       default => 'utf8'
   );
+
+=head2 freeze()
+	
+See L<Nile::Serializer>.
+
+=cut
 
 has 'freeze' => (
       is      => 'rw',
@@ -1178,6 +1420,12 @@ has 'freeze' => (
   );
 sub serialize {shift->freeze(@_);}
 
+=head2 thaw()
+	
+See L<Nile::Deserializer>.
+
+=cut
+
 has 'thaw' => (
       is      => 'rw',
       isa    => 'Nile::Deserializer',
@@ -1188,6 +1436,12 @@ has 'thaw' => (
 	  }
   );
 sub deserialize {shift->thaw(@_);}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 file()
+	
+See L<Nile::File>.
+
+=cut
 
 has 'file' => (
       is      => 'rw',
@@ -1198,6 +1452,12 @@ has 'file' => (
 		}
   );
 
+=head2 xml()
+	
+See L<Nile::XML>.
+
+=cut
+
 has 'xml' => (
       is      => 'rw',
 	  lazy	=> 1,
@@ -1206,6 +1466,12 @@ has 'xml' => (
 			$self->object("Nile::XML", @_);
 		}
   );
+
+=head2 config()
+	
+See L<Nile::Config>.
+
+=cut
 
 has 'config' => (
       is      => 'rw',
@@ -1216,6 +1482,12 @@ has 'config' => (
 		}
   );
 
+=head2 var()
+	
+See L<Nile::Var>.
+
+=cut
+
 has 'var' => (
       is      => 'rw',
 	  lazy	=> 1,
@@ -1224,6 +1496,12 @@ has 'var' => (
 			$self->object ("Nile::Var", @_);
 		}
   );
+
+=head2 setting()
+	
+See L<Nile::Setting>.
+
+=cut
 
 has 'setting' => (
       is      => 'rw',
@@ -1235,18 +1513,37 @@ has 'setting' => (
 		}
   );
 
+=head2 env()
+	
+	$request_uri = $app->env->{REQUEST_URI};
+
+Plack/PSGI env object.
+
+=cut
+
 has 'env' => (
 	is => 'rw',
 	isa => 'HashRef',
 	default => sub { +{} }
 );
 
+=head2 request()
+	
+See L<Nile::Request>.
+
+=cut
 
 has 'request' => (
 	is      => 'rw',
 	lazy	=> 1,
 	default => sub {},
 );
+
+=head2 response()
+	
+See L<Nile::Response>.
+
+=cut
 
 has 'response' => (
       is      => 'rw',
@@ -1256,6 +1553,12 @@ has 'response' => (
 			shift->object("Nile::HTTP::Response", @_);
 		}
   );
+
+=head2 mime()
+	
+See L<Nile::MIME>.
+
+=cut
 
 has 'mime' => (
       is      => 'rw',
@@ -1267,6 +1570,12 @@ has 'mime' => (
 		}
   );
 
+=head2 lang()
+	
+See L<Nile::Lang>.
+
+=cut
+
 has 'lang' => (
       is      => 'rw',
 	  isa    => 'Nile::Lang',
@@ -1275,6 +1584,12 @@ has 'lang' => (
 			shift->object("Nile::Lang", @_);
 		}
   );
+
+=head2 router()
+	
+See L<Nile::Router>.
+
+=cut
 
 has 'router' => (
       is      => 'rw',
@@ -1285,6 +1600,12 @@ has 'router' => (
 		}
   );
 
+=head2 dispatcher()
+	
+See L<Nile::Dispatcher>.
+
+=cut
+
 has 'dispatcher' => (
       is      => 'rw',
 	  isa    => 'Nile::Dispatcher',
@@ -1294,6 +1615,12 @@ has 'dispatcher' => (
 		}
   );
 
+=head2 plugin()
+	
+See L<Nile::Plugin>.
+
+=cut
+
 has 'plugin' => (
       is      => 'rw',
 	  lazy	=> 1,
@@ -1302,6 +1629,12 @@ has 'plugin' => (
 			$self->object("Nile::Plugin::Object", @_);
 		}
   );
+
+=head2 hook()
+	
+See L<Nile::Hook>.
+
+=cut
 
 has 'hook' => (
       is      => 'rw',
@@ -1314,6 +1647,12 @@ has 'hook' => (
   );
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 logger()
+	
+Returns L<Log::Tiny> object.
+
+=cut
+
 has 'logger' => (
       is      => 'rw',
 	  lazy	=> 1,
@@ -1323,16 +1662,47 @@ has 'logger' => (
 			Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm'));
 		}
   );
+
+=head2 log()
+
+	$app->log->info("application run start");
+	$app->log->DEBUG("application run start");
+	$app->log->ERROR("application run start");
+	$app->log->INFO("application run start");
+	$app->log->ANYTHING("application run start");
+
+ Log object L<Log::Tiny> supports unlimited log categories.
+
+=cut
+
 sub log {
 	my $self = shift;
 	$self->start_logger if (!$self->logger);
 	$self->logger(@_);
 }
+
+=head2 start_logger()
+	
+	$app->start_logger();
+
+Start the log object and open the log file for writing logs.
+
+=cut
+
 sub start_logger {
 	my $self = shift;
 	$self->stop_logger;
 	$self->logger(Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm')));
 }
+
+=head2 stop_logger()
+	
+	$app->stop_logger();
+
+Stops the log object and close the log file.
+
+=cut
+
 sub stop_logger {
 	my $self = shift;
 	# close log file
@@ -1378,6 +1748,21 @@ sub new_request {
 	$self->request;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 object()
+	
+	$obj = $app->object("Nile::MyClass", @args);
+	$obj = $app->object("Nile::Plugin::MyClass", @args);
+	$obj = $app->object("Nile::Module::MyClass", @args);
+
+	#...
+
+	$me = $obj->me;
+	
+Creates and returns an object. This automatically adds the method L<me> to the object
+and sets it to the current context so your object or class can access the current instance.
+
+=cut
+
 sub object {
 
 	my ($self, $class, @args) = @_;
@@ -1431,30 +1816,67 @@ sub add_object_context {
 	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 view()
+	
+Returns L<Nile::View> object.
+
+=cut
+
 sub view {
 	my ($self) = shift;
 	return $self->object("Nile::View", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 database()
+	
+Returns L<Nile::Database> object.
+
+=cut
+
 sub database {
 	my ($self) = shift;
 	return $self->object("Nile::Database", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 theme_list()
+	
+	@themes = $app->theme_list;
+
+Returns themes names installed.
+
+=cut
+
 sub theme_list {
 	my ($self) = @_;
 	my @folders = ($self->file->folders($self->var->get("themes_dir"), "", 1));
 	return grep (/^[^_]/, @folders);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 lang_list()
+	
+	@langs = $app->lang_list;
+
+Returns languages names installed.
+
+=cut
+
 sub lang_list {
 	my ($self) = @_;
 	my @folders = ($self->file->folders($self->var->get("langs_dir"), "", 1));
 	return grep (/^[^_]/, @folders);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 detect_user_language()
+	
+	$user_lang = $app->detect_user_language;
+
+Detects and retuns the user langauge.
+
+=cut
+
 sub detect_user_language {
 	my ($self) = @_;
+
 	#my $lang = $self->request->param("lang") || $self->request->cookie("userlang") || $self->reg->get("lang");
 	my $lang = $self->request->param("lang");#
 
@@ -1469,30 +1891,82 @@ sub detect_user_language {
 	return $lang;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 dump()
+	
+	$app->dump({...});
+
+Print object to the STDOUT. Same as C<say Dumper (@_);>.
+
+=cut
+
 sub dump {
 	my $self = shift;
 	say Dumper (@_);
-	return "";
+	return;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 is_loaded()
+	
+	if ($app->is_loaded("Nile::SomeModule")) {
+		#...
+	}
+	
+	if ($app->is_loaded("Nile/SomeModule.pm")) {
+		#...
+	}
+
+Returns true if module is loaded, false otherwise.
+
+=cut
+
 sub is_loaded {
     my ($self, $module) = @_;
     (my $file = $module) =~ s/::/\//g;
-    $file .= '.pm';
+    $file .= '.pm' unless ($file =~ /\.pm$/);
 	#note: do() does unconditional loading -- no lookup in the %INC hash is made.
 	exists $INC{$file};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub is_cli {
-	# return 1 if called from browser, 0 if called from command line
+=head2 cli_mode()
+	
+	if ($app->cli_mode) {
+		say "Running from the command line";
+	}
+	else {
+		say "Running from web server";
+	}
+
+Returns true if running from the command line interface, false if called from web server.
+
+=cut
+
+sub cli_mode {
+    my ($self) = @_;
+	
 	if  (exists $ENV{REQUEST_METHOD} || defined $ENV{GATEWAY_INTERFACE} ||  exists $ENV{HTTP_HOST}){
 		return 0;
 	}
+	
+	# PSGI
+	if  (exists $self->env->{REQUEST_METHOD} || defined $self->env->{GATEWAY_INTERFACE} ||  exists $self->env->{HTTP_HOST}){
+		return 0;
+	}
+	
+	# CLI
 	return 1;
+
 	#if (-t STDIN) { }
 	#use IO::Interactive qw(is_interactive interactive busy);if ( is_interactive() ) {print "Running interactively\n";}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 utf8_safe()
+	
+	$str_utf8 = $app->utf8_safe($str);
+
+Encode data in C<utf8> safely.
+
+=cut
+
 sub utf8_safe {
 	my ($self, $str) = @_;
 	if (utf8::is_utf8($str)) {
@@ -1501,16 +1975,68 @@ sub utf8_safe {
 	$str;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 encode()
+	
+	$encoded = $app->encode($data);
+
+Encode data using the current L</charset>.
+
+=cut
+
 sub encode {
 	my ($self, $data) = @_;
 	return Encode::encode($self->charset, $data);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 decode()
+	
+	$data = $app->decode($encoded);
+
+Decode data using the current L</charset>.
+
+=cut
+
 sub decode {
 	my ($self, $data) = @_;
 	return Encode::decode($self->charset, $data);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 instance_isa()
+	
+	$app->instance_isa($object, $class);
+
+Test for an object of a particular class in a strictly correct manner.
+
+Returns the object itself or C<undef> if the value provided is not an object of that type.
+
+=cut
+
+sub instance_isa ($$) {
+	#my ($self, $object, $class) = @_;
+	(Scalar::Util::blessed($_[1]) and $_[1]->isa($_[2])) ? $_[1] : undef;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 instance_does()
+	
+	$app->instance_does($object, $class);
+
+Returns the object itself or C<undef> if the value provided is not an object of that type.
+
+=cut
+
+sub instance_does ($$) {
+	(Scalar::Util::blessed($_[1]) and $_[1]->DOES($_[2])) ? $_[1] : undef;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 trim()
+	
+	$str = $app->trim($str);
+	@str = $app->trim(@str);
+
+Remove white spaces from left and right of a string.
+
+=cut
+
 sub trim {
 	my ($self) = shift;
 	my (@out) = @_;
@@ -1521,6 +2047,15 @@ sub trim {
 	return (scalar @out >1)? @out : $out[0];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 ltrim()
+	
+	$str = $app->ltrim($str);
+	@str = $app->ltrim(@str);
+
+Remove white spaces from left of a string.
+
+=cut
+
 sub ltrim {
 	my ($self) = shift;
 	my (@out) = @_;
@@ -1530,6 +2065,15 @@ sub ltrim {
 	return (scalar @out >1)? @out : $out[0];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 rtrim()
+	
+	$str = $app->rtrim($str);
+	@str = $app->rtrim(@str);
+
+Remove white spaces from right of a string.
+
+=cut
+
 sub rtrim {
 	my ($self) = shift;
 	my (@out) = @_;
@@ -1539,6 +2083,14 @@ sub rtrim {
 	return (scalar @out >1)? @out : $out[0];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 trims()
+	
+	$str = $app->trims($str);
+
+Remove all white spaces from a string.
+
+=cut
+
 sub trims {
 	my ($self) = shift;
 	my $str =  $_[0];
@@ -1546,6 +2098,14 @@ sub trims {
 	return $str;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 max()
+	
+	$max = $app->max(10, 200, 40, 30, 50, 60);
+
+Returns the maximum value in array of numbers.
+
+=cut
+
 sub max {
 	my ($self, $max, @vars) = @_;
 	for (@vars) {
@@ -1554,6 +2114,14 @@ sub max {
 	return $max;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 min()
+	
+	$min = $app->min(10, 200, 40, 30, 50, 60);
+
+Returns the minimum value in array of numbers.
+
+=cut
+
 sub min {
 	my ($self, $min, @vars) = @_;
 	for (@vars) {
@@ -1587,18 +2155,16 @@ sub commify {
 	return scalar reverse $str;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub capture_output {
-my ($self, $code) = @_;
+=head2 abort()
 	
-	undef $@;
-	my ($merged, @result) = Capture::Tiny::capture_merged {eval $code};
-	#$merged .= join "", @result;
-	if ($@) {
-		$merged  = "Embeded Perl code error: $@\n$code\n$merged\n";
-	}
-	return $merged;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	$app->abort("error message");
+
+	$app->abort("error title", "error message");
+
+Stop and quit the application and display message to the user. See L<Nile::Abort> module.
+
+=cut
+
 sub abort {
 	my ($self) = shift;
 	load Nile::Abort;
@@ -1607,7 +2173,6 @@ sub abort {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #__PACKAGE__->meta->make_immutable;#(inline_constructor => 0)
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 
 =head1 Sub Modules
 
@@ -1655,6 +2220,8 @@ Timer	L<Nile::Timer>.
 
 Plugin	L<Nile::Plugin>.
 
+Email L<Nile::Plugin::Email>.
+
 Paginatation L<Nile::Plugin::Paginate>.
 
 Module L<Nile::Module>.
@@ -1662,8 +2229,6 @@ Module L<Nile::Module>.
 Hook L<Nile::Hook>.
 
 Base L<Nile::Base>.
-
-Object L<Nile::Object>.
 
 Abort L<Nile::Abort>.
 

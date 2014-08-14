@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Base;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -19,14 +19,10 @@ Nile::Base - Base class for the Nile framework.
 
 =head1 SYNOPSIS
 		
-	package Nile::Module::Home::Home;
+	package Nile::MyModule;
 
 	use Nile::Base;
 
-	sub home  : GET Action {
-		my ($self) = @_;
-	}
-	
 	1;
 
 =head1 DESCRIPTION

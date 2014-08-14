@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Response;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -71,7 +71,7 @@ use Scalar::Util ();
 use HTTP::Headers;
 use URI::Escape ();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub main { # sub new
+sub main { # sub new{}
 	my ($self, $code, $headers, $content) = @_;
 	$self->status($code) if defined $code;
     $self->headers($headers) if defined $headers;

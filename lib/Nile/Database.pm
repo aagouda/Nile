@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Database;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -65,7 +65,11 @@ Returns the database connection handle is success.
 sub connect {
 
 	my ($self, %args) = @_;
-	my ($dbh, $dsn);
+	my ($dbh, $dsn, $me);
+	
+	$me = $self->me;
+	
+	%args = (%{$me->config->var->{database}}, %args);
 	
 	if (!%args) {
 		$args{driver} = $self->me->config->var->{database}->{driver};
@@ -85,7 +89,7 @@ sub connect {
 	$args{attr} ||= +{};
 
 	if (!$args{name}) {
-		$self->me->abort("Database error: Empty database name.");
+		$me->abort("Database error: Empty database name.");
 	}
 
 	#$self->dbh->disconnect if ($self->dbh);

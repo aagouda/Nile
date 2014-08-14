@@ -45,6 +45,11 @@ WriteMakefile(
 			Devel::StackTrace::WithLexicals => 0,
 			Plack::Builder => 0,
 			Plack::Middleware::Deflater => 0,
+			Email::Address => 0,
+			Email::Date::Format => 0,
+			Email::Simple => 0,
+			Email::Sender::Simple => 0,
+			MIME::Entity => 0,
 
 	}, # e.g., Module::Name => 1.1
 

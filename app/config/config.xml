@@ -13,8 +13,8 @@
     <name>auctions</name>
     <user>auctions</user>
     <pass>auctions</pass>
-    <attribute>
-    </attribute>
+    <attr>
+    </attr>
     <encoding>utf8</encoding>
 </database>
 
@@ -26,12 +26,10 @@
 </module>
 
 <plugin>
-    <email>
-		<sendmail>/usr/bin/sendmail</sendmail>
-        <smtp>localhost</smtp>
-        <user>webmaster</user>
-        <pass>1234</pass>
-    </email>
+	<email>
+		<transport>Sendmail</transport>
+		<sendmail>/usr/sbin/sendmail</sendmail>
+	</email>
 </plugin>
 
 <hook>

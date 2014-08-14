@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Paginate;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 # pagination - pag·i·na·tion
 #1. the process of numbering the pages of a book.
@@ -31,7 +31,7 @@ Nile::Plugin::Paginate - Efficient Data Pagination
 	my $pages_per_set = 7;
 	my $current_page = 4;
 
-	my $paginate = $self->me->paginate(
+	my $paginate = $me->plugin->paginate(
 
 		total_entries       => $total_entries, 
 		entries_per_page    => $entries_per_page, 

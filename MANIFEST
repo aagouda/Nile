@@ -27,9 +27,9 @@ app/theme/default/widget/footer.html
 app/theme/default/widget/header.html
 app/web/.exists
 Changes
+Email.html
 lib/Nile.pm
 lib/Nile/Abort.pm
-lib/Nile/Autouse.pm
 lib/Nile/Base.pm
 lib/Nile/Config.pm
 lib/Nile/Database.pm

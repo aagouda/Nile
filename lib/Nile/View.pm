@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -524,6 +524,7 @@ sub parse_nest_blocks {
 	#The (?<xxx> syntax requires perl 5.10 or above: http://perldoc.perl.org/perl5100delta.html#Named-Capture-Buffers
     #while ($core =~ /(<!--block:(.*?)-->((?:(?:(?!<!--block:(?:.*?)-->).)|(?R))*?)<!--endblock-->|((?:(?!<!--.*?-->).)+))/igsx )
 	#while ( $core =~ /(?is)(<!--block:(.*?)-->((?:(?:(?!<!--block:(?:.*?)-->).)|(?R))*?)<!--endblock-->|((?:(?!<!--block:.*?-->).)+))/g )
+	
 	while ( $core =~ /(?is)(?:((?&content))|(?><!--block:(.*?)-->)((?&core)|)<!--endblock-->|(<!--(?:block:.*?|endblock)-->))(?(DEFINE)(?<core>(?>(?&content)|(?><!--block:.*?-->)(?:(?&core)|)<!--endblock-->)+)(?<content>(?>(?!<!--(?:block:.*?|endblock)-->).)+))/g )
     {
         if (defined $2) {
@@ -955,55 +956,7 @@ sub process {
 			$self->parse;
 		}
 	}
-	#------------------------------------------------------
-	#$ProgramEndTime = Time::HiRes::gettimeofday();
-	#$Benchmark = sprintf("%.3f", Time::HiRes::gettimeofday() - $ProgramStartTime);
-	#------------------------------------------------------
-	#for (1..1) {$self->process_vars();}
-	#------------------------------------------------------
-	$self;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 header()
-	
-	$view->header;
 
-Prints the header to the browser.
-
-=cut
-
-sub header {
-	my ($self, $type) = @_;
-	$type ||= "text/html;charset=utf-8";
-	print "Content-type: $type\n\n";
-	$self;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 render()
-	
-	$view->render;
-
-Send the template content to the browser. This method can be chained.
-
-=cut
-
-sub render {
-
-	my ($self) = $_[0];
-	my ($gziped);	
-	
-	unless (exists	$ENV{HTTP_ACCEPT_ENCODING} &&
-							$ENV{HTTP_ACCEPT_ENCODING} =~ /\bgzip\b/ &&
-							$self->me->var->{gzip_output}) {
-		$self->header();
-		print $self->{content};
-		return;
-	}
-
-	print "Content-Type: text/html\n";
-	print "Content-Encoding: gzip\n\n";
-	gzip $self->{content}, \$gziped or die "gzip failed: $GzipError\n";
-	print $gziped;
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1019,25 +972,6 @@ sub out {
 	my ($self) = $_[0];
 	$self->process();
 	return $self->{content};
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 show()
-	
-	$view->show;
-	
-	# is the same as doing
-	$view->process();
-	$view->render();
-
-Process the template and send the content to the browser.
-
-=cut
-
-sub show {
-	my ($self) = $_[0];
-	$self->process();
-	$self->render();
-	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()

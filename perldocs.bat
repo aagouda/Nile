@@ -1,12 +1,12 @@
 call perldoc -o html lib/Nile.pm > Nile.html
 call perldoc -o html lib/Nile/Abort.pm > Abort.html
-call perldoc -o html lib/Nile/Autouse.pm > Autouse.html
 call perldoc -o html lib/Nile/Base.pm > Base.html
 call perldoc -o html lib/Nile/Config.pm > Config.html
 call perldoc -o html lib/Nile/Database.pm > Database.html
 call perldoc -o html lib/Nile/Dispatcher.pm > Dispatcher.html
 call perldoc -o html lib/Nile/File.pm > File.html
 call perldoc -o html lib/Nile/Lang.pm > Lang.html
+call perldoc -o html lib/Nile/Plugin/Email.pm > Email.html
 call perldoc -o html lib/Nile/Paginate.pm > Paginate.html
 call perldoc -o html lib/Nile/Setting.pm > Setting.html
 call perldoc -o html lib/Nile/HTTP/Request.pm > Request.html

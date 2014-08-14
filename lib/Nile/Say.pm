@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Say;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -19,15 +19,11 @@ Nile::Say -  Compatibility layer to use say().
 
 =head1 SYNOPSIS
 		
-	package Nile::Plugin::Home::Home;
+	print "hello world\n";
 
-	use Nile::Base;
+	# same as:
 
-	sub home  : GET Action {
-		my ($self) = @_;
-	}
-	
-	1;
+	say "hello world";
 
 =head1 DESCRIPTION
 

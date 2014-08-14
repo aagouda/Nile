@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::XML;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -22,10 +22,13 @@ Nile::XML - XML file manager.
 	# get a reference to the framework xml object.
 	$xml = $self->me->xml;
 
+	# get a reference to a new xml object.
+	$xml = $self->me->xml->new;
+
 	# keep sort order when reading and writing the xml file data. default is off.
 	#$xml->keep_order(1);
 
-	# load xml file and return object to it
+	# load xml file
 	$xml->load("path/to/xml/file.xml");
 
 	# load and append another xml file to the same object
@@ -80,7 +83,7 @@ Nile::XML - XML file manager.
 	# updated the provided tags and save changes to the file
 	$xml->update(%tags);
 
-	# save changes to the file
+	# Save changes to the output file. If no file name just update the loaded file name.
 	$xml->save($file);
 
 	# load xml file content and return it as a hash, not added to the object
@@ -93,6 +96,7 @@ Nile::XML - XML file manager.
 
 	# get a new xml object
 	#my $xml_other = $xml->object;
+	#my $xml_other = $xml->new;
 	
 	# load and manage another xml files separately
 	#$xml_other->load("xmlfile");
@@ -180,7 +184,6 @@ sub AUTOLOAD {
 	my ($self) = shift;
 
     my ($class, $method) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
-	#return if $method eq 'DESTROY'; 
 
     if ($self->can($method)) {
 		return $self->$method(@_);
@@ -197,7 +200,7 @@ sub AUTOLOAD {
 =head2 load()
 	
 	# get xml object
-	$xml = $self->me->xml;
+	$xml = $self->me->xml->new;
 
 	# load xml file
 	$xml->load($file);

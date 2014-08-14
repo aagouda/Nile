@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Config;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -19,7 +19,11 @@ Nile::Config - Configuration file manager.
 
 =head1 SYNOPSIS
 	
+	# get the app config object
 	$config = $self->me->config;
+	
+	# get a new config object
+	$config = $self->me->config->new;
 	
 	# keep sort order when reading and writing the xml file data. default is off.
 	#$config->keep_order(1);
@@ -72,7 +76,6 @@ This class extends L<Nile::XML> class, therefore all methods from L<Nile::XML> i
 
 use Nile::Base;
 extends 'Nile::XML';
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 around 'load' => sub {
 
@@ -86,6 +89,7 @@ around 'load' => sub {
 	
 	# get a new config object
 	#my $configure = $config->object;
+	#my $configure = $config->new;
 	
 	# load and manage a language files separately
 	#$configure->load("configuration");

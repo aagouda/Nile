@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Router;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -59,6 +59,7 @@ Nile::Router - URL route manager.
 Routes are stored in a special xml files in the application folder named B<route>. Below is a sample C<route.xml> file.
 
 	<?xml version="1.0" encoding="UTF-8" ?>
+
 	<register route="/register" action="Accounts/Register/create" method="get" defaults="year=1900|month=1|day=23" />
 	<post route="/blog/post/{cid:\d+}/{id:\d+}" action="Blog/Article/post" method="post" />
 	<browse route="/blog/{id:\d+}" action="Blog/Article/browse" method="get" />

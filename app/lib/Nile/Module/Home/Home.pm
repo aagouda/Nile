@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 use Nile::Module; # automatically extends Nile::Module
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -40,13 +40,9 @@ sub home : GET Action {
 
 	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
-	# plugin class
-	my $email = $me->plugin->email;
-	#$email->send();
-
 	# module settings from config files
 	my $setting = $self->setting;
-	
+
 	return $view->out;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

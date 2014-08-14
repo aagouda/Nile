@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Hook;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -19,15 +19,25 @@ Nile::Hook - Hook class for the Nile framework.
 
 =head1 SYNOPSIS
 	
-	# run this hook before start
+	# run this hook before the "start"
 	$app->hook->before_start( sub {
 		my ($me, @args) = @_; 
+
 	});
 	
-	# run this hook after start
+	# run this hook after the "start"
 	$app->hook->after_start( sub { 
 		my ($me, @args) = @_;
+
 	});
+	
+	# inside plugins and modules
+	
+	# call the before hook for "start"
+	#$self->me->hook->on_start;
+
+	# call the after hook for "start"
+	#$self->me->hook->off_start;
 
 =head1 DESCRIPTION
 
@@ -59,8 +69,8 @@ sub AUTOLOAD {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
 	my ($self, $arg) = @_;
-	$self->{hooks}->{before} = {};
-	$self->{hooks}->{after} = {};
+	$self->{hooks}->{before} = +{};
+	$self->{hooks}->{after} = +{};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub hook_before {

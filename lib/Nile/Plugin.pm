@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -34,6 +34,9 @@ use Module::Runtime qw(use_module);
 
 our @EXPORT_MODULES = (
 		Moose => [],
+		utf8 => [],
+		'Nile::Say' => [],
+		'MooseX::MethodAttributes' => [],
 	);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
@@ -75,13 +78,13 @@ sub import {
 
 Returns plugin class settings from configuration files loaded.
 
-Helper plugin settings in config files must be in inside the plugin tag. The plugin class name must be lower case tag, so class C<Email> should be C<email>.
+Helper plugin settings in config files must be in inside the plugin tag. The plugin class name can be lower case tag, so plugin C<Email> can be C<email>.
 
 Exampler settings for C<email> plugin class below:
 
 	<plugin>
 		<email>
-			<smtp>localhost</smtp>
+			<host>localhost</host>
 			<user>webmaster</user>
 			<pass>1234</pass>
 		</email>
@@ -95,6 +98,11 @@ sub setting {
 	$plugin ||= caller();
 	$plugin =~ s/^(.*):://;
 	$plugin = lc($plugin);
+	
+	# access plugin name as "email" or "Email"
+	if (!exists $self->me->config->var->{plugin}->{$plugin} && exists $self->me->config->var->{plugin}->{ucfirst($plugin)}) {
+		$plugin = ucfirst($plugin);
+	}
 
 	return wantarray ? %{ $self->me->config->var->{plugin}->{$plugin} } : $self->me->config->var->{plugin}->{$plugin};
 }

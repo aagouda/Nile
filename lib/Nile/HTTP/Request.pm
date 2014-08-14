@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request;
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 =pod
 
@@ -36,6 +36,9 @@ Nile::HTTP::Request -  The HTTP request manager.
 The http request is available as a shared object extending the L<CGI::Simple> module. This means that all methods supported
 by L<CGI::Simple> is available with the additions to these few methods:
 
+	base_url
+	abs_url
+	url_path
 	is_ajax
 	is_post
 	is_get
