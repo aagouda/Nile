@@ -27,7 +27,6 @@ app/theme/default/widget/footer.html
 app/theme/default/widget/header.html
 app/web/.exists
 Changes
-Email.html
 lib/Nile.pm
 lib/Nile/Abort.pm
 lib/Nile/Base.pm
@@ -37,6 +36,7 @@ lib/Nile/Declare.pm
 lib/Nile/Deserializer.pm
 lib/Nile/Dispatcher.pm
 lib/Nile/File.pm
+lib/Nile/Filter.pm
 lib/Nile/Handler/CGI.pm
 lib/Nile/Handler/FCGI.pm
 lib/Nile/Handler/PSGI.pm

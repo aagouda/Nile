@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.38';
+our $VERSION = '0.39';
 
 =pod
 
@@ -99,7 +99,7 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
 
 Nile - Android Like Visual Web App Framework Separating Code From Design Multi Lingual And Multi Theme.
 
-B<Alpha> version, do not use it for production. The project's homepage L<https://github.com/mewsoft/Nile>.
+B<Beta> version, API may change. The project's homepage L<https://github.com/mewsoft/Nile>.
 
 The main idea in this framework is to separate all the html design and layout from programming. 
 The framework uses html templates for the design with special xml tags for inserting the dynamic output into the templates.
@@ -175,7 +175,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
 	package Nile::Module::Home::Home;
 
-	our $VERSION = '0.38';
+	our $VERSION = '0.39';
 
 	use Nile::Module;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -462,7 +462,9 @@ Example config file path/config/config.xml:
 	</plugin>
 
 	<hook>
-			<example>enabled</example>
+			<example>
+				<status>enabled</status>
+			</example>
 	</hook>
 
 =head1 APPLICATION INSTANCE SHARED DATA
@@ -934,19 +936,20 @@ sub init {
 		$self->router->load($_);
 	}
 	#------------------------------------------------------
-	# load module hooks  from perl/.../lib/Nile/Hook
+	# force load these passed hooks, ignore their config status
 	foreach my $hook (@{$arg->{hook}}) {
 		$hook = "Nile::Hook::".ucfirst($hook);
 		load $hook;
 		$self->object($hook)->hooks();
 	}
 
-	# load app hooks from app/lib/Nile/Hook
-	foreach my $hook (sort $self->file->files($file->catdir($arg->{path}, "lib/Nile/Hook") , "*.pm", 1)) {
-		$hook =~ s/\.pm$//;
-		$hook = "Nile::Hook::$hook";
-		load $hook;
-		$self->object($hook)->hooks();
+	# load hooks enabled in the config files
+	while (my ($name, $hook) = each %{$self->config->get("hook")} ) {
+		if ($hook->{status}) {
+			$name = "Nile::Hook::".ucfirst($name);
+			load $name;
+			$self->object($name)->hooks();
+		}
 	}
 	#------------------------------------------------------
 
@@ -1646,6 +1649,22 @@ has 'hook' => (
 		}
   );
 
+=head2 filter()
+	
+See L<Nile::Filter>.
+
+=cut
+
+has 'filter' => (
+      is      => 'rw',
+	  isa    => 'Nile::Filter',
+	  lazy	=> 1,
+	  default => sub {
+			load Nile::Filter;
+			shift->object("Nile::Filter", @_);
+		}
+  );
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 logger()
 	
@@ -2028,133 +2047,6 @@ sub instance_does ($$) {
 	(Scalar::Util::blessed($_[1]) and $_[1]->DOES($_[2])) ? $_[1] : undef;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 trim()
-	
-	$str = $app->trim($str);
-	@str = $app->trim(@str);
-
-Remove white spaces from left and right of a string.
-
-=cut
-
-sub trim {
-	my ($self) = shift;
-	my (@out) = @_;
-	for (@out) {
-		s/^\s+//;
-		s/\s+$//;
-	}
-	return (scalar @out >1)? @out : $out[0];
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 ltrim()
-	
-	$str = $app->ltrim($str);
-	@str = $app->ltrim(@str);
-
-Remove white spaces from left of a string.
-
-=cut
-
-sub ltrim {
-	my ($self) = shift;
-	my (@out) = @_;
-	for (@out) {
-		s/^\s+//;
-	}
-	return (scalar @out >1)? @out : $out[0];
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 rtrim()
-	
-	$str = $app->rtrim($str);
-	@str = $app->rtrim(@str);
-
-Remove white spaces from right of a string.
-
-=cut
-
-sub rtrim {
-	my ($self) = shift;
-	my (@out) = @_;
-	for (@out) {
-		s/\s+$//;
-	}
-	return (scalar @out >1)? @out : $out[0];
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 trims()
-	
-	$str = $app->trims($str);
-
-Remove all white spaces from a string.
-
-=cut
-
-sub trims {
-	my ($self) = shift;
-	my $str =  $_[0];
-	$str =~ s/\s+//g;
-	return $str;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 max()
-	
-	$max = $app->max(10, 200, 40, 30, 50, 60);
-
-Returns the maximum value in array of numbers.
-
-=cut
-
-sub max {
-	my ($self, $max, @vars) = @_;
-	for (@vars) {
-		$max = $_ if $_ > $max;
-	}
-	return $max;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 min()
-	
-	$min = $app->min(10, 200, 40, 30, 50, 60);
-
-Returns the minimum value in array of numbers.
-
-=cut
-
-sub min {
-	my ($self, $min, @vars) = @_;
-	for (@vars) {
-		$min = $_ if $_ < $min;
-	}
-	return $min;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub digit {
-	my ($self) = shift;
-	my $str =  $_[0];
-	$str =~ s/\D+//g;
-	$str += 0;
-	return $str;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub number {
-	my ($self) = shift;
-	my $str =  $_[0];
-	#if ($str =~ /(\+|-)?([0-9]+(\.[0-9]+)?)/) {
-	if ($str =~ /(-)?([0-9]+(\.[0-9]+)?)/) {
-		return "$1$2";
-	}
-	return "";
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub commify {
-	my ($self) = shift;
-	my $str =  reverse $_[0];
-	$str =~ s/(\d\d\d)(?=\d)(?!\d*\.)/$1,/g;
-	return scalar reverse $str;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 abort()
 	
 	$app->abort("error message");
@@ -2213,6 +2105,8 @@ Serializer L<Nile::Serializer>.
 Deserializer L<Nile::Deserializer>.
 
 Serialization Base L<Nile::Serialization>.
+
+Filter	L<Nile::Filter>.
 
 MIME L<Nile::MIME>.
 

@@ -1,5 +1,5 @@
-#!C:\perl\bin\perl.exe
 #!/usr/bin/perl
+#!C:\perl\bin\perl.exe
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #	Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,8 +37,8 @@
 		# load route files, default extension is xml
 		route		=> [ qw(route) ],
 
-		# load hooks, app hooks loaded automatically
-		#hook		=> [ qw() ],
+		# force load these hooks, ignore their config status
+		#hook		=> [ qw(hooks) ],
 
 		# log file name
 		log_file	=>	"log.pm",
