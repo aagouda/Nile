@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::CGI;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -49,6 +49,8 @@ sub run {
 	# dispatch the action
 	my $content = $me->dispatcher->dispatch;
 	#------------------------------------------------------
+	$me->hook->on_response;
+
 	# assume OK response if not set
 	$response->code(200) unless ($response->code);
 
@@ -94,6 +96,8 @@ sub run {
 	#my $res = $response->finalize;
 	#my $res = $response->headers_as_string;
 	
+	$me->hook->off_response;
+
 	my $res = $response->as_string;
 	
 	#print "Content-type: text/html;charset=utf-8\n\n";

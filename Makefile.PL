@@ -50,6 +50,9 @@ WriteMakefile(
 			Email::Simple => 0,
 			Email::Sender::Simple => 0,
 			MIME::Entity => 0,
+			Email::Valid => 0,
+			Data::Validate::URI => 0,
+			HTML::Entities => 0,
 
 	}, # e.g., Module::Name => 1.1
 

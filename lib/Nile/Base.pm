@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Base;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -33,7 +33,7 @@ Nile::Base - Base class for the Nile framework.
 
 use utf8;
 use Moose;
-#use MooseX::Declare;
+use MooseX::Declare;
 use MooseX::MethodAttributes;
 use Import::Into;
 use Module::Runtime qw(use_module);
@@ -43,6 +43,12 @@ use Module::Runtime qw(use_module);
 use Nile::Say;
 #use Nile::Declare ('method' => 'method', 'function' => 'function', 'invocant'=>'$this', 'inject'=>'my ($me) = $this->me;');
 
+no warnings 'redefine';
+no strict 'refs';
+# disable the auto immutable feature of Moosex::Declare, or use class Nile::Home is mutable {...}
+*{"MooseX::Declare::Syntax::Keyword::Class" . '::' . "auto_make_immutable"} = sub { 0 };
+#around auto_make_immutable => sub { 0 };
+
 our @EXPORT_MODULES = (
 		#strict => [],
 		#warnings => [],
@@ -51,7 +57,7 @@ our @EXPORT_MODULES = (
 		#true => [],
 		'Nile::Say' => [],
 		#'Nile::Declare' => ['method' => 'method', 'function' => 'function', 'invocant'=>'$self', 'inject'=>'my ($me) = $self->me;'],
-		#'MooseX::Declare' => [],
+		'MooseX::Declare' => [],
 		#'Nile::Declare' => [],
 		'MooseX::MethodAttributes' => [],
 		#'MooseX::ClassAttribute' => [],

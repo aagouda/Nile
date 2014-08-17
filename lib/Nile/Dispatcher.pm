@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -156,6 +156,7 @@ sub dispatch_action {
 	my $meta = $object->meta;
 
 	my $attrs = $meta->get_method($action)->attributes;
+	#$self->me->dump($attrs);
 	
 	# sub home: Action Capture Public {...}
 	if (!grep(/^(action|public|capture)$/i, @$attrs)) {

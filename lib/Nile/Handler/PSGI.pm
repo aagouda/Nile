@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -79,6 +79,8 @@ sub run {
 		# dispatch the action
 		my $content = $me->dispatcher->dispatch;
 		#--------------------------------------------------
+		$me->hook->on_response;
+
 		my $ctype = $response->header('Content-Type');
 		if ($me->charset && $ctype && $me->content_type_text($ctype)) {
 			$response->header('Content-Type' => "$ctype; charset=" . $me->charset) if $ctype !~ /charset/i;
@@ -109,7 +111,8 @@ sub run {
 		
 		#$me->log->debug("PSGI request end");
 		$me->stop_logger;
-
+		
+		$me->hook->off_response;
 		# return the PSGI response array ref
 		return $response->finalize;
 	};

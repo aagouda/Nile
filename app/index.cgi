@@ -37,8 +37,8 @@
 		# load route files, default extension is xml
 		route		=> [ qw(route) ],
 
-		# force load these hooks, ignore their config status
-		#hook		=> [ qw(hooks) ],
+		# load these plugins on startup, ignore their config autoload
+		#plugin		=> [ qw(cache) ],
 
 		# log file name
 		log_file	=>	"log.pm",

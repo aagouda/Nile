@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -23,19 +23,107 @@ Nile::Plugin - Plugin base class for the Nile framework.
 
 Nile::Plugin - Plugin base class for the Nile framework.
 
+This module is the base class for plugins. You include it by using it which also makes itself as a parent class for the plugin and inherts
+the method setting which has the plugin setting loaded automatically from the config files.
+
+Creating your first plugin C<Hello> is simple like that, just create a module file called C<Hello.pm> in the folder C<Nile/Plugin> and 
+put the following code in it:
+
+	package Nile::Plugin::Hello;
+	
+	our $VERSION = '0.40';
+	
+	# this also extends Nile::Plugin, the plugin base class
+	use Nile::Plugin;
+	
+	# optional our alternative for sub new {} called automaticall on object creation
+	sub main {
+
+		my ($self, $arg) = @_;
+		
+		# plugin settings from config files section
+		my $setting = $self->setting();
+		#same as
+		#my $setting = $self->setting("hello");
+		
+		# get app context
+		my $me = $self->me;
+
+		# good to setup hooks here
+		# run this hook after the "start" method
+		$me->hook->after_start( sub { 
+			my ($me, @args) = @_;
+			#...
+		});
+		
+	}
+	
+	sub welcome {
+		my ($self) = @_;
+		return "Hello world";
+	}
+
+	1;
+
+Then inside other modules or plugins you can access this plugin as
+	
+	say $me->plugin->hello->welcome;
+
+	# in general, you access plugins like this:
+	$me->plugin->your_plugin_name->your_plugin_method([args]);
+
+Plugins will be loaded automatically on the first time it is used and can be load on application startup in the C<init> method:
+
+	$app->init({
+		plugin	=> [ qw(hello) ],
+	});
+
+Plugins also can be loaded on application startup by setting the C<autoload> variable in the plugin configuration in the
+config files. 
+
+Example of plugin configuration to auto load on application startup:
+
+	<plugin>
+
+		<hello>
+			<autoload>1</autoload>
+		</hello>
+
+	</plugin>
+
+At the plugin load, the plugin optional method C<main> will be called automatically if it exists, this is an alternative for the method C<new>.
+
+Inside the plugin methods, you access the application context by the injected method C<me> and you use it in this way:
+
+	my $me = $self->me;
+	$me->request->param("name");
+	...
+	$me->config->get("email");
+
+Plugins that setup C<hooks> must be set to autoload on startup for hooks works as expected.
+
 =cut
 
 use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 use Moose;
+use MooseX::Declare;
+use MooseX::MethodAttributes;
 
 use Import::Into;
 use Module::Runtime qw(use_module);
+
+no warnings 'redefine';
+no strict 'refs';
+# disable the auto immutable feature of Moosex::Declare, or use class Nile::Home is mutable {...}
+*{"MooseX::Declare::Syntax::Keyword::Class" . '::' . "auto_make_immutable"} = sub { 0 };
+#around auto_make_immutable => sub { 0 };
 
 our @EXPORT_MODULES = (
 		Moose => [],
 		utf8 => [],
 		'Nile::Say' => [],
+		'MooseX::Declare' => [],
 		'MooseX::MethodAttributes' => [],
 	);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -80,31 +168,40 @@ Returns plugin class settings from configuration files loaded.
 
 Helper plugin settings in config files must be in inside the plugin tag. The plugin class name can be lower case tag, so plugin C<Email> can be C<email>.
 
-Exampler settings for C<email> plugin class below:
+Exampler settings for C<email> and  C<cache> plugins class below:
 
 	<plugin>
 		<email>
-			<host>localhost</host>
-			<user>webmaster</user>
-			<pass>1234</pass>
+			<transport>Sendmail</transport>
+			<sendmail>/usr/sbin/sendmail</sendmail>
 		</email>
+		<cache>
+			<autoload>1</autoload>
+		</cache>
 	</plugin>
 
 =cut
 
 sub setting {
+
 	my ($self, $plugin) = @_;
 
 	$plugin ||= caller();
 	$plugin =~ s/^(.*):://;
 	$plugin = lc($plugin);
+
+	my $me = $self->me;
 	
 	# access plugin name as "email" or "Email"
-	if (!exists $self->me->config->var->{plugin}->{$plugin} && exists $self->me->config->var->{plugin}->{ucfirst($plugin)}) {
+	if (!exists $me->config->get("plugin")->{$plugin} && exists $me->config->get("plugin")->{ucfirst($plugin)}) {
 		$plugin = ucfirst($plugin);
 	}
+	
+	my $setting = $me->config->get("plugin")->{$plugin};
 
-	return wantarray ? %{ $self->me->config->var->{plugin}->{$plugin} } : $self->me->config->var->{plugin}->{$plugin};
+	delete $setting->{autoload};
+
+	return wantarray ? %{$setting} : $setting;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

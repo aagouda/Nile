@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 use Nile::Module; # automatically extends Nile::Module
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +67,15 @@ sub welcome {
 	return "Nice to see you, " . $args{message};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Bug in MooseX::Method::Signatures does not support attributes, waiting fix
+# Error: Can't locate object method "attributes" via package "MooseX::Method::Signatures::Meta::Method"
+# MooseX::Declare does not seem to work with "MooseX::MethodAttributes because" they both try to override Moose's default metaclass for methods.
+# MooseX::MethodAttributes would need to be fixed to respect the original method metaclass, rather than imposing one.
+#method hello ($args) : Action {
+#	my $me = $self->me;
+#	return "Nice to say hello";
+#}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 
@@ -99,5 +108,4 @@ L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =cut
-
 1;

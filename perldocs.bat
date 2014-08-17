@@ -7,6 +7,7 @@ call perldoc -o html lib/Nile/Dispatcher.pm > Dispatcher.html
 call perldoc -o html lib/Nile/File.pm > File.html
 call perldoc -o html lib/Nile/Filter.pm > Filter.html
 call perldoc -o html lib/Nile/Lang.pm > Lang.html
+call perldoc -o html lib/Nile/Plugin.pm > Plugin.html
 call perldoc -o html lib/Nile/Plugin/Email.pm > Email.html
 call perldoc -o html lib/Nile/Paginate.pm > Paginate.html
 call perldoc -o html lib/Nile/Setting.pm > Setting.html

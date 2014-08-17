@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Email;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -98,6 +98,7 @@ sub main { # our sub new {}
 	my $setting = $self->setting();
 	
 	my $transport = delete $setting->{transport};
+
 
 	if ($transport) {
 		$self->transport($transport, $setting);

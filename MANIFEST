@@ -11,7 +11,6 @@ app/file/.exists
 app/index.cgi
 app/lang/ar/general.xml
 app/lang/en-US/general.xml
-app/lib/Nile/Hook/Hooks.pm
 app/lib/Nile/Module/Home/Home.pm
 app/lib/Nile/Plugin/Date.pm
 app/log/log.pm
@@ -41,7 +40,6 @@ lib/Nile/Handler/CGI.pm
 lib/Nile/Handler/FCGI.pm
 lib/Nile/Handler/PSGI.pm
 lib/Nile/Hook.pm
-lib/Nile/Hook/.exists
 lib/Nile/HTTP/PSGI.pm
 lib/Nile/HTTP/Request.pm
 lib/Nile/HTTP/Request/PSGI.pm
@@ -52,6 +50,7 @@ lib/Nile/MIME.pm
 lib/Nile/Module.pm
 lib/Nile/Plugin.pm
 lib/Nile/Plugin/.exists
+lib/Nile/Plugin/Cache.pm
 lib/Nile/Plugin/Email.pm
 lib/Nile/Plugin/Object.pm
 lib/Nile/Plugin/Paginate.pm
@@ -67,5 +66,6 @@ lib/Nile/XML.pm
 LICENSE
 Makefile.PL
 MANIFEST
+Plugin.html
 README
 t/Nile.t

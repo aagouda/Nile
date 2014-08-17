@@ -30,6 +30,9 @@
 		<transport>Sendmail</transport>
 		<sendmail>/usr/sbin/sendmail</sendmail>
 	</email>
+	<cache>
+		<autoload>1</autoload>
+	</cache>
 </plugin>
 
 <hook>

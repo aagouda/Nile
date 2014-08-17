@@ -3,7 +3,7 @@ package Nile::HTTP::PSGI;
 use strict;
 use 5.008_001;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 use base qw(CGI::Simple);
 

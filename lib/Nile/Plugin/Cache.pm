@@ -5,9 +5,9 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Hook::Hooks;
+package Nile::Plugin::Cache;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -15,22 +15,38 @@ our $VERSION = '0.39';
 
 =head1 NAME
 
-Nile::Hook::Hooks - Hook example class for the Nile framework.
+Nile::Plugin::Cache - Cache plugin for the Nile framework.
 
 =head1 SYNOPSIS
-			
+	
+	# TODO
+		
 =head1 DESCRIPTION
+	
+Nile::Plugin::Cache - Cache plugin for the Nile framework.
 
-Nile::Hook::Hooks - Hook example class for the Nile framework.
+
+Plugin settings in th config file under C<plugin> section. The C<autoload> variable is set to true value for the plugin to be loaded
+on application startup to setup hooks to work before actions dispatch:
+
+	<plugin>
+
+		<cache>
+			<autoload>1</autoload>
+		</cache>
+
+	</plugin>
+
 
 =cut
 
-use Nile::Base;
-
+use Nile::Plugin; # also extends Nile::Plugin
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub hooks {
+sub main { # our sub new {}
 
-	my ($self) = @_;
+	my ($self, $arg) = @_;
+	
+	my $setting = $self->setting();
 	
 	my $me = $self->me;
 	
@@ -47,8 +63,12 @@ sub hooks {
 	$me->hook->before_request(sub {
 		my ($me, @args) = @_;
 	});
+	
+	#say "loaded Cache plugin";
 
 }
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod

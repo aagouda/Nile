@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -175,7 +175,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
 	package Nile::Module::Home::Home;
 
-	our $VERSION = '0.39';
+	our $VERSION = '0.40';
 
 	use Nile::Module;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -936,19 +936,23 @@ sub init {
 		$self->router->load($_);
 	}
 	#------------------------------------------------------
-	# force load these passed hooks, ignore their config status
-	foreach my $hook (@{$arg->{hook}}) {
-		$hook = "Nile::Hook::".ucfirst($hook);
-		load $hook;
-		$self->object($hook)->hooks();
+	# load these passed plugins on startup, ignore their config status
+	foreach my $name (@{$arg->{plugin}}) {
+		$name = "Nile::Plugin::".ucfirst($name);
+		if (!$self->is_loaded($name)) {
+			load $name;
+			$self->object($name);
+		}
 	}
 
-	# load hooks enabled in the config files
-	while (my ($name, $hook) = each %{$self->config->get("hook")} ) {
-		if ($hook->{status}) {
-			$name = "Nile::Hook::".ucfirst($name);
-			load $name;
-			$self->object($name)->hooks();
+	# load plugins set to autoload in the config files
+	while (my ($name, $plugin) = each %{$self->config->get("plugin")} ) {
+		if ($plugin->{autoload}) {
+			$name = "Nile::Plugin::".ucfirst($name);
+			if (!$self->is_loaded($name)) {
+				load $name ;
+				$self->object($name);
+			}
 		}
 	}
 	#------------------------------------------------------
@@ -1074,6 +1078,13 @@ sub uri_for {
 	else {
 		return $self->var->get("base_url") . $uri;
 	}
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub forward {
+	my ($self, $uri) = @_;
+	
+	#$me->forward($uri);
+
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 run()

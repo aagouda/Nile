@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Hook;
 
-our $VERSION = '0.39';
+our $VERSION = '0.40';
 
 =pod
 
@@ -20,13 +20,13 @@ Nile::Hook - Hook class for the Nile framework.
 =head1 SYNOPSIS
 	
 	# run this hook before the "start"
-	$app->hook->before_start( sub {
+	$me->hook->before_start( sub {
 		my ($me, @args) = @_; 
 
 	});
 	
 	# run this hook after the "start"
-	$app->hook->after_start( sub { 
+	$me->hook->after_start( sub { 
 		my ($me, @args) = @_;
 
 	});
