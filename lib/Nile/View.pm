@@ -7,7 +7,9 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
+
 
 =pod
 
@@ -325,15 +327,17 @@ view extension is B<html>. The second optional argument is the theme name, if no
 
 sub view {
 	my ($self, $view, $theme) = @_;	
+	
+	my $me = $self->me;
 
 	if ($view) {
 		$view .= ".html" unless ($view =~ /\.html$/i);
-		$theme ||= $self->{theme} ||= $self->me->var->get("theme");
-		my $file = $self->me->file->catfile($self->me->var->get("themes_dir"), $theme, "view", $view);
-		$self->{content} = $self->me->file->get($file);
+		$theme ||= $self->{theme} ||= $me->var->get("theme");
+		my $file = $me->file->catfile($me->var->get("themes_dir"), $theme, "view", $view);
+		$self->{content} = $me->file->get($file);
 		$self->{file} = $file;
 		$self->{view} = $view;
-		$self->{lang} ||= $self->me->var->get("lang");
+		$self->{lang} ||= $me->var->get("lang");
 		$self->{theme} = $theme;
 		$self->parse;
 		return $self;
@@ -512,7 +516,7 @@ sub parse_blocks {
 	my ($self) = @_;
 	$self->{block} = +{};
 	$self->parse_nest_blocks($self->{block}, $self->{content});
-	return $self; 
+	return $self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub parse_nest_blocks {

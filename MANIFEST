@@ -1,7 +1,7 @@
 app/.htaccess
 app/.htaccessFCGI
 app/api/.exists
-app/cash/.exists
+app/cache/.exists
 app/cmd/.exists
 app/config/config.xml
 app/cron/.exists
@@ -11,6 +11,7 @@ app/file/.exists
 app/index.cgi
 app/lang/ar/general.xml
 app/lang/en-US/general.xml
+app/lib/Nile/Module/Home/Contact.pm
 app/lib/Nile/Module/Home/Home.pm
 app/lib/Nile/Plugin/Date.pm
 app/log/log.pm
@@ -54,6 +55,7 @@ lib/Nile/Plugin/Cache.pm
 lib/Nile/Plugin/Email.pm
 lib/Nile/Plugin/Object.pm
 lib/Nile/Plugin/Paginate.pm
+lib/Nile/Plugin/Session.pm
 lib/Nile/Router.pm
 lib/Nile/Say.pm
 lib/Nile/Serialization.pm
@@ -66,6 +68,5 @@ lib/Nile/XML.pm
 LICENSE
 Makefile.PL
 MANIFEST
-Plugin.html
 README
 t/Nile.t

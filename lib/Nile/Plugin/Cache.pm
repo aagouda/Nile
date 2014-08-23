@@ -7,7 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Cache;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
 
@@ -26,7 +27,7 @@ Nile::Plugin::Cache - Cache plugin for the Nile framework.
 Nile::Plugin::Cache - Cache plugin for the Nile framework.
 
 
-Plugin settings in th config file under C<plugin> section. The C<autoload> variable is set to true value for the plugin to be loaded
+Plugin settings in th config file under C<plugin> section. The C<autoload> variable is must be set to true value for the plugin to be loaded
 on application startup to setup hooks to work before actions dispatch:
 
 	<plugin>
@@ -46,10 +47,9 @@ sub main { # our sub new {}
 
 	my ($self, $arg) = @_;
 	
-	my $setting = $self->setting();
-	
 	my $me = $self->me;
-	
+	my $setting = $self->setting();
+
 	# add the hooks you want here
 
 	$me->hook->before_start(sub {

@@ -30,6 +30,20 @@
 		<transport>Sendmail</transport>
 		<sendmail>/usr/sbin/sendmail</sendmail>
 	</email>
+
+	<session>
+		<autoload>1</autoload>
+		<key>nile_session_key</key>
+		<expire>1 year</expire>
+		<driver>File</driver>
+		<cookie>
+			<path>/</path>
+			<secure></secure>
+			<domain></domain>
+			<httponly></httponly>
+		</cookie>
+	</session>
+
 	<cache>
 		<autoload>1</autoload>
 	</cache>

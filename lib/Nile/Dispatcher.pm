@@ -7,7 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
 
@@ -74,8 +75,10 @@ sub dispatch_action {
 
 	my ($self, $route, $request_method) = @_;
 	
-	$request_method ||= $self->me->request->request_method;
-	$request_method ||= "ajax" if ($self->me->request->is_ajax);
+	my $me = $self->me;
+
+	$request_method ||= $me->request->request_method;
+	$request_method ||= "ajax" if ($me->request->is_ajax);
 	$request_method ||= "*";
 
 	$route = $self->route($route);
@@ -85,13 +88,13 @@ sub dispatch_action {
 	$route = "/$route" if ($route !~ /^\//);
 
 	#$match->{action}, $match->{args}, $match->{query}, $match->{uri}, $match->{code}, $match->{route}
-	my $match = $self->me->router->match($route, $request_method);
-	#$self->me->dump($match);
+	my $match = $me->router->match($route, $request_method);
+	#$me->dump($match);
 	
 	if ($match->{action}) {
 		$route =  $match->{action};
 		while (my($k, $v) = each %{$match->{args}}) {
-			$self->me->request->add_param($k, $v);
+			$me->request->add_param($k, $v);
 		}
 	}
 	#------------------------------------------------------
@@ -111,7 +114,7 @@ sub dispatch_action {
 		}
 
 		if ($@) {
-			$self->me->abort("Dispatcher error. Inline action dispatcher error for route '$route'.\n\n$@");
+			$me->abort("Dispatcher error. Inline action dispatcher error for route '$route'.\n\n$@");
 		}
 
 		return $content;
@@ -119,10 +122,10 @@ sub dispatch_action {
 	#------------------------------------------------------
 	# if route is '/' then use the default route
 	if (!$route || $route eq "/") {
-		$route = $self->me->var->get("default_route");
+		$route = $me->var->get("default_route");
 	}
 
-	$route ||= $self->me->abort("Dispatcher error. No route defined.");
+	$route ||= $me->abort("Dispatcher error. No route defined.");
 	
 	my ($module, $controller, $action) = $self->action($route);
 
@@ -131,7 +134,7 @@ sub dispatch_action {
 	eval "use $class;";
 
 	if ($@) {
-		$self->me->abort("Dispatcher error. Module error for route '$route' class '$class'.\n\n$@");
+		$me->abort("Dispatcher error. Module error for route '$route' class '$class'.\n\n$@");
 	}
 	
 	my $object = $class->new();
@@ -149,28 +152,28 @@ sub dispatch_action {
 			}
 		}
 		else {
-			$self->me->abort("Dispatcher error. Module '$class' action '$action' does not exist.");
+			$me->abort("Dispatcher error. Module '$class' action '$action' does not exist.");
 		}
 	}
 	
 	my $meta = $object->meta;
-
+	
 	my $attrs = $meta->get_method($action)->attributes;
-	#$self->me->dump($attrs);
+	#$me->dump($attrs);
 	
 	# sub home: Action Capture Public {...}
 	if (!grep(/^(action|public|capture)$/i, @$attrs)) {
-		$self->me->abort("Dispatcher error. Module '$class' method '$action' is not marked as 'Action' or 'Capture'.");
+		$me->abort("Dispatcher error. Module '$class' method '$action' is not marked as 'Action' or 'Capture'.");
 	}
 
 	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH, [ajax]
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
-		$self->me->abort("Dispatcher error. Module '$class' action '$action' request method '$request_method' is not allowed.");
+		$me->abort("Dispatcher error. Module '$class' action '$action' request method '$request_method' is not allowed.");
 	}
 	
 	# add method "me" or one of its alt
-	$self->me->add_object_context($object, $meta);
+	$me->add_object_context($object, $meta);
 	
 	undef $@;
 
@@ -255,17 +258,19 @@ If not found, it will try to detect the route from the request uri after the pat
 sub route {
 	my ($self, $route) = @_;
 	
+	my $me = $self->me;
+
 	# if no route, try to find route from the request param named by action_name
 	if (!$route) {
 		# allow multiple names separated with commas, i.e. 'action', 'action,route,cmd'.
-		my @action_name = split(/\,/, $self->me->var->get("action_name"));
+		my @action_name = split(/\,/, $me->var->get("action_name"));
 		foreach (@action_name) {
-			last if ($route = $self->me->request->param($_));
+			last if ($route = $me->request->param($_));
 		}
 	}
 	
 	# if no route, get the route from the query string in the REQUEST_URI
-	$route ||= $self->me->request->url_path;
+	$route ||= $me->request->url_path;
 	
 	if ($route) {
 		$route =~ s!^/!!g;

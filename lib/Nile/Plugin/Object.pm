@@ -7,7 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Object;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
 
@@ -26,7 +27,6 @@ Nile::Plugin::Object - Plugin base class for the Nile framework.
 =cut
 
 use Nile::Base;
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub AUTOLOAD {
 	

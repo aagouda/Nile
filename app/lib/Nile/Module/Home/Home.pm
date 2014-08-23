@@ -7,9 +7,11 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
+use DateTime qw();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
@@ -41,9 +43,16 @@ sub home : GET Action {
 	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
 	# module settings from config files
-	my $setting = $self->setting;
+	my $setting = $self->setting();
 	
-	return $view->out;
+	# plugin session must be enabled in config.xml
+	if (!$me->session->{first_visit}) {
+		$me->session->{first_visit} = time;
+	}
+	my $dt = DateTime->from_epoch(epoch => $me->session->{first_visit});
+	$view->set("first_visit", $dt->strftime("%a, %d %b %Y %H:%M:%S"));
+	
+	return $view->out();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # run action and capture print statements, no returns. url: /home/news
@@ -62,7 +71,7 @@ sub welcome {
 
 	my ($self, %args) = @_;
 	
-	my $me = $self->me;
+	my $me = $self->me();
 
 	return "Nice to see you, " . $args{message};
 }

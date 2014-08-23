@@ -15,10 +15,13 @@ css url: <vars name="css_url" /><br>
 new url: <a href="<vars name="base_url" />comments" >comments</a><br>
 image: <img src="<vars name="image_url" />logo.png" /><br>
 <br>
+first visit: <vars name="first_visit" /><br>
+<br>
 
 {date_now} <vars type="plugin" method="Date->date" format="%a, %d %b %Y %H:%M:%S" /><br>
 {time_now} <vars type="plugin" method="Date->time" format="%A %d, %B %Y  %T %p" /><br>
 {date_time} <vars type="plugin" method="Date::now" capture="1" format="%B %d, %Y  %r" /><br>
+
 <br>
 <vars type="module" method="Home::Home->welcome" message="Welcome back!" /><br>
 <br>

@@ -7,7 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
 
@@ -141,7 +142,7 @@ Applications built with this framework must have basic folder structure. Applica
 The following is the basic application folder tree that must be created manually before runing:
 
 	├───api
-	├───cash
+	├───cache
 	├───cmd
 	├───config
 	├───cron
@@ -175,7 +176,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
 	package Nile::Module::Home::Home;
 
-	our $VERSION = '0.40';
+	our $VERSION = '0.41';
 
 	use Nile::Module;
 	#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -454,18 +455,13 @@ Example config file path/config/config.xml:
 
 	<plugin>
 		<email>
-			<sendmail>/usr/bin/sendmail</sendmail>
-			<smtp>localhost</smtp>
-			<user>webmaster</user>
-			<pass>1234</pass>
+			<transport>Sendmail</transport>
+			<sendmail>/usr/sbin/sendmail</sendmail>
 		</email>
+		<cache>
+			<autoload>1</autoload>
+		</cache>
 	</plugin>
-
-	<hook>
-			<example>
-				<status>enabled</status>
-			</example>
-	</hook>
 
 =head1 APPLICATION INSTANCE SHARED DATA
 
@@ -474,7 +470,7 @@ on the main object to access all application shared data. The plugin modules fil
 
 Moose enabled
 Strict and Warnings enabled.
-a Moose attribute called 'me' or 'nile' injected in the same plugin class holds the
+a Moose attribute called 'me' injected in the same plugin class holds the
 application singleton instance to access all the shared data and methods.
 
 you will be able to access from the plugin class the shared vars as:
@@ -636,7 +632,7 @@ BEGIN {
 		my $msg = shift;
 		#my $trace = Devel::StackTrace->new(indent => 1, message => $msg, ignore_package => [qw(Carp CGI::Carp)]);
 		my $trace = Devel::StackTrace::WithLexicals->new(indent => 1, message => $msg, ignore_package => [qw(Carp CGI::Carp)]);
-		$trace->frames(reverse $trace->frames);
+		#$trace->frames(reverse $trace->frames);
 		print $trace->as_html;
 	}
 	set_message(\&handle_errors);
@@ -869,7 +865,7 @@ sub init {
 	my $file = $self->file;
 
 	# setup the path for the app folders
-	foreach (qw(api cash cmd config cron data file lib log route temp web)) {
+	foreach (qw(api cache cmd config cron data file lib log route temp web)) {
 		$self->var->set($_."_dir" => $file->catdir($arg->{path}, $_));
 	}
 
@@ -938,20 +934,24 @@ sub init {
 	#------------------------------------------------------
 	# load these passed plugins on startup, ignore their config status
 	foreach my $name (@{$arg->{plugin}}) {
-		$name = "Nile::Plugin::".ucfirst($name);
-		if (!$self->is_loaded($name)) {
-			load $name;
-			$self->object($name);
+		$name = ucfirst($name);
+		my $class = "Nile::Plugin::$name";
+		if (!$self->is_loaded($class)) {
+			load $class;
+			#$self->object($name);
+			$self->plugin->$name;
 		}
 	}
 
 	# load plugins set to autoload in the config files
 	while (my ($name, $plugin) = each %{$self->config->get("plugin")} ) {
 		if ($plugin->{autoload}) {
-			$name = "Nile::Plugin::".ucfirst($name);
-			if (!$self->is_loaded($name)) {
-				load $name ;
-				$self->object($name);
+			$name = ucfirst($name);
+			my $class = "Nile::Plugin::$name";
+			if (!$self->is_loaded($class)) {
+				load $class;
+				#$self->object($name);
+				$self->plugin->$name;
 			}
 		}
 	}
@@ -1020,7 +1020,7 @@ sub start {
 
 	#$self->uri_mode(1);
 	# app folders url's
-	foreach (qw(api cash file temp web)) {
+	foreach (qw(api cache file temp web)) {
 		$self->var->set($_."_url" => $self->uri_for("$_/"));
 	}
 	
@@ -1644,6 +1644,66 @@ has 'plugin' => (
 		}
   );
 
+=head2 module()
+	
+	# load module Nile::Module::Home::Contact and create a new object
+	$contact = $me->module("Home::Contact");
+
+	# to get another new instance
+	$contact1 = $me->module("Home::MyModule")->new();
+	# or
+	$contact2 = $contact->new();
+
+	# if you are calling from inside the Home module, you can just use
+	$contact = $me->module("Contact");
+
+	# of course you can load sub classes
+	$send = $me->module("Home::Contact::Send");
+
+	# if you are calling from inside the Home module, you can just use
+	$send = $me->module("Contact::Send");
+
+	# all the above is the same as
+	use Nile::Module::Home::Contact;
+	$contact = Nile::Module::Home::Contact->new();
+	$contact->main() if ($contact->can("main"));
+
+Load modules classes.
+
+=cut
+
+sub module {
+	
+	my ($self, $module) = @_;
+	
+	my ($package, $script) = caller;
+	my ($class, $method) = $package =~ /^(.*)::(\w+)$/;
+	
+	$module = ucfirst($module);
+	my $name;
+
+	if ($module =~ /::/) {
+		# module("Home::Contact") called from any module
+		$name = "Nile::Module::" . $module;
+	}
+	else {
+		# module("Contact") called from Home module
+		$name = $class . "::" . $module;
+	}
+
+	return $self->{module}->{$name} if ($self->{module}->{$name});
+
+	eval "use $name";
+	
+	if ($@) {
+		$self->abort("Module Load Error: $name . $@");
+	}
+
+	$self->{module}->{$name} = $self->object($name, @_);
+
+	return $self->{module}->{$name};
+}
+
 =head2 hook()
 	
 See L<Nile::Hook>.
@@ -1675,6 +1735,20 @@ has 'filter' => (
 			shift->object("Nile::Filter", @_);
 		}
   );
+
+=head2 session()
+	
+See session plugin L<Nile::Plugin::Session>.
+
+=cut
+
+has 'session' => (
+	is => 'rw',
+	lazy	=> 1,
+	isa => 'HashRef',
+	default => sub { +{} }
+);
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 logger()
@@ -1955,6 +2029,8 @@ sub is_loaded {
     $file .= '.pm' unless ($file =~ /\.pm$/);
 	#note: do() does unconditional loading -- no lookup in the %INC hash is made.
 	exists $INC{$file};
+	#return eval { $module->can( 'can' ) };
+	#return UNIVERSAL::can($module,'can');
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cli_mode()

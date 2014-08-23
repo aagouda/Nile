@@ -5,76 +5,18 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Say;
+package Nile::Module::Home::Contact;
 
 our $VERSION = '0.41';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
-=pod
-
-=encoding utf8
-
-=head1 NAME
-
-Nile::Say -  Compatibility layer to use say().
-
-=head1 SYNOPSIS
-		
-	print "hello world\n";
-
-	# same as:
-
-	say "hello world";
-
-=head1 DESCRIPTION
-
-Nile::Say -  Compatibility layer to use say().
-
-=cut
-
-use strict;
-use warnings;
-use IO::Handle;
-use Scalar::Util 'openhandle';
-use Carp;
-
-# modified code from Say::Compat
-sub import {
-    my $class = shift;
-    my $caller = caller;
-
-    if( $] < 5.010 ) {
-        no strict 'refs';
-		*{caller() . '::say'} = \&say; 
-		use strict 'refs';
-    }
-    else {
-        require feature;
-        feature->import("say");
-    }
+use Nile::Module; # automatically extends Nile::Module
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub message {
+	my ($self) = @_;
+	return "Hello from contact module";
 }
-
-# code from Perl6::Say
-sub say {
-    my $currfh = select();
-    my $handle;
-    {
-        no strict 'refs';
-        $handle = openhandle($_[0]) ? shift : \*$currfh;
-        use strict 'refs';
-    }
-    @_ = $_ unless @_;
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = join q{}, @_ };
-    my $res = print {$handle} @_, "\n";
-    return $res if $res;
-    $warning =~ s/[ ]at[ ].*//xms;
-    croak $warning;
-}
-
-# Handle OO calls:
-*IO::Handle::say = \&say if ! defined &IO::Handle::say;
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 
@@ -107,5 +49,4 @@ L<https://github.com/mewsoft/Nile>, L<http://www.mewsoft.com>
 This library is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =cut
-
 1;

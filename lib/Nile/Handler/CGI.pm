@@ -7,7 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::CGI;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
 
@@ -38,8 +39,12 @@ sub run {
 
 	#$me->log->debug("CGI/FCGI request start");
 
+	$me->hook->on_request;
+
 	# direct CGI mode.
 	my $request = $me->new_request();
+	
+	$me->hook->off_request;
 
 	$me->response($me->object("Nile::HTTP::Response"));
 	my $response = $me->response;

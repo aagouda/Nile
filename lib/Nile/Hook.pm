@@ -7,7 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Hook;
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
+our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
 
@@ -98,7 +99,6 @@ sub hook_on {
 
 	foreach my $hook (@hooks) {
 		($code, @hook_args) = @{$hook};
-		#say "hook: $code " . $self;
 		$code->($self->me, @args, @hook_args);
 	}
 }
@@ -117,8 +117,7 @@ sub hook_off {
 
 	foreach my $hook (@hooks) {
 		($code, @hook_args) = @{$hook};
-		#say "hook: $code " . $self;
-		$code->(@args, @hook_args);
+		$code->($self->me, @args, @hook_args);
 	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
