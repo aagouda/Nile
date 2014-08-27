@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::CGI;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -30,31 +30,31 @@ Nile::Handler::CGI - CGI Handler.
 =cut
 
 use Nile::Base;
+use Nile::App;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
 	
 	my ($self) = shift;
-
-	my $me = $self->me;
-
-	#$me->log->debug("CGI/FCGI request start");
-
-	$me->hook->on_request;
-
-	# direct CGI mode.
-	my $request = $me->new_request();
 	
-	$me->hook->off_request;
+	my $app = Nile::App->new(app => $self->app());
+	
+	# direct CGI mode.
+	my $request = $app->new_request();
 
-	$me->response($me->object("Nile::HTTP::Response"));
-	my $response = $me->response;
+	$app->response($app->object("Nile::HTTP::Response"));
+	my $response = $app->response();
+	
+	#$app->log->debug("CGI/FCGI request start");
 
-	$me->start;
+	$app->start();
+
+	#$app->hook->on_request();
+	$app->hook->off_request();
 	#------------------------------------------------------
 	# dispatch the action
-	my $content = $me->dispatcher->dispatch;
+	my $content = $app->dispatcher->dispatch;
 	#------------------------------------------------------
-	$me->hook->on_response;
+	$app->hook->on_response;
 
 	# assume OK response if not set
 	$response->code(200) unless ($response->code);
@@ -70,14 +70,14 @@ sub run {
 	else {
 
 		my $ctype = $response->header('Content-Type');
-		if ($me->charset && $ctype && $me->content_type_text($ctype)) {
-			$response->header('Content-Type' => "$ctype; charset=" . $me->charset) if $ctype !~ /charset/i;
+		if ($app->charset && $ctype && $app->content_type_text($ctype)) {
+			$response->header('Content-Type' => "$ctype; charset=" . $app->charset) if $ctype !~ /charset/i;
 		}
 
 		$response->content($content);
 
 		if (!$ctype) {
-			$response->content_type('text/html;charset=' . $me->charset);
+			$response->content_type('text/html;charset=' . $app->charset);
 		}
 
 		if (!defined $response->header('Content-Length')) {
@@ -101,7 +101,7 @@ sub run {
 	#my $res = $response->finalize;
 	#my $res = $response->headers_as_string;
 	
-	$me->hook->off_response;
+	$app->hook->off_response;
 
 	my $res = $response->as_string;
 	
@@ -110,8 +110,8 @@ sub run {
 	#binmode STDOUT, ":UTF8";
 	#binmode STDOUT, ':encoding(utf8)';
 
-	#$me->log->debug("CGI/FCGI request end");
-	#$me->stop_logger;
+	#$app->log->debug("CGI/FCGI request end");
+	#$app->stop_logger;
 
 	print $res;
 }

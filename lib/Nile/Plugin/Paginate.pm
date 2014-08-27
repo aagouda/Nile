@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Paginate;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 # pagination - pag·i·na·tion
@@ -32,7 +32,7 @@ Nile::Plugin::Paginate - Efficient Data Pagination
 	my $pages_per_set = 7;
 	my $current_page = 4;
 
-	my $paginate = $me->plugin->paginate(
+	my $paginate = $app->plugin->paginate(
 
 		total_entries       => $total_entries, 
 		entries_per_page    => $entries_per_page, 
@@ -131,7 +131,7 @@ You can even choose to view page numbers in your set in a 'sliding' fassion.
 
 =head2 paginate()
 
-	my $paginate = $self->me->paginate(
+	my $paginate = $self->app->paginate(
 		total_entries       => $total_entries, 
 		entries_per_page    => $entries_per_page, 
 		current_page        => $current_page,
@@ -864,11 +864,6 @@ sub showing {
 sub showing_list {
 	my ($self) = shift;
     return $self->{showing_list};
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

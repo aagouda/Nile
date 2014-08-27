@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Router;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -116,12 +116,12 @@ sub load {
 	my ($self, $file) = @_;
 
 	$file .= ".xml" unless ($file =~ /\.xml$/i);
-	my $filename = $self->me->file->catfile($self->me->var->get("route_dir"), $file);
+	my $filename = $self->app->file->catfile($self->app->var->get("route_dir"), $file);
 	
 	# keep routes sorted
-	$self->me->xml->keep_order(1);
+	$self->app->xml->keep_order(1);
 
-	my $xml = $self->me->xml->get_file($filename);
+	my $xml = $self->app->xml->get_file($filename);
 	
 	my ($regexp, $capture, $uri_template, $k, $v, $defaults, $key, $val);
 
@@ -564,11 +564,6 @@ sub url_decode {
 	$encode =~ tr/ /+/;
 	return $encode;
   }
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
-}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -104,7 +104,7 @@ sub setting {
 	$module =~ s/^(.*):://;
 	$module = lc($module);
 
-	return wantarray ? %{ $self->me->config->var->{module}->{$module} } : $self->me->config->var->{module}->{$module};
+	return wantarray ? %{ $self->app->config->var->{module}->{$module} } : $self->app->config->var->{module}->{$module};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

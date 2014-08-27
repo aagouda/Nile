@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Lang;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,7 +20,7 @@ Nile::Lang - Language file manager.
 
 =head1 SYNOPSIS
 	
-	$lang = $self->me->lang;
+	$lang = $self->app->lang;
 	
 	# load language file from the current active or default language, file extension is xml.
 	$lang->load("general");
@@ -137,8 +137,9 @@ This method can be chained C<$lang->load($file)->load($register)>;
 sub load {
 	
 	my ($self, $file, $lang) = @_;
+	my $app = $self->app;
 
-	$lang ||= $self->{lang} ||= $self->me->var->get("lang");
+	$lang ||= $self->{lang} ||= $app->var->get("lang");
 
 	# file already loaded
 	if ($self->files->{$lang}->{$file}) {
@@ -149,9 +150,9 @@ sub load {
 
 	$file .= ".xml" unless ($file =~ /\.xml$/i);
 
-	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $lang, $file);
+	my $filename = $app->file->catfile($app->var->get("langs_dir"), $lang, $file);
 	
-	my $xml = $self->me->xml->get_file($filename);
+	my $xml = $app->xml->get_file($filename);
 
 	$self->{vars}->{$lang} ||= +{};
 	$self->{vars}->{$lang} = {%{$self->{vars}->{$lang}}, %$xml};
@@ -212,7 +213,7 @@ Get and set active language used when loading or writing the language files.
 sub lang {
 	my ($self, $lang) = @_;
 	$self->{lang} = $lang if ($lang);
-	$self->{lang} ||= $self->me->var->get("lang");
+	$self->{lang} ||= $self->app->var->get("lang");
 	return $self->{lang};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -277,7 +278,7 @@ Returns language variables from the active or specific installed language.
 
 sub get {
 	my ($self, $name, $lang) = @_;
-	$lang ||= $self->{lang} ||= $self->me->var->get("lang");
+	$lang ||= $self->{lang} ||= $self->app->var->get("lang");
 	$self->{vars}->{$lang}->{$name};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -373,13 +374,14 @@ Returns language file data as a hash or hash reference from the active or specif
 sub get_file {
 	
 	my ($self, $file, $lang) = @_;
+	my $app = $self->app;
 
 	$file .= ".xml" unless ($file =~ /\.xml$/i);
-	$lang ||= $self->{lang} ||= $self->me->var->get("lang");
+	$lang ||= $self->{lang} ||= $app->var->get("lang");
 
-	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $lang, $file);
+	my $filename = $app->file->catfile($app->var->get("langs_dir"), $lang, $file);
 
-	my $xml = $self->me->xml->get_file($filename);
+	my $xml = $app->xml->get_file($filename);
 	
 	return wantarray? %{$xml} : $xml;
 }
@@ -395,10 +397,11 @@ Save changes to the output file. If no file name it will update the loaded file 
 
 sub save {
 	my ($self, $file) = @_;
+	my $app = $self->app;
 	$file ||= $self->file;
 	$file .= ".xml" unless ($file =~ /\.xml$/i);
-	my $filename = $self->me->file->catfile($self->me->var->get("langs_dir"), $self->{lang}, $file);
-	$self->me->xml->writefile($filename, $self->{vars}->{$self->{lang}}, $self->encoding);
+	my $filename = $app->file->catfile($app->var->get("langs_dir"), $self->{lang}, $file);
+	$app->xml->writefile($filename, $self->{vars}->{$self->{lang}}, $self->encoding);
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -466,24 +469,7 @@ Loads and translates a file. The $file argument must be the full system file pat
 
 sub translate_file {
 	my ($self, $file, $lang, $passes) = @_;
-	return $self->translate($self->me->file->get($file), $lang, $passes);
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 object()
-	
-	# get a new lang object
-	#my $lang_ar = $lang->object;
-	
-	# load and manage a language files separately
-	#$lang_ar->load("general", "ar");
-
-Returns a new language object. This allows to load individual language files and work with them.
-
-=cut
-
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
+	return $self->translate($self->app->file->get($file), $lang, $passes);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::SendFile;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -36,7 +36,7 @@ sub send_file  {
     my ($self, $res, $file, $opt) = @_;
 
     my %options = (
-        type => $self->me->mime->for_file($file) || "application/x-download",
+        type => $self->app->mime->for_file($file) || "application/x-download",
         range => !ref($file),
         cache => 0,
         inline => 0,

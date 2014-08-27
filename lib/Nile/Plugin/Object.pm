@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Object;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -41,10 +41,10 @@ sub AUTOLOAD {
 	eval "use $name";
 	
 	if ($@) {
-		$self->me->abort("Plugin Error: $name. $@");
+		$self->app->abort("Plugin Error: $name. $@");
 	}
 
-	$self->{$plugin} = $self->me->object($name, @_);
+	$self->{$plugin} = $self->app->object($name, @_);
 
 	return $self->{$plugin};
 }

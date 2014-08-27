@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request::PSGI;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,7 +21,7 @@ Nile::HTTP::Request::PSGI -  The HTTP request manager.
 =head1 SYNOPSIS
 	
 	# get app context
-	$app = $self->me;
+	$app = $self->app;
 
 	# get request instance which extends CGI::Simple
 	$request = $app->request;
@@ -48,7 +48,7 @@ by L<CGI::Simple> is available with the additions to these few methods:
 	is_delete
 	is_patch
 
-You access the request object by $self->me->request.
+You access the request object by $self->app->request.
 
 =cut
 
@@ -100,7 +100,7 @@ sub url_path {
 	my ($path, $script_name) = $self->script_name =~ m#(.*)/(.*)$#;
 	$path ||= "";
 	$script_name ||= "";
-	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
+	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->app->env->{REQUEST_URI} || ''));
 	if ($request_uri) {
 		$route = $request_uri;
 	
@@ -117,11 +117,6 @@ sub url_path {
 sub request_base {
 	my  $self = shift;
 	 return $self->env->{REQUEST_BASE} ||  $self->env->{HTTP_REQUEST_BASE} || "";
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

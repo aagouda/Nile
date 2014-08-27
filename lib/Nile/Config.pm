@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Config;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,10 +21,10 @@ Nile::Config - Configuration file manager.
 =head1 SYNOPSIS
 	
 	# get the app config object
-	$config = $self->me->config;
+	$config = $self->app->config;
 	
 	# get a new config object
-	$config = $self->me->config->new;
+	$config = $self->app->config->new;
 	
 	# keep sort order when reading and writing the xml file data. default is off.
 	#$config->keep_order(1);
@@ -79,30 +79,9 @@ use Nile::Base;
 extends 'Nile::XML';
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 around 'load' => sub {
-
 	my ($orig, $self, $file) = @_;
-
-	return $self->$orig($self->me->file->catfile($self->me->var->get("config_dir"), $file));
-
+	return $self->$orig($self->app->file->catfile($self->app->var->get("config_dir"), $file));
 };
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 object()
-	
-	# get a new config object
-	#my $configure = $config->object;
-	#my $configure = $config->new;
-	
-	# load and manage a language files separately
-	#$configure->load("configuration");
-
-Returns a new config object. This allows to load individual config files and work with them.
-
-=cut
-
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
-}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod

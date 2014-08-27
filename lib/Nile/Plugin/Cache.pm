@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Cache;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -47,20 +47,20 @@ sub main { # our sub new {}
 
 	my ($self, $arg) = @_;
 	
-	my $me = $self->me;
+	my $me = $self->app;
 	my $setting = $self->setting();
 
 	# add the hooks you want here
 
-	$me->hook->before_start(sub {
+	$app->hook->before_start(sub {
 		my ($me, @args) = @_;
 	});
 
-	$me->hook->after_start(sub {
+	$app->hook->after_start(sub {
 		my ($me, @args) = @_;
 	});
 
-	$me->hook->before_request(sub {
+	$app->hook->before_request(sub {
 		my ($me, @args) = @_;
 	});
 	

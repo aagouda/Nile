@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -75,10 +75,10 @@ sub dispatch_action {
 
 	my ($self, $route, $request_method) = @_;
 	
-	my $me = $self->me;
+	my $app = $self->app;
 
-	$request_method ||= $me->request->request_method;
-	$request_method ||= "ajax" if ($me->request->is_ajax);
+	$request_method ||= $app->request->request_method;
+	$request_method ||= "ajax" if ($app->request->is_ajax);
 	$request_method ||= "*";
 
 	$route = $self->route($route);
@@ -88,13 +88,13 @@ sub dispatch_action {
 	$route = "/$route" if ($route !~ /^\//);
 
 	#$match->{action}, $match->{args}, $match->{query}, $match->{uri}, $match->{code}, $match->{route}
-	my $match = $me->router->match($route, $request_method);
-	#$me->dump($match);
+	my $match = $app->router->match($route, $request_method);
+	#$app->dump($match);
 	
 	if ($match->{action}) {
 		$route =  $match->{action};
 		while (my($k, $v) = each %{$match->{args}}) {
-			$me->request->add_param($k, $v);
+			$app->request->add_param($k, $v);
 		}
 	}
 	#------------------------------------------------------
@@ -106,15 +106,15 @@ sub dispatch_action {
 	if (ref($route) eq "CODE") {
 		if (defined $match->{route}->{attributes} && $match->{route}->{attributes} =~ /capture/i) {
 			# run the action and capture output of print statements
-			($content, @result) = Capture::Tiny::capture_merged {eval {$route->($self->me)}};
+			($content, @result) = Capture::Tiny::capture_merged {eval {$route->($self->app)}};
 		}
 		else {
 			# run the action and get the returned content
-			$content = eval {$route->($self->me)};
+			$content = eval {$route->($self->app)};
 		}
 
 		if ($@) {
-			$me->abort("Dispatcher error. Inline action dispatcher error for route '$route'.\n\n$@");
+			$app->abort("Dispatcher error. Inline action dispatcher error for route '$route'.\n\n$@");
 		}
 
 		return $content;
@@ -122,19 +122,20 @@ sub dispatch_action {
 	#------------------------------------------------------
 	# if route is '/' then use the default route
 	if (!$route || $route eq "/") {
-		$route = $me->var->get("default_route");
+		$route = $app->var->get("default_route");
 	}
 
-	$route ||= $me->abort("Dispatcher error. No route defined.");
+	$route ||= $app->abort("Dispatcher error. No route defined.");
 	
 	my ($module, $controller, $action) = $self->action($route);
 
-	my $class = "Nile::Module:\:$module:\:$controller";
+	my $class = "Nile::Module::${module}::${controller}";
 	
+	undef $@;
 	eval "use $class;";
 
 	if ($@) {
-		$me->abort("Dispatcher error. Module error for route '$route' class '$class'.\n\n$@");
+		$app->abort("Dispatcher error. Module error for route '$route' class '$class'.\n\n$@");
 	}
 	
 	my $object = $class->new();
@@ -152,38 +153,38 @@ sub dispatch_action {
 			}
 		}
 		else {
-			$me->abort("Dispatcher error. Module '$class' action '$action' does not exist.");
+			$app->abort("Dispatcher error. Module '$class' action '$action' does not exist.");
 		}
 	}
 	
 	my $meta = $object->meta;
 	
 	my $attrs = $meta->get_method($action)->attributes;
-	#$me->dump($attrs);
+	#$app->dump($attrs);
 	
 	# sub home: Action Capture Public {...}
 	if (!grep(/^(action|public|capture)$/i, @$attrs)) {
-		$me->abort("Dispatcher error. Module '$class' method '$action' is not marked as 'Action' or 'Capture'.");
+		$app->abort("Dispatcher error. Module '$class' method '$action' is not marked as 'Action' or 'Capture'.");
 	}
 
 	#Methods: HEAD, POST, GET, PUT, DELETE, PATCH, [ajax]
 
 	if ($request_method ne "*" && !grep(/^$request_method$/i, @$attrs)) {
-		$me->abort("Dispatcher error. Module '$class' action '$action' request method '$request_method' is not allowed.");
+		$app->abort("Dispatcher error. Module '$class' action '$action' request method '$request_method' is not allowed.");
 	}
 	
 	# add method "me" or one of its alt
-	$me->add_object_context($object, $meta);
+	$app->add_object_context($object, $meta);
 	
 	undef $@;
 
 	if (grep(/^(capture)$/i, @$attrs)) {
 		# run the action and capture output of print statements. sub home: Capture {...}
-		($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action($self->me)}};
+		($content, @result) = Capture::Tiny::capture_merged {eval {$object->$action($self->app)}};
 	}
 	else {
 		# run the action and get the returned content sub home: Action {...}
-		$content = eval {$object->$action($self->me)};
+		$content = eval {$object->$action($self->app)};
 	}
 
 	if ($@) {
@@ -258,19 +259,19 @@ If not found, it will try to detect the route from the request uri after the pat
 sub route {
 	my ($self, $route) = @_;
 	
-	my $me = $self->me;
+	my $app = $self->app;
 
 	# if no route, try to find route from the request param named by action_name
 	if (!$route) {
 		# allow multiple names separated with commas, i.e. 'action', 'action,route,cmd'.
-		my @action_name = split(/\,/, $me->var->get("action_name"));
+		my @action_name = split(/\,/, $app->var->get("action_name"));
 		foreach (@action_name) {
-			last if ($route = $me->request->param($_));
+			last if ($route = $app->request->param($_));
 		}
 	}
 	
 	# if no route, get the route from the query string in the REQUEST_URI
-	$route ||= $me->request->url_path;
+	$route ||= $app->request->url_path;
 	
 	if ($route) {
 		$route =~ s!^/!!g;
@@ -278,11 +279,6 @@ sub route {
 	}
 
 	return $route;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

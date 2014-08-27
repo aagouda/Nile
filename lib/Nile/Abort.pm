@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Abort;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,9 +20,9 @@ Nile::Abort - Abort the application at anytime with optional message and stacktr
 
 =head1 SYNOPSIS
 		
-	$self->me->abort("error message");
+	$self->app->abort("error message");
 
-	$self->me->abort("error title", "error message");
+	$self->app->abort("error title", "error message");
 
 =head1 DESCRIPTION
 
@@ -84,7 +84,7 @@ HTML
 	#$out .= "$trace\n\n";
 
 	die $out;
-	#if ($self->me->db->connected) {$self->me->db->disconnect();}
+	#if ($self->app->db->connected) {$self->app->db->disconnect();}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

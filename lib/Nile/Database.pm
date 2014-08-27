@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Database;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -26,7 +26,7 @@ Nile::Database - SQL database manager.
 	# if called without params, it will try to load from the default config vars.
 
 	# get app context
-	$app = $self->me;
+	$app = $self->app;
 
 	$dbh = $app->db->connect(%args);
 	
@@ -66,22 +66,11 @@ Returns the database connection handle is success.
 sub connect {
 
 	my ($self, %args) = @_;
-	my ($dbh, $dsn, $me);
+	my ($dbh, $dsn, $app);
 	
-	$me = $self->me;
+	$app = $self->app;
 	
-	%args = (%{$me->config->var->{database}}, %args);
-	
-	if (!%args) {
-		$args{driver} = $self->me->config->var->{database}->{driver};
-		$args{host} = $self->me->config->var->{database}->{host};
-		$args{dsn} = $self->me->config->var->{database}->{dsn};
-		$args{port} = $self->me->config->var->{database}->{port};
-		$args{attr} = $self->me->config->var->{database}->{attribute}; #PrintError, RaiseError, AutoCommit etc
-		$args{name} = $self->me->config->var->{database}->{name};
-		$args{user} = $self->me->config->var->{database}->{user};
-		$args{pass} = $self->me->config->var->{database}->{pass};
-	}
+	%args = (%{$app->config->var->{database}}, %args);
 	
 	$args{driver} ||= "mysql";
 	$args{dsn} ||= "";
@@ -90,7 +79,7 @@ sub connect {
 	$args{attr} ||= +{};
 
 	if (!$args{name}) {
-		$me->abort("Database error: Empty database name.");
+		$app->abort("Database error: Empty database name.");
 	}
 
 	#$self->dbh->disconnect if ($self->dbh);
@@ -382,24 +371,7 @@ Aborts the application and display the last database error message.
 
 sub db_error {
 	my $self = shift;
-	$self->me->abort("Database Error: $DBI::errstr<br>@_");
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 object()
-	
-	# get a new setting object
-	#my $db_obj = $app->db->object;
-	
-	# load and manage settings table separately
-	#$db_obj->load("table", "name", "value");
-
-Returns a new setting object. This allows to load individual setting table and work with them.
-
-=cut
-
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
+	$self->app->abort("Database Error: $DBI::errstr<br>@_");
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

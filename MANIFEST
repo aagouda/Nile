@@ -1,6 +1,7 @@
 app/.htaccess
 app/.htaccessFCGI
 app/api/.exists
+app/bar()'
 app/cache/.exists
 app/cmd/.exists
 app/config/config.xml
@@ -29,6 +30,7 @@ app/web/.exists
 Changes
 lib/Nile.pm
 lib/Nile/Abort.pm
+lib/Nile/App.pm
 lib/Nile/Base.pm
 lib/Nile/Config.pm
 lib/Nile/Database.pm

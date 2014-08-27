@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Response;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -436,7 +436,7 @@ sub build_body {
 	
 	if (!$self->encoded) {
 		$self->encoded(1);
-		$body = Encode::encode($self->me->charset, $body);
+		$body = Encode::encode($self->app->charset, $body);
 	}
 
 	if (!ref $body or Scalar::Util::blessed($body) && overload::Method($body, q("")) && !$body->can('getline')) {
@@ -478,7 +478,7 @@ sub file_response {
 
 	my ($self, $file, $mime, $status) = @_;
 	
-	$mime ||= $self->me->mime->for_file($file) || "application/x-download",
+	$mime ||= $self->app->mime->for_file($file) || "application/x-download",
 
 	$self->status($status) if ($status);
 	
@@ -703,11 +703,6 @@ sub response_400 {
 sub response_404 {
 	# 404 => 'Not Found',
 	return shift->http_code_response(404);
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -16,12 +16,12 @@ use DateTime qw();
 # plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
 	
-	my ($self, $me) = @_;
+	my ($self, $app) = @_;
 	
-	# $me is set to the application context object, same as $self->me inside any method
-	#my $me = $self->me;
+	# $app is set to the application context object, same as $self->app inside any method
+	#my $app = $self->app;
 	
-	my $view = $me->view("home");
+	my $view = $app->view("home");
 	
 	$view->var(
 		fname			=>	'Ahmed',
@@ -33,23 +33,23 @@ sub home : GET Action {
 	);
 	
 	#my $var = $view->block();
-	#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
+	#say "block: " . $app->dump($view->block("first/second/third/fourth/fifth"));
 	#$view->block("first/second/third/fourth/fifth", "Block Modified ");
-	#say "block: " . $me->dump($view->block("first/second/third/fourth/fifth"));
+	#say "block: " . $app->dump($view->block("first/second/third/fourth/fifth"));
 
 	$view->block("first", "1st Block New Content ");
 	$view->block("six", "6th Block New Content ");
 
-	#say "dump: " . $me->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
+	#say "dump: " . $app->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
 	
 	# module settings from config files
 	my $setting = $self->setting();
 	
 	# plugin session must be enabled in config.xml
-	if (!$me->session->{first_visit}) {
-		$me->session->{first_visit} = time;
+	if (!$app->session->{first_visit}) {
+		$app->session->{first_visit} = time;
 	}
-	my $dt = DateTime->from_epoch(epoch => $me->session->{first_visit});
+	my $dt = DateTime->from_epoch(epoch => $app->session->{first_visit});
 	$view->set("first_visit", $dt->strftime("%a, %d %b %Y %H:%M:%S"));
 	
 	return $view->out();
@@ -58,7 +58,7 @@ sub home : GET Action {
 # run action and capture print statements, no returns. url: /home/news
 sub news: GET Capture {
 
-	my ($self, $me) = @_;
+	my ($self, $app) = @_;
 
 	say qq{Hello world. This content is captured from print statements.
 		The action must be marked by 'Capture' attribute. No returns.};
@@ -71,7 +71,7 @@ sub welcome {
 
 	my ($self, %args) = @_;
 	
-	my $me = $self->me();
+	my $app = $self->app();
 
 	return "Nice to see you, " . $args{message};
 }
@@ -81,7 +81,7 @@ sub welcome {
 # MooseX::Declare does not seem to work with "MooseX::MethodAttributes because" they both try to override Moose's default metaclass for methods.
 # MooseX::MethodAttributes would need to be fixed to respect the original method metaclass, rather than imposing one.
 #method hello ($args) : Action {
-#	my $me = $self->me;
+#	my $app = $self->app;
 #	return "Nice to say hello";
 #}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

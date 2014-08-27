@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -32,7 +32,7 @@ put the following code in it:
 
 	package Nile::Plugin::Hello;
 	
-	our $VERSION = '0.41';
+	our $VERSION = '0.42';
 	
 	# this also extends Nile::Plugin, the plugin base class
 	use Nile::Plugin;
@@ -52,7 +52,7 @@ put the following code in it:
 
 		# good to setup hooks here
 		# run this hook after the "start" method
-		$me->hook->after_start( sub { 
+		$app->hook->after_start( sub { 
 			my ($me, @args) = @_;
 			#...
 		});
@@ -68,10 +68,10 @@ put the following code in it:
 
 Then inside other modules or plugins you can access this plugin as
 	
-	say $me->plugin->hello->welcome;
+	say $app->plugin->hello->welcome;
 
 	# in general, you access plugins like this:
-	$me->plugin->your_plugin_name->your_plugin_method([args]);
+	$app->plugin->your_plugin_name->your_plugin_method([args]);
 
 Plugins will be loaded automatically on the first time it is used and can be load on application startup in the C<init> method:
 
@@ -97,9 +97,9 @@ At the plugin load, the plugin optional method C<main> will be called automatica
 Inside the plugin methods, you access the application context by the injected method C<me> and you use it in this way:
 
 	my $me = $self->me;
-	$me->request->param("name");
+	$app->request->param("name");
 	...
-	$me->config->get("email");
+	$app->config->get("email");
 
 Plugins that setup C<hooks> must be set to autoload on startup for hooks works as expected.
 
@@ -191,14 +191,14 @@ sub setting {
 	$plugin =~ s/^(.*):://;
 	$plugin = lc($plugin);
 
-	my $me = $self->me;
+	my $app = $self->app;
 	
 	# access plugin name as "email" or "Email"
-	if (!exists $me->config->get("plugin")->{$plugin} && exists $me->config->get("plugin")->{ucfirst($plugin)}) {
+	if (!exists $app->config->get("plugin")->{$plugin} && exists $app->config->get("plugin")->{ucfirst($plugin)}) {
 		$plugin = ucfirst($plugin);
 	}
 	
-	my $setting = $me->config->get("plugin")->{$plugin};
+	my $setting = $app->config->get("plugin")->{$plugin};
 
 	delete $setting->{autoload};
 

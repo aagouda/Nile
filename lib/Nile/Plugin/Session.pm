@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Session;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -25,19 +25,19 @@ Nile::Plugin::Session - Session manager plugin for the Nile framework.
 	# plugin session must be set to autoload in config.xml
 	
 	# save current username to session
-	if (!$me->session->{username}) {
-		$me->session->{username} = $username;
+	if (!$app->session->{username}) {
+		$app->session->{username} = $username;
 	}
 
 	# get current username from session
-	$username = $me->session->{username};
+	$username = $app->session->{username};
 	
 	# save time of the user first visit to session
-	if (!$me->session->{first_visit}) {
-		$me->session->{first_visit} = time;
+	if (!$app->session->{first_visit}) {
+		$app->session->{first_visit} = time;
 	}
 
-	my $dt = DateTime->from_epoch(epoch => $me->session->{first_visit});
+	my $dt = DateTime->from_epoch(epoch => $app->session->{first_visit});
 	$view->set("first_visit", $dt->strftime("%a, %d %b %Y %H:%M:%S"));
 		
 =head1 DESCRIPTION
@@ -55,7 +55,9 @@ This plugin uses the cache module L<CHI> for saving sessions. All drivers suppor
 			<autoload>1</autoload>
 			<key>nile_session_key</key>
 			<expire>1 year</expire>
-			<driver>File</driver>
+			<driver>
+				<driver>File</driver>
+			</driver>
 			<cookie>
 				<path>/</path>
 				<secure></secure>
@@ -65,6 +67,25 @@ This plugin uses the cache module L<CHI> for saving sessions. All drivers suppor
 		</session>
 
 	</plugin>
+
+For DBI driver configuration example:
+
+			<driver>
+				<driver>DBI</driver>
+				<namespace>session</namespace>
+				<table_prefix>cache_</table_prefix>
+				<create_table>1</create_table>
+			</driver>
+
+The DBI create table example:
+
+    CREATE TABLE <table_prefix><namespace> (
+       `key` VARCHAR(...),
+       `value` TEXT,
+       PRIMARY KEY (`key`)
+    )
+
+The driver will try to create the table if you set C<create_table> in the config and table does not exist.
 
 =cut
 
@@ -77,22 +98,34 @@ use Time::Duration::Parse;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cache()
 	
-	$me->plugin->session->cache();
+	$app->plugin->session->cache();
 
-Returns the cache L<CHI> object instance used by the session.
+Returns the L<CHI> cache object instance used by the session. All L<CHI> methods can be accessed through this method.
+
+=head2 get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired
+	
+	$app->plugin->session->set($key, $data, "10 minutes" );
+
+	# same as
+
+	$app->plugin->session->cache->set($key, $data, "10 minutes" );
+
+These methods are a proxy to the L<CHI> cache object methods. See L<CHI> for details about these methods.
 
 =cut
 
 has 'cache' => (
       is      => 'rw',
 	  lazy	=> 1,
-	  default => undef
+	  #isa	=> "CHI",
+	  default => undef,
+	  handles => [qw(get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired)],
   );
 
 =head2 id()
 	
-	$id = $me->plugin->session->id();
-	$me->plugin->session->id($id);
+	$id = $app->plugin->session->id();
+	$app->plugin->session->id($id);
 
 Returns or sets the current session id. Session id's are auto generated.
 
@@ -106,10 +139,12 @@ has 'id' => (
 
 =head2 sha_bits()
 	
+	$bits = $app->plugin->session->sha_bits();
+	
 	# bits: 1= 40 bytes, 256=64 bytes, 512=128 bytes, 512224, 512256 
-	$bits = $me->plugin->session->sha_bits();
+
 	$bits = 1;
-	$me->plugin->session->sha_bits($bits);
+	$app->plugin->session->sha_bits($bits);
 
 Returns or sets the current session id generator L<Digest::SHA> sha_bits.
 
@@ -126,12 +161,10 @@ sub main { # our sub new {}
 
 	my ($self, $arg) = @_;
 	
-	my $me = $self->me;
+	my $app = $self->app;
 	my $setting = $self->setting();
 
-	#$me->dump($setting);
-	
-	my %options;
+	my $driver = $setting->{cache} || +{};
 
 	$setting->{key} ||= "nile_session_key";
 	$setting->{sha_bits} ||= 1;
@@ -147,48 +180,51 @@ sub main { # our sub new {}
 
 	$self->sha_bits($setting->{sha_bits});
 
-	$options{driver} = ($setting->{driver} || "File");
+	$driver->{driver} ||= "File";
+	$driver->{namespace} ||= "session"; # default namespace is Default
 
-	if (!$options{root_dir}) {
-		$options{root_dir} = $me->file->catdir($me->var->get("cache_dir"), "session");
+	if (!$driver->{root_dir}) {
+		$driver->{root_dir} = $app->file->catdir($app->var->get("cache_dir"), $driver->{namespace});
 	}
-		
+
+	if ($driver->{driver} eq "DBI") {
+		$driver->{dbh} = $app->dbh();
+	}
+
 	if (!$self->cache) {
-		$self->cache(CHI->new(%options));
+		$self->cache(CHI->new(%{$driver}));
 	}
 
 	# load session data after loading request
-	$me->hook->after_request(sub {
+	$app->hook->after_request(sub {
 		my ($me, @args) = @_;
-		
-		if (!$self->id) {
-			$self->id($me->request->cookie($setting->{key}) || $me->request->param($setting->{key}) || undef);
-		}
+		#say "key: " . $app->request->cookie($setting->{key});
+		$self->id($app->request->cookie($setting->{key}) || $app->request->param($setting->{key}) || undef);
 		
 		if ($self->id) {
-			$me->session($self->cache->get($self->id) || +{});
+			$app->session($self->cache->get($self->id) || +{});
 		}
 		else {
-			$me->session(+{});
+			$app->session(+{});
 		}
 
-		#$me->dump($me->session);
+		#$app->dump($app->session);
 	});
 	
 	# save session data, write session headers etc
-	$me->hook->before_response(sub {
+	$app->hook->before_response(sub {
 		my ($me, @args) = @_;
 		
 		#$cache->set( $name, $customer, "10 minutes" );
 		# do not save empty sessions;
-		return if (!$me->session);
+		return if (!$app->session);
 		
 		# create new session and save it
-		if (!$self->id) {
+		if (!$self->id()) {
 			$self->id($self->new_id());
 			$self->cache->set($self->id(), +{});
 
-			$me->response->cookies->{$setting->{key}} = {
+			$app->response->cookies->{$setting->{key}} = {
 				value => $self->id(),
 				expires => time + $setting->{expire},
 				path  => $setting->{cookie}->{path},
@@ -198,7 +234,7 @@ sub main { # our sub new {}
 			};
 		}
 
-		$self->cache->set($self->id, $me->session, $setting->{expire});
+		$self->cache->set($self->id, $app->session, $setting->{expire});
 	});
 
 }
@@ -209,19 +245,6 @@ sub new_id {
 	my $rand = sprintf("%.f", $$ * (+{}) * $ms * rand());
 	# bits: 1= 40 bytes, 256=64 bytes, 512=128 bytes, 512224, 512256 
 	return Digest::SHA->new($self->sha_bits())->add($rand)->hexdigest();
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 purge()
-	
-	$me->plugin->session->purge();
-
-Remove all sessions that have expired from the cache. Warning: May be very inefficient, depending on the number of keys and the driver.
-
-=cut
-
-sub purge {
-	my ($self) = @_;
-	$self->cache->purge();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

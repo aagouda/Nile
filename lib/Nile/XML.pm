@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::XML;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,10 +21,10 @@ Nile::XML - XML file manager.
 =head1 SYNOPSIS
 		
 	# get a reference to the framework xml object.
-	$xml = $self->me->xml;
+	$xml = $self->app->xml;
 
 	# get a reference to a new xml object.
-	$xml = $self->me->xml->new;
+	$xml = $self->app->xml->new;
 
 	# keep sort order when reading and writing the xml file data. default is off.
 	#$xml->keep_order(1);
@@ -112,7 +112,6 @@ Parsing and writing XML files into a hash tree object supports sorted order and 
 
 use Nile::Base;
 use XML::TreePP;
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
 	
@@ -201,7 +200,7 @@ sub AUTOLOAD {
 =head2 load()
 	
 	# get xml object
-	$xml = $self->me->xml->new;
+	$xml = $self->app->xml->new;
 
 	# load xml file
 	$xml->load($file);
@@ -219,7 +218,7 @@ sub load {
 	my ($self, $file) = @_;
 	
 	$file .= ".xml" unless ($file =~ /\.[^.]*$/i);
-	($file && -f $file) || $self->me->abort("Error reading file $file. $!");
+	($file && -f $file) || $self->app->abort("Error reading file '$file'. $!");
 	
 	my $xml = $self->xml->parsefile($file);
 
@@ -276,6 +275,10 @@ sub keep_order {
 	# automatic getter support
 	$email = $xml->email; # same as $xml->get('email');
 
+	# get list
+	# <lang><file>general</file><file>contact</file><file>register</file></lang>
+	@files = $xml->get("lang/file");
+
 Returns xml tag value, if not found returns the optional provided default value.
 
 =cut
@@ -284,22 +287,36 @@ sub get {
 	
 	my ($self, $path, $default) = @_;
 	
-	if ($path !~ /\//) {
-		return exists $self->{vars}->{$path}? $self->{vars}->{$path} : $default;
-	}
-	
-	$path =~ s/^\/+|\/+$//g;
-	my @path = split /\//, $path;
-	my $v = $self->{vars};
-	
-	while (my $k = shift @path) {
-		if (!exists $v->{$k}) {
-			return $default;
-		}
-		 $v = $v->{$k};
-	}
+	my $value;
 
-	return $v;
+	if ($path !~ /\//) {
+		$value = exists $self->{vars}->{$path}? $self->{vars}->{$path} : $default;
+	}
+	else {
+		$path =~ s/^\/+|\/+$//g;
+		my @path = split /\//, $path;
+		my $v = $self->{vars};
+		
+		while (my $k = shift @path) {
+			if (!exists $v->{$k}) {
+				$v = $default;
+				last;
+			}
+			 $v = $v->{$k};
+		}
+		$value = $v;
+	}
+	
+	if (ref($value) eq "ARRAY" ) {
+		return @{$value};
+	}
+	elsif (ref($value) eq "HASH" ) {
+		#return %{$value};
+		return $value;
+	}
+	else {
+		return $value;
+	}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 set()
@@ -467,7 +484,7 @@ Load xml file content and return it as a hash or hash ref, not added to the obje
 
 sub get_file {
 	my ($self, $file) = @_;
-	($file && -f $file) || $self->me->abort("Error reading file '$file'. $!");
+	($file && -f $file) || $self->app->abort("Error reading file '$file'. $!");
 	my $xml = $self->xml->parsefile($file);
 	return wantarray? %{$xml} : $xml;
 }
@@ -488,23 +505,6 @@ sub add_file {
 		$self->{vars}->{$k} = $v;
 	}
 	$self;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 object()
-	
-	# get a new xml object
-	#my $xml_other = $xml->object;
-	
-	# load and manage xml files separately
-	#$xml_other->load("xmlfile");
-
-Returns a new xml object. This allows to load individual xml files and work with them.
-
-=cut
-
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {

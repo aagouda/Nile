@@ -25,52 +25,18 @@
 	use Nile;
 
 	my $app = Nile->new();
-	
-	# initialize the application with the shared and safe sessions settings
+
 	$app->init({
 		# base application path, auto detected if not set
 		path		=>	dirname(File::Spec->rel2abs(__FILE__)),
-
+		
 		# load config files, default extension is xml
 		config		=> [ qw(config) ],
 
-		# load route files, default extension is xml
-		route		=> [ qw(route) ],
-
-		# load these plugins on startup, ignore their config autoload
-		#plugin		=> [ qw(cache) ],
-
-		# log file name
-		log_file	=>	"log.pm",
-
-		# url action name i.e. index.cgi?action=register
-		action_name	=>	"action,route,cmd",
-
-		# app home page Plugin/Controller/method
-		default_route	=>	"/Home/Home/home",
-		
 		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
 		#mode	=>	"fcgi", # psgi, cgi, fcgi
 	});
-	
-	# set the application per single user session settings
-	$app->start_setting({
-		# site language for user, auto detected if not set
-		lang	=>	"en-US",
 
-		# theme used
-		theme	=>	"default",
-		
-		# load language files
-		langs	 => [ qw(general) ],
-		
-		# charset for encoding/decoding and output
-		charset => "utf-8",
-	});
-
-	# inline hook
-	#$app->hook->before_start(sub {my ($me, @args) = @_;});
-	
 	# inline actions, return content. url: /forum/home
 	$app->action("get", "/forum/home", sub {
 		my ($self) = @_;

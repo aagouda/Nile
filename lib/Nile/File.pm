@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::File;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,7 +21,7 @@ Nile::File - Files and folders manager.
 =head1 SYNOPSIS
 	
 	# get app context
-	$app = $self->me;
+	$app = $self->app;
 
 	# get the file content as a single string.
 	$content = $app->file->get($file);
@@ -415,7 +415,7 @@ sub open {
 	}
 	
 	$mode ||= "<";
-    CORE::open(my $fh, $mode, $filename) or $self->me->abort("Error opening file $filename in mode $mode. $!");
+    CORE::open(my $fh, $mode, $filename) or $self->app->abort("Error opening file $filename in mode $mode. $!");
 	binmode $fh, ":encoding($charset)" if ($charset);
     return $fh;
 }
@@ -460,11 +460,6 @@ sub tempdir {
 	else {
 		return File::Temp::tempdir(@_);
 	}
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

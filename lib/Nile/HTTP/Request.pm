@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,7 +21,7 @@ Nile::HTTP::Request -  The HTTP request manager.
 =head1 SYNOPSIS
 	
 	# get app context
-	$app = $self->me;
+	$app = $self->app;
 
 	# get request instance which extends CGI::Simple
 	$request = $app->request;
@@ -48,7 +48,7 @@ by L<CGI::Simple> is available with the additions to these few methods:
 	is_delete
 	is_patch
 
-You access the request object by $self->me->request.
+You access the request object by $self->app->request.
 
 =cut
 
@@ -95,7 +95,7 @@ sub url_path {
 	my $self = shift;
 	my $route = "";
 	my ($path, $script_name) = $self->script_name =~ m#(.*)/(.*)$#;
-	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->me->env->{REQUEST_URI} || ''));
+	my ($request_uri, $params) = split(/\?/, ($ENV{REQUEST_URI} || $self->app->env->{REQUEST_URI} || ''));
 	if ($request_uri) {
 		$route = $request_uri;
 	
@@ -107,11 +107,6 @@ sub url_path {
 	}
 	$route = "$route/" if $route !~ m|/$|;
 	return $route;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

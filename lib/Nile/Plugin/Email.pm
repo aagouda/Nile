@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Email;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,9 +20,9 @@ Nile::Plugin::Email - Email plugin for the Nile framework.
 
 =head1 SYNOPSIS
 
-	$email = $me->plugin->email;
+	$email = $app->plugin->email;
 	# or create new object
-	#$email = $me->plugin->email->new;
+	#$email = $app->plugin->email->new;
 
 	$email->email({
 		from    => 'ahmed@mewsoft.com',
@@ -534,13 +534,13 @@ sub attach {
 	foreach $attach (@attach) {
 		if (ref($attach) eq 'HASH') {
 			$attach->{Encoding} ||= 'base64';
-			$attach->{Type} ||= $self->me->mime->for_file($attach->{Path});
+			$attach->{Type} ||= $self->app->mime->for_file($attach->{Path});
 		} 
 		else {
 			$attach = {
 				Path     => $attach,
 				Encoding => 'base64',
-				Type     => $self->me->mime->for_file($attach),
+				Type     => $self->app->mime->for_file($attach),
 			};
 		}
 		push @{$self->attachments}, $attach;
@@ -588,7 +588,7 @@ sub transport {
 	
 	my ($self, $transport, @arg) = @_;
 
-	if ( $self->me->instance_isa($transport, 'Email::Sender::Transport') ) {
+	if ( $self->app->instance_isa($transport, 'Email::Sender::Transport') ) {
 		$self->transporter($transport);
 	}
 	else {
@@ -613,7 +613,7 @@ sub send {
 	# setting method is inherited from Nile::Plugin the base class
 	my $setting = $self->setting();
 	
-	#$self->me->dump($setting);
+	#$self->app->dump($setting);
 	
 	$self->header->{Date} ||= email_date();
 	

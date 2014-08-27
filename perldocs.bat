@@ -9,6 +9,8 @@ call perldoc -o html lib/Nile/Filter.pm > Filter.html
 call perldoc -o html lib/Nile/Lang.pm > Lang.html
 call perldoc -o html lib/Nile/Plugin.pm > Plugin.html
 call perldoc -o html lib/Nile/Plugin/Email.pm > Email.html
+call perldoc -o html lib/Nile/Plugin/Session.pm > Session.html
+call perldoc -o html lib/Nile/Plugin/Cache.pm > Cache.html
 call perldoc -o html lib/Nile/Paginate.pm > Paginate.html
 call perldoc -o html lib/Nile/Setting.pm > Setting.html
 call perldoc -o html lib/Nile/HTTP/Request.pm > Request.html

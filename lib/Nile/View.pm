@@ -7,9 +7,8 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::View;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
-
 
 =pod
 
@@ -22,7 +21,7 @@ Nile::View - The template processing system.
 =head1 SYNOPSIS
 		
 	# get view home.html in current active theme
-	my $view = $self->me->view("home");
+	my $view = $self->app->view("home");
 	# get view home.html in specific arabic theme
 	my $view = $app->view("home", "arabic");
 	
@@ -119,7 +118,7 @@ following are the same:
 
 To replace these variables when working with the view, just do it like this:
 	
-	$view = $self->me->view("home");
+	$view = $self->app->view("home");
 	$view->set("email", 'sales@mewsoft.com');
 	$view->set("website", 'http://mewsoft.com');
 
@@ -150,7 +149,7 @@ the output and insert it in the template.
 
 Example to insert embedded Perl code output when processing the view:
 
-	<vars type="perl">print $self->me->VERSION; return;</vars>
+	<vars type="perl">print $self->app->VERSION; return;</vars>
 
 You can run any Perl code in this tag, here is example to call a system function and display its results:
 
@@ -160,9 +159,9 @@ You can also include your Perl code in an CDATA like this:
 
 	<vars type="perl"><![CDATA[ 
 		say "";
-		say "<br>active language: " . $self->me->var->get("lang");
-		say "<br>active theme: " . $self->me->var->get("theme");
-		say "<br>app path: " . $self->me->var->get("path");
+		say "<br>active language: " . $self->app->var->get("lang");
+		say "<br>active theme: " . $self->app->var->get("theme");
+		say "<br>app path: " . $self->app->var->get("path");
 		say "<br>";
 	]]></vars>
 
@@ -318,7 +317,7 @@ sub main { # our sub new{...}, called automatically after the constructor new
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 view()
 
-	my $view =  $self->me->view([$view, $theme]);
+	my $view =  $self->app->view([$view, $theme]);
 
 Creates new view object or returns the current view name. The first option is the view name with or without file extension $view, the default 
 view extension is B<html>. The second optional argument is the theme name, if not supplied the current default theme will be used.
@@ -328,16 +327,16 @@ view extension is B<html>. The second optional argument is the theme name, if no
 sub view {
 	my ($self, $view, $theme) = @_;	
 	
-	my $me = $self->me;
+	my $app = $self->app;
 
 	if ($view) {
 		$view .= ".html" unless ($view =~ /\.html$/i);
-		$theme ||= $self->{theme} ||= $me->var->get("theme");
-		my $file = $me->file->catfile($me->var->get("themes_dir"), $theme, "view", $view);
-		$self->{content} = $me->file->get($file);
+		$theme ||= $self->{theme} ||= $app->var->get("theme");
+		my $file = $app->file->catfile($app->var->get("themes_dir"), $theme, "view", $view);
+		$self->{content} = $app->file->get($file);
 		$self->{file} = $file;
 		$self->{view} = $view;
-		$self->{lang} ||= $me->var->get("lang");
+		$self->{lang} ||= $app->var->get("lang");
 		$self->{theme} = $theme;
 		$self->parse;
 		return $self;
@@ -507,7 +506,7 @@ sub parse_vars {
 		#print "\n";
 	}
 	
-	#$self->me->dump($self->{tag});
+	#$self->app->dump($self->{tag});
 
 	$self;
 }
@@ -682,7 +681,7 @@ sub translate {
 	my ($self, $passes) = @_;
 	$passes += 0;
 	$passes ||= 2;
-	$self->me->lang->translate(\$self->{content}, $self->{lang}, $passes);
+	$self->app->lang->translate(\$self->{content}, $self->{lang}, $passes);
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -702,7 +701,7 @@ sub process_vars {
 	my $vars = $self->{vars};
 	
 	# get a hash reference to the global variables
-	my $shared = $self->me->var->vars();
+	my $shared = $self->app->var->vars();
 
 	while (($name, $var) = each %{$self->{tag}->{var}}) {
 		#$self->{tag}->{$type}->{$attr{name}} = {attr=>{%attr}, match=>$match, content=>$content};
@@ -773,14 +772,14 @@ sub get_widget {
 	my ($self, $view, $theme) = @_;
 		
 	$view .= ".html" unless ($view =~ /\.html$/i);
-	$theme ||= $self->{theme} ||= $self->me->var->get("theme");
-	my $file = $self->me->file->catfile($self->me->var->get("themes_dir"), $theme, "widget", $view);
+	$theme ||= $self->{theme} ||= $self->app->var->get("theme");
+	my $file = $self->app->file->catfile($self->app->var->get("themes_dir"), $theme, "widget", $view);
 
 	if (exists $self->{cash}->{$file}) {
 		return $self->{cash}->{$file};
 	}
 
-	my $content = $self->me->file->get($file);
+	my $content = $self->app->file->get($file);
 	$self->{cash}->{$file} = $content;
 	return $content;
 }
@@ -823,10 +822,10 @@ sub process_plugins {
 
 	my ($self) = $_[0];
 
-	my ($me, $name, $var, $match, $content, $k, $v, $class, $plugin, $vars, %attr);
+	my ($app, $name, $var, $match, $content, $k, $v, $class, $plugin, $vars, %attr);
 	my ($tags, $type, $method, $object, $meta, $capture, $merged, @result);
 
-	$me = $self->me;
+	$app = $self->app;
 	
 	$self->{tag}->{plugin} ||= +{};
 	$self->{tag}->{module} ||= +{};
@@ -858,7 +857,7 @@ sub process_plugins {
 				$object = $self->{class_object}->{$class};
 			}
 			else {
-				if (!$me->is_loaded($class)) {
+				if (!$app->is_loaded($class)) {
 					eval "use $class;";
 					if ($@) {
 						$content = " View Error: $type $plugin\->$method does not exist method $name";
@@ -873,7 +872,7 @@ sub process_plugins {
 				$meta = $object->meta;
 
 				# add method "me" or one of its alt
-				$self->me->add_object_context($object, $meta);
+				$self->app->add_object_context($object, $meta);
 			}
 		
 			if ($object->can($method)) {
@@ -989,7 +988,7 @@ Returns a new view object.
 
 sub object {
 	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
+	$self->app->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {

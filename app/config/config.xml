@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
+<app>
+	<config></config>
+	<route>route.xml</route>
+	<log_file>log.pm</log_file>
+	<action_name>action,route,cmd</action_name>
+	<default_route>/Home/Home/home</default_route>
+	<charset>utf-8</charset>
+	<theme>default</theme>
+	<lang>en-US</lang>
+	<lang_param_key>lang</lang_param_key>
+	<lang_cookie_key>lang</lang_cookie_key>
+	<lang_session_key>lang</lang_session_key>
+	<lang_file>general</lang_file>
+</app>
+
 <admin>
     <user>admin_user</user>
     <password>admin_pass</password>
@@ -35,7 +50,11 @@
 		<autoload>1</autoload>
 		<key>nile_session_key</key>
 		<expire>1 year</expire>
-		<driver>File</driver>
+		<cache>
+			<driver>File</driver>
+			<root_dir></root_dir>
+			<namespace>session</namespace>
+		</cache>
 		<cookie>
 			<path>/</path>
 			<secure></secure>
@@ -45,13 +64,6 @@
 	</session>
 
 	<cache>
-		<autoload>1</autoload>
+		<autoload>0</autoload>
 	</cache>
 </plugin>
-
-<hook>
-		<hooks>
-			<status>1</status>
-		</hooks>
-</hook>
-

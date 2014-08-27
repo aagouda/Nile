@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -30,6 +30,7 @@ Nile::Handler::PSGI - PSGI Handler.
 =cut
 
 use Nile::Base;
+use Nile::App;
 use Plack::Builder;
 use Plack::Middleware::Deflater;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -37,60 +38,62 @@ sub run {
 	
 	my ($self) = shift;
 
-	my $me = $self->me;
-	#$me->log->debug("PSGI app handler start");
+	#$app->log->debug("PSGI app handler start");
+	
+	my $apps = $self->app(); # Nile object
 
 	# PSGI mode. PSGI app will loop inside this closure, so reset any user session shared data inside it.
 	my $psgi = sub {
 
 		my $env = shift;
-
-		my $me = $self->me;
 		
-		#$me->start_logger;
-		#$me->log->debug("PSGI request start");
+		my $app = Nile::App->new(app => $apps);
 
-		$me->env($env);
+		#$app->dump($env);
+
+		#$app->start_logger;
+		#$app->log->debug("PSGI request start");
+
+		$app->env($env);
 		
 		#*ENV = $env;
 		 #%ENV = %$env;
 		#----------------------------------------------
-		$me->hook->on_request;
+		$app->new_request($app->env());
 
-		$me->new_request($me->env);
+		my $request = $app->request();
+		$self->dump($request);
 
-		$me->hook->off_request;
+		$app->response($app->object("Nile::HTTP::Response"));
+		my $response = $app->response();
 
-		my $request = $me->request;
+		$app->start();
 
-		$me->response($me->object("Nile::HTTP::Response"));
-		my $response = $me->response;
-
-		$me->start;
+		$app->hook->off_request();
 		#----------------------------------------------
-		#my $path = $me->env->{PATH_INFO} || $me->env->{REQUEST_URI};
-		#$path = $me->file->catfile($me->var->get("path"), $path);
+		#my $path = $app->env->{PATH_INFO} || $app->env->{REQUEST_URI};
+		#$path = $app->file->catfile($app->var->get("path"), $path);
 		#if (-f $path) {
 		#	# file response: /favicon.ico
 		#	$response->file_response($path);
-		#	$me->stop_logger;
+		#	$app->stop_logger;
 		#	return $response->finalize;
 		#}
 		#--------------------------------------------------
 		# dispatch the action
-		my $content = $me->dispatcher->dispatch;
+		my $content = $app->dispatcher->dispatch();
 		#--------------------------------------------------
-		$me->hook->on_response;
+		$app->hook->on_response();
 
 		my $ctype = $response->header('Content-Type');
-		if ($me->charset && $ctype && $me->content_type_text($ctype)) {
-			$response->header('Content-Type' => "$ctype; charset=" . $me->charset) if $ctype !~ /charset/i;
+		if ($app->charset && $ctype && $app->content_type_text($ctype)) {
+			$response->header('Content-Type' => "$ctype; charset=" . $app->charset) if $ctype !~ /charset/i;
 		}
 
 		$response->content($content);
 
 		if (!$ctype) {
-			$response->content_type('text/html;charset=' . $me->charset || "utf-8");
+			$response->content_type('text/html;charset=' . $app->charset || "utf-8");
 		}
 
 		if (!defined $response->header('Content-Length')) {
@@ -110,17 +113,14 @@ sub run {
 
 		$response->content($content);
 		
-		#$me->log->debug("PSGI request end");
-		$me->stop_logger;
+		#$app->log->debug("PSGI request end");
+		$app->stop_logger();
 		
-		$me->hook->off_response;
+		$app->hook->off_response();
 		# return the PSGI response array ref
-		return $response->finalize;
+		return $response->finalize();
 	};
 	
-	#$me->log->debug("PSGI app handler return");
-	$me->stop_logger;
-
 	#return $psgi;
 
 	# support Middleware

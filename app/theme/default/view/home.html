@@ -26,7 +26,7 @@ first visit: <vars name="first_visit" /><br>
 <vars type="module" method="Home::Home->welcome" message="Welcome back!" /><br>
 <br>
 
-Our Version: <vars type="perl"><![CDATA[print $self->me->VERSION; return;]]></vars><br>
+Our Version: <vars type="perl"><![CDATA[print $self->app->VERSION; return;]]></vars><br>
 <br>
 
 <pre>
@@ -47,9 +47,9 @@ cdata start here is may have html tags and 'single' and "double" qoutes
 
 <vars type="perl"><![CDATA[ 
 	say "";
-	say "<br>active language: " . $self->me->var->get("lang");
-	say "<br>active theme: " . $self->me->var->get("theme");
-	say "<br>app path: " . $self->me->var->get("path");
+	say "<br>active language: " . $self->app->var->get("lang");
+	say "<br>active theme: " . $self->app->var->get("theme");
+	say "<br>app path: " . $self->app->var->get("path");
 	say "<br>";
 ]]></vars>
 <br><br>

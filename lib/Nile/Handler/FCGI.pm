@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::FCGI;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -47,23 +47,23 @@ sub run {
 
 	my ($self) = shift;
 
-	my $me = $self->me;
+	my $app = $self->app;
 
 	# The goal of fast cgi is to load the program once, and iterate in a loop for every request.
 
 	while ($handling_request = ($fcgi_request->Accept() >= 0)) {
 		
-		#$me->log->debug("FCGI request start");
+		#$app->log->debug("FCGI request start");
 
 		# handle it as the normal CGI request
-		$me->object("Nile::Handler::CGI")->run();
+		$app->object("Nile::Handler::CGI")->run();
 
 		$handling_request = 0;
 		last if $exit_requested;
 		#exit if -M $ENV{SCRIPT_FILENAME} < 0; # Autorestart
 		
-		#$me->log->debug("FCGI request end");
-		#$me->stop_logger;
+		#$app->log->debug("FCGI request end");
+		#$app->stop_logger;
 	}
 
 	$fcgi_request->Finish();

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Var;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,7 +21,7 @@ Nile::Var - Application Shared variables.
 =head1 SYNOPSIS
 	
 	# get  a reference to the the shared var object
-	$var = $self->me->var;
+	$var = $self->app->var;
 
 	# set some variables
 	$var->set('email', 'ahmed@mewsoft.com');
@@ -216,11 +216,6 @@ Delete a list of shared variables.
 sub delete {
 	my ($self, @n) = @_;
 	delete $self->{vars}->{$_} for @n;
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {

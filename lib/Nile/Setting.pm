@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Setting;
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,7 +21,7 @@ Nile::Setting - Application global settings database table manager.
 =head1 SYNOPSIS
 		
 	# get setting object instance
-	$setting = $self->me->setting;
+	$setting = $self->app->setting;
 
 	# load settings from database to the setting object.
 	$setting->load("settings", "name", "value");
@@ -60,7 +60,7 @@ Then you need to call the load setting once at the start of the application afte
 database.
 	
 	# get setting object instance
-	$setting = $self->me->setting;
+	$setting = $self->app->setting;
 
 	# load settings from database to the setting object.
 	$setting->load("settings", "name", "value");
@@ -171,7 +171,7 @@ sub load {
 	$self->table($table) if ($table);
 	$self->name($name) if ($name);
 	$self->value($value) if ($value);
-	$self->{vars} = $self->me->db->colhash(qq{select $self->name($name), $self->value($value) from $self->table($table)});
+	$self->{vars} = $self->app->db->colhash(qq{select $self->name($name), $self->value($value) from $self->table($table)});
 	$self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -224,13 +224,13 @@ sub set {
 	my ($name, $value, $n, $v);
 	
 	while (($name, $value) = each %vars) {
-		$n = $self->me->db->quote($name);
-		$v = $self->me->db->quote($value);
+		$n = $self->app->db->quote($name);
+		$v = $self->app->db->quote($value);
 		if (exists $self->{vars}->{$name}) {
-			$self->me->db->run(qq{update $self->table set $self->name=$n, $self->value=$v});
+			$self->app->db->run(qq{update $self->table set $self->name=$n, $self->value=$v});
 		}
 		else {
-			$self->me->db->run(qq{insert into $self->table set $self->name=$n, $self->value=$v});
+			$self->app->db->run(qq{insert into $self->table set $self->name=$n, $self->value=$v});
 		}
 		$self->{vars}->{$name} = $value;
 	}
@@ -309,7 +309,7 @@ Delete a list of settings from memory and database table..
 
 sub delete {
 	my ($self, @n) = @_;
-	$self->me->db->run(qq{delete from $self->table where $self->name=} . $self->me->db->quote($_)) for @n;
+	$self->app->db->run(qq{delete from $self->table where $self->name=} . $self->app->db->quote($_)) for @n;
 	delete $self->{vars}->{$_} for @n;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -326,25 +326,8 @@ function as a confirmation that you want to do the job.
 sub clear {
 	my ($self, $confirm) = @_;
 	return unless ($confirm);
-	$self->me->db->run(q{delete from $self->table});
+	$self->app->db->run(q{delete from $self->table});
 	$self->{vars} = +{};
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 object()
-	
-	# get a new setting object
-	#my $setting_obj = $setting->object;
-	
-	# load and manage settings table separately
-	#$setting_obj->load("table", "name", "value");
-
-Returns a new setting object. This allows to load individual setting table and work with them.
-
-=cut
-
-sub object {
-	my $self = shift;
-	$self->me->object(__PACKAGE__, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub DESTROY {
