@@ -65,5 +65,11 @@
 
 	<cache>
 		<autoload>0</autoload>
+		<cache>
+			<driver>File</driver>
+			<root_dir></root_dir>
+			<namespace>cache</namespace>
+		</cache>
 	</cache>
+
 </plugin>

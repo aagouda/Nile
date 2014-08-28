@@ -1,13 +1,13 @@
-#	Copyright Infomation
+#   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
-#	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
-#	Email		:	mewsoft@cpan.org, support@mewsoft.com
-#	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
+# Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
+# Website: https://github.com/mewsoft/Nile, http://www.mewsoft.com
+# Email  : mewsoft@cpan.org, support@mewsoft.com
+# Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -65,29 +65,29 @@ use Nile::HTTP::Response;
 use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'app' => (
-	is => 'rw',
-	default => undef
+    is => 'rw',
+    default => undef
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
-	my ($self, $arg) = @_;
-	$self->app($arg->{app});
-	# start the app page load timer
-	$self->run_time->start();
+    my ($self, $arg) = @_;
+    $self->app($arg->{app});
+    # start the app page load timer
+    $self->run_time->start();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 object()
-	
-	$obj = $app->object("Nile::MyClass", @args);
-	$obj = $app->object("Nile::Plugin::MyClass", @args);
-	$obj = $app->object("Nile::Module::MyClass", @args);
+    
+    $obj = $app->object("Nile::MyClass", @args);
+    $obj = $app->object("Nile::Plugin::MyClass", @args);
+    $obj = $app->object("Nile::Module::MyClass", @args);
 
-	#...
+    #...
 
-	$app = $obj->app;
-	$request = $app->request;
-	$response = $app->response;
-	
+    $app = $obj->app;
+    $request = $app->request;
+    $response = $app->response;
+    
 Creates and returns an object. This automatically adds the method L<app> to the object
 and sets it to the current context so your object or class can access the current instance.
 
@@ -95,60 +95,60 @@ and sets it to the current context so your object or class can access the curren
 
 sub object {
 
-	my ($self, $class, @args) = @_;
-	my ($object, $me);
-	
-	#if (@args == 1 && ref($args[0]) eq "HASH") {
-	#	# Moose single arguments must be hash ref
-	#	$object = $class->new(@args);
-	#}
+    my ($self, $class, @args) = @_;
+    my ($object, $me);
+    
+    #if (@args == 1 && ref($args[0]) eq "HASH") {
+    #   # Moose single arguments must be hash ref
+    #   $object = $class->new(@args);
+    #}
 
-	if (@args && @args % 2) {
-		# Moose needs args as hash, so convert odd size arrays to even for hashing
-		$object = $class->new(@args, undef);
-	}
-	else {
-		$object = $class->new(@args);
-	}
+    if (@args && @args % 2) {
+        # Moose needs args as hash, so convert odd size arrays to even for hashing
+        $object = $class->new(@args, undef);
+    }
+    else {
+        $object = $class->new(@args);
+    }
 
-	my $meta = $object->meta;
+    my $meta = $object->meta;
 
-	#$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
-	#$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
-	#$meta->add_class_attribute( 'cash', ());
+    #$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
+    #$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
+    #$meta->add_class_attribute( 'cash', ());
 
-	# add method "me" or one of its alt
-	$self->add_object_context($object, $meta);
+    # add method "me" or one of its alt
+    $self->add_object_context($object, $meta);
 
-	# if class has defined "main" method, then call it
-	if ($object->can("main")) {
-		$object->main(@args);
-	}
-		
-	#no strict 'refs';
-	#*{"$object"."::me"} = \&me;
-	#${"${package}::$var_name"} = 1;
-	
-	return $object;
+    # if class has defined "main" method, then call it
+    if ($object->can("main")) {
+        $object->main(@args);
+    }
+        
+    #no strict 'refs';
+    #*{"$object"."::me"} = \&me;
+    #${"${package}::$var_name"} = 1;
+    
+    return $object;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub add_object_context {
-	my ($self, $object, $meta) = @_;
-	$meta ||= $object->meta;
-	# add method "me" or one of its alt
-	#foreach (qw(app APP _app)) {
-	foreach (qw(app)) {
-		unless ($object->can($_)) {
-			$meta->add_attribute($_ => (is => 'rw', default => sub{$self}));
-			$object->$_($self);
-			last;
-		}
-	}
+    my ($self, $object, $meta) = @_;
+    $meta ||= $object->meta;
+    # add method "app" or one of its alt
+    #foreach (qw(app APP _app)) {
+    foreach (qw(app)) {
+        unless ($object->can($_)) {
+            $meta->add_attribute($_ => (is => 'rw', default => sub{$self}));
+            $object->$_($self);
+            last;
+        }
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 start()
-	
-	$app->start;
+    
+    $app->start;
 
 Set the application startup variables.
 
@@ -156,86 +156,86 @@ Set the application startup variables.
 
 sub start {
 
-	my ($self) = @_;
-	#------------------------------------------------------
-	my $app = $self->app;
-	my $file = $self->file;
-	
-	# shared vars
-	my %arg = $app->var->vars();
+    my ($self) = @_;
+    #------------------------------------------------------
+    my $app = $self->app;
+    my $file = $self->file;
+    
+    # shared vars
+    my %arg = $app->var->vars();
 
-	$self->var->set(%arg);
+    $self->var->set(%arg);
 
-	#$self->dump({$app->var->vars()});
-	#$self->dump({$self->var->vars()});
+    #$self->dump({$app->var->vars()});
+    #$self->dump({$self->var->vars()});
 
-	$arg{lang} ||= "";
-	$arg{theme} ||= "default";
-	
-	my $path = $self->var->get("path");
+    $arg{lang} ||= "";
+    $arg{theme} ||= "default";
+    
+    my $path = $self->var->get("path");
 
-	# detect user language
-	$arg{lang} = $self->detect_user_language($arg{lang});
+    # detect user language
+    $arg{lang} = $self->detect_user_language($arg{lang});
 
-	$self->var->set(
-			'lang'					=>	$arg{lang},
-			'theme'				=>	$arg{theme},
-			'lang_dir'			=>	$file->catdir($path, "lang", $arg{lang}),
-			'theme_dir'			=>	$file->catdir($path, "theme", $arg{theme}),
-		);
-	
-	#$self->dump({$self->var->vars()});
+    $self->var->set(
+            'lang'                  =>  $arg{lang},
+            'theme'             =>  $arg{theme},
+            'lang_dir'          =>  $file->catdir($path, "lang", $arg{lang}),
+            'theme_dir'         =>  $file->catdir($path, "theme", $arg{theme}),
+        );
+    
+    #$self->dump({$self->var->vars()});
 
-	# load language files
-	foreach ($self->config->get("app/lang_file")) {
-		$self->lang->load($_);
-	}
-	#------------------------------------------------------
-	#$self->hook->on_start;
+    # load language files
+    foreach ($self->config->get("app/lang_file")) {
+        $self->lang->load($_);
+    }
+    #------------------------------------------------------
+    #$self->hook->on_start;
 
-	my $req = $self->request;
+    my $req = $self->request;
 
-	# global variables, safe to render in views
-	$self->var->set(
-			url => $req->url,
-			base_url => $req->base_url,
-			abs_url => $req->abs_url,
-			url_path => $req->url_path,
-		);
+    # global variables, safe to render in views
+    $self->var->set(
+            url => $req->url,
+            base_url => $req->base_url,
+            abs_url => $req->abs_url,
+            url_path => $req->url_path,
+        );
 
-	#$self->uri_mode(1);
-	# app folders url's
-	foreach (qw(api cache file temp web)) {
-		$self->var->set($_."_url" => $self->uri_for("$_/"));
-	}
-	
-	# themes and current theme url's
-	$self->var->set(
-			themes_url => $self->uri_for("theme/"),
-			theme_url => $self->uri_for("theme/$arg{theme}/"),
-		);
+    #$self->uri_mode(1);
+    # app folders url's
+    foreach (qw(api cache file temp web)) {
+        $self->var->set($_."_url" => $self->uri_for("$_/"));
+    }
+    
+    # themes and current theme url's
+    $self->var->set(
+            themes_url => $self->uri_for("theme/"),
+            theme_url => $self->uri_for("theme/$arg{theme}/"),
+        );
 
-	foreach (qw(css icon image js view widget)) {
-		$self->var->set($_."_url" => $self->uri_for("theme/$arg{theme}/$_/"));
-	}
-	#------------------------------------------------------
-	# load plugins set to autoload in the config files
-	while (my ($name, $plugin) = each %{$self->config->get("plugin")} ) {
-		next if (!$plugin->{autoload});
-		$name = ucfirst($name);
-		my $class = "Nile::Plugin::$name";
-		if (!$self->is_loaded($class)) {
-			load $class;
-			$self->plugin->$name;
-		}
-	}
-	#------------------------------------------------------
-	#$self->hook->off_start;
+    foreach (qw(css icon image js view widget)) {
+        $self->var->set($_."_url" => $self->uri_for("theme/$arg{theme}/$_/"));
+    }
+    #------------------------------------------------------
+    # load plugins set to autoload in the config files
+    while (my ($name, $plugin) = each %{$self->config->get("plugin")} ) {
+        next if (!$plugin->{autoload});
+        $name = ucfirst($name);
+        my $class = "Nile::Plugin::$name";
+        if (!$self->is_loaded($class)) {
+            load $class;
+            $self->plugin->$name;
+        }
+    }
+    #------------------------------------------------------
+    #$self->hook->off_start;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 mode()
-	
-	my $mode = $app->mode;
+    
+    my $mode = $app->mode;
 
 Returns the current application mode PSGI, FCGI or CGI.
 
@@ -244,104 +244,119 @@ Returns the current application mode PSGI, FCGI or CGI.
 has 'mode' => (
       is      => 'rw',
       isa     => 'Str',
-	  lazy	=> 1,
+      lazy  => 1,
       default => sub {shift->app->mode(@_)},
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 config()
-	
+    
 See L<Nile::Config>.
 
 =cut
 
 has 'config' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  default => sub {
-		  shift->app->config(@_);
-		}
+      lazy  => 1,
+      default => sub {
+          shift->app->config(@_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 router()
-	
+    
 See L<Nile::Router>.
 
 =cut
 
 has 'router' => (
       is      => 'rw',
-	  isa    => 'Nile::Router',
-	  lazy	=> 1,
-	  default => sub {
-			shift->app->router(@_);
-		}
+      isa    => 'Nile::Router',
+      lazy  => 1,
+      default => sub {
+            shift->app->router(@_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 lang()
-	
+    
 See L<Nile::Lang>.
 
 =cut
 
 has 'lang' => (
       is      => 'rw',
-	  isa    => 'Nile::Lang',
-	  lazy	=> 1,
-	  default => sub {
-			#shift->app->lang(@_);
-			shift->object("Nile::Lang", @_);
-		}
+      isa    => 'Nile::Lang',
+      lazy  => 1,
+      default => sub {
+            #shift->app->lang(@_);
+            shift->object("Nile::Lang", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 lang()
+    
+See L<Nile::Lang>.
 
+=cut
+
+has 'cache' => (
+      is      => 'rw',
+      isa    => 'Nile::Plugin::Cache',
+      lazy  => 1,
+      default => sub {
+            load Nile::Plugin::Cache;
+            shift->object("Nile::Plugin::Cache", @_);
+        }
+  );
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 uri_mode()
-	
-	# uri mode: 0=full, 1=absolute, 2=relative
-	$app->uri_mode(1);
+    
+    # uri mode: 0=full, 1=absolute, 2=relative
+    $app->uri_mode(1);
 
 Set the uri mode. The values allowed are: 0= full, 1=absolute, 2=relative
 
 =cut
 
 has 'uri_mode' => (
-	is => 'rw',
-	default => 0, # 0= full, 1=absolute, 2=relative
+    is => 'rw',
+    default => 0, # 0= full, 1=absolute, 2=relative
 );
 
 =head2 uri_for()
-	
-	$url = $app->uri_for("/users", [$mode]);
+    
+    $url = $app->uri_for("/users", [$mode]);
 
 Returns the uri for specific action or route. The mode parameter is optional. The mode values allowed are: 0= full, 1=absolute, 2=relative.
 
 =cut
 
 sub uri_for {
-	my ($self, $uri, $mode) = @_;
-	
-	if (!defined $mode) {
-		$mode = $self->uri_mode;
-	}
+    my ($self, $uri, $mode) = @_;
+    
+    if (!defined $mode) {
+        $mode = $self->uri_mode;
+    }
 
-	if ($self->uri_mode == 1) {
-		return $self->var->get("abs_url") . $uri;
-	}
-	else {
-		return $self->var->get("base_url") . $uri;
-	}
+    if ($self->uri_mode == 1) {
+        return $self->var->get("abs_url") . $uri;
+    }
+    else {
+        return $self->var->get("base_url") . $uri;
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub forward {
-	my ($self, $uri) = @_;
-	
-	#$me->forward($uri);
+    my ($self, $uri) = @_;
+    
+    #$me->forward($uri);
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 debug()
-	
-	# 1=enabled, 0=disabled
-	$app->debug(1);
+    
+    # 1=enabled, 0=disabled
+    $app->debug(1);
 
 Enable or disable debugging flag.
 
@@ -354,19 +369,19 @@ has 'debug' => (
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 bm()
-	
-	$app->bm->lap("start task");
-	....
-	$app->bm->lap("end task");
-	
-	say $app->bm->stop->summary;
+    
+    $app->bm->lap("start task");
+    ....
+    $app->bm->lap("end task");
+    
+    say $app->bm->stop->summary;
 
-	# NAME			TIME		CUMULATIVE		PERCENTAGE
-	# start task		0.123		0.123			34.462%
-	# end task		0.234		0.357			65.530%
-	# _stop_		0.000		0.357			0.008%
-	
-	say "Total time: " . $app->bm->total_time;
+    # NAME          TIME        CUMULATIVE      PERCENTAGE
+    # start task        0.123       0.123           34.462%
+    # end task      0.234       0.357           65.530%
+    # _stop_        0.000       0.357           0.008%
+    
+    say "Total time: " . $app->bm->total_time;
 
 Benchmark specific parts of your code. This is a L<Benchmark::Stopwatch> object.
 
@@ -375,63 +390,63 @@ Benchmark specific parts of your code. This is a L<Benchmark::Stopwatch> object.
 has 'bm' => (
       is      => 'rw',
       isa    => 'Benchmark::Stopwatch',
-	  lazy	=> 1,
-	  default => sub{
-		  #autoload, load CGI, ':all';
-		  load Benchmark::Stopwatch;
-		  Benchmark::Stopwatch->new->start;
-	  }
+      lazy  => 1,
+      default => sub{
+          #autoload, load CGI, ':all';
+          load Benchmark::Stopwatch;
+          Benchmark::Stopwatch->new->start;
+      }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 file()
-	
+    
 See L<Nile::File>.
 
 =cut
 
 has 'file' => (
       is      => 'rw',
-	  isa    => 'Nile::File',
-	  lazy	=> 1,
-	  default => sub {
-			my $self = shift;
-			$self->object("Nile::File", @_);
-		}
+      isa    => 'Nile::File',
+      lazy  => 1,
+      default => sub {
+            my $self = shift;
+            $self->object("Nile::File", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
-	
+    
 See L<Nile::XML>.
 
 =cut
 
 has 'xml' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  default => sub {
-			my $self = shift;
-			$self->object("Nile::XML", @_);
-		}
+      lazy  => 1,
+      default => sub {
+            my $self = shift;
+            $self->object("Nile::XML", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 setting()
-	
+    
 See L<Nile::Setting>.
 
 =cut
 
 has 'setting' => (
       is      => 'rw',
-	  isa    => 'Nile::Setting',
-	  lazy	=> 1,
-	  default => sub {
-			my $self = shift;
-			$self->object("Nile::Setting", @_);
-		}
+      isa    => 'Nile::Setting',
+      lazy  => 1,
+      default => sub {
+            my $self = shift;
+            $self->object("Nile::Setting", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 mime()
-	
+    
 See L<Nile::MIME>.
 
 =cut
@@ -439,112 +454,112 @@ See L<Nile::MIME>.
 has 'mime' => (
       is      => 'rw',
       isa    => 'Nile::MIME',
-	  lazy	=> 1,
-	  default => sub {
-			load Nile::MIME;
-			shift->object("Nile::MIME", only_complete => 1);
-		}
+      lazy  => 1,
+      default => sub {
+            load Nile::MIME;
+            shift->object("Nile::MIME", only_complete => 1);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dispatcher()
-	
+    
 See L<Nile::Dispatcher>.
 
 =cut
 
 has 'dispatcher' => (
       is      => 'rw',
-	  isa    => 'Nile::Dispatcher',
-	  lazy	=> 1,
-	  default => sub {
-			shift->object("Nile::Dispatcher", @_);
-		}
+      isa    => 'Nile::Dispatcher',
+      lazy  => 1,
+      default => sub {
+            shift->object("Nile::Dispatcher", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 logger()
-	
+    
 Returns L<Log::Tiny> object.
 
 =cut
 
 has 'logger' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  default => sub {
-			my $self = shift;
-			load Log::Tiny;
-			Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm'));
-		}
+      lazy  => 1,
+      default => sub {
+            my $self = shift;
+            load Log::Tiny;
+            Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm'));
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 log()
 
-	$app->log->info("application run start");
-	$app->log->DEBUG("application run start");
-	$app->log->ERROR("application run start");
-	$app->log->INFO("application run start");
-	$app->log->ANYTHING("application run start");
+    $app->log->info("application run start");
+    $app->log->DEBUG("application run start");
+    $app->log->ERROR("application run start");
+    $app->log->INFO("application run start");
+    $app->log->ANYTHING("application run start");
 
  Log object L<Log::Tiny> supports unlimited log categories.
 
 =cut
 
 sub log {
-	my $self = shift;
-	$self->start_logger if (!$self->logger);
-	$self->logger(@_);
+    my $self = shift;
+    $self->start_logger if (!$self->logger);
+    $self->logger(@_);
 }
 
 =head2 start_logger()
-	
-	$app->start_logger();
+    
+    $app->start_logger();
 
 Start the log object and open the log file for writing logs.
 
 =cut
 
 sub start_logger {
-	my $self = shift;
-	$self->stop_logger;
-	$self->logger(Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm')));
+    my $self = shift;
+    $self->stop_logger;
+    $self->logger(Log::Tiny->new($self->file->catfile($self->var->get("log_dir"), $self->var->get("log_file") || 'log.pm')));
 }
 
 =head2 stop_logger()
-	
-	$app->stop_logger();
+    
+    $app->stop_logger();
 
 Stops the log object and close the log file.
 
 =cut
 
 sub stop_logger {
-	my $self = shift;
-	# close log file
-	$self->logger(undef);
+    my $self = shift;
+    # close log file
+    $self->logger(undef);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 timer()
-	
-	# start the timer
-	$app->timer->start;
-	
-	# do some operations...
-	
-	# get time elapsed since start called
-	say $app->timer->lap;
+    
+    # start the timer
+    $app->timer->start;
+    
+    # do some operations...
+    
+    # get time elapsed since start called
+    say $app->timer->lap;
 
-	# do some other operations...
+    # do some other operations...
 
-	# get time elapsed since last lap called
-	say $app->timer->lap;
+    # get time elapsed since last lap called
+    say $app->timer->lap;
 
-	# get another timer object, timer automatically starts
-	my $timer = $app->timer->new;
-	say $timer->lap;
-	#...
-	say $timer->lap;
-	#...
-	say $timer->total;
+    # get another timer object, timer automatically starts
+    my $timer = $app->timer->new;
+    say $timer->lap;
+    #...
+    say $timer->lap;
+    #...
+    say $timer->total;
 
 Returns L<Nile::Timer> object. See L<Nile::Timer> for more details.
 
@@ -552,23 +567,23 @@ Returns L<Nile::Timer> object. See L<Nile::Timer> for more details.
 
 has 'timer' => (
       is      => 'rw',
-	  #lazy	=> 1,
-	  default => sub{
-		  Nile::Timer->new;
-	  }
+      #lazy => 1,
+      default => sub{
+          Nile::Timer->new;
+      }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # page load timer, run time
 
 =head2 run_time()
-	
-	# get time elapsed since app started
-	say $app->run_time->lap;
+    
+    # get time elapsed since app started
+    say $app->run_time->lap;
 
-	# do some other operations...
+    # do some other operations...
 
-	# get time elapsed since last lap called
-	say $app->run_time->lap;
+    # get time elapsed since last lap called
+    say $app->run_time->lap;
 
 Returns L<Nile::Timer> object. Timer automatically starts with the application.
 
@@ -576,55 +591,55 @@ Returns L<Nile::Timer> object. Timer automatically starts with the application.
 
 has 'run_time' => (
       is      => 'rw',
-	  #lazy	=> 1,
-	  default => sub{
-		  Nile::Timer->new;
-	  }
+      #lazy => 1,
+      default => sub{
+          Nile::Timer->new;
+      }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 var()
-	
+    
 See L<Nile::Var>.
 
 =cut
 
 has 'var' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  default => sub {
-		  shift->object("Nile::Var", @_);
-		}
+      lazy  => 1,
+      default => sub {
+          shift->object("Nile::Var", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 env()
-	
-	$request_uri = $app->env->{REQUEST_URI};
+    
+    $request_uri = $app->env->{REQUEST_URI};
 
 Plack/PSGI env object.
 
 =cut
 
 has 'env' => (
-	is => 'rw',
-	isa => 'HashRef',
-	lazy	=> 1,
-	default => sub { +{} }
+    is => 'rw',
+    isa => 'HashRef',
+    lazy    => 1,
+    default => sub { +{} }
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 request()
-	
+    
 See L<Nile::Request>.
 
 =cut
 
 has 'request' => (
-	is      => 'rw',
-	lazy	=> 1,
-	default => sub {},
+    is      => 'rw',
+    lazy    => 1,
+    default => sub {},
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 response()
-	
+    
 See L<Nile::Response>.
 
 =cut
@@ -632,36 +647,99 @@ See L<Nile::Response>.
 has 'response' => (
       is      => 'rw',
       isa    => 'Nile::HTTP::Response',
-	  lazy	=> 1,
-	  default => sub {
-			shift->object("Nile::HTTP::Response", @_);
-		}
+      lazy  => 1,
+      default => sub {
+            shift->object("Nile::HTTP::Response", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 plugin()
-	
+    
 See L<Nile::Plugin>.
 
 =cut
 
 has 'plugin' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  default => sub {
-			shift->object("Nile::Plugin::Object", @_);
-		}
+      lazy  => 1,
+      default => sub {
+            shift->object("Nile::Plugin::Object", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 helper()
+    
+    # add helper method to the framework
+    
+    $app->helper($method => $coderef);
+    
+    # add method "echo"
+    $app->helper("echo" => sub{shift; say @_;});
+
+    # access the helper method normal from plugins and modules
+    $app->echo("Helper echo example.");
+
+=cut
+
+sub helper {
+    my ($self, %arg) = @_;
+    while (my($name, $code) = each %arg) {
+        if (ref($code) ne "CODE") {
+            $self->abort("Helper setup error: helper '$name' code should be a code ref. $code");
+        }
+
+        if (!$self->can($name)) {
+            $self->meta->add_method($name => $code);
+        }
+        else {
+            $self->abort("Helper setup error: helper '$name' method already exists. $code");
+        }
+
+    }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 attr()
+    
+    # add attr to the framework
+    
+    $app->attr($name => $default);
+    
+    # add attribute "PI"
+    $app->attr("PI" => 4 * atan2(1, 1));
+	
+	# or
+	$app->attr("PI" => sub{4 * atan2(1, 1)});
+
+    # get the attribute value
+    say $app->PI;
+
+    # set the the attribute value to new value
+    $app->PI(3.14159265358979);
+
+=cut
+
+sub attr {
+    my ($self, %arg) = @_;
+    while (my($name, $code) = each %arg) {
+        if (!$self->can($name)) {
+            $self->meta->add_attribute($name => (is => 'rw', lazy=>1, default => $code));
+        }
+        else {
+            $self->abort("Attr setup error: attr '$name' already exists. $code");
+        }
+    }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 ua()
-	
-	my $response = $app->ua->get('http://example.com/');
-	say $response->{content} if length $response->{content};
-	
-	$response = $app->ua->get($url, \%options);
-	$response = $app->ua->head($url);
-	
-	$response = $app->ua->post_form($url, $form_data);
-	$response = $app->ua->post_form($url, $form_data, \%options);
+    
+    my $response = $app->ua->get('http://example.com/');
+    say $response->{content} if length $response->{content};
+    
+    $response = $app->ua->get($url, \%options);
+    $response = $app->ua->head($url);
+    
+    $response = $app->ua->post_form($url, $form_data);
+    $response = $app->ua->post_form($url, $form_data, \%options);
 
 Simple HTTP client. This is a L<HTTP::Tiny> object.
 
@@ -670,17 +748,17 @@ Simple HTTP client. This is a L<HTTP::Tiny> object.
 has 'ua' => (
       is      => 'rw',
       isa    => 'HTTP::Tiny',
-	  lazy	=> 1,
-	  #trigger => sub {shift->clearer},
-	  default => sub {
-		  load HTTP::Tiny;
-		  HTTP::Tiny->new;
-	  }
+      lazy  => 1,
+      #trigger => sub {shift->clearer},
+      default => sub {
+          load HTTP::Tiny;
+          HTTP::Tiny->new;
+      }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 uri()
-	
-	my $uri = $app->uri('http://mewsoft.com/');
+    
+    my $uri = $app->uri('http://mewsoft.com/');
 
 Returns L<URI> object.
 
@@ -689,17 +767,17 @@ Returns L<URI> object.
 has 'uri' => (
       is      => 'rw',
       isa    => 'URI',
-	  lazy	=> 1,
-	  default => sub {
-		  load URI;
-		  URI->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load URI;
+          URI->new;
+      }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 charset()
-	
-	$app->charset('utf8');
-	$charset = $app->charset;
+    
+    $app->charset('utf8');
+    $charset = $app->charset;
 
 Set or return the charset for encoding and decoding. Default is C<utf8>.
 
@@ -707,12 +785,12 @@ Set or return the charset for encoding and decoding. Default is C<utf8>.
 
 has 'charset' => (
       is      => 'rw',
-	  lazy	=> 1,
+      lazy  => 1,
       default => sub {shift->var->get("charset")}
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 freeze()
-	
+    
 See L<Nile::Serializer>.
 
 =cut
@@ -720,16 +798,16 @@ See L<Nile::Serializer>.
 has 'freeze' => (
       is      => 'rw',
       isa    => 'Nile::Serializer',
-	  lazy	=> 1,
-	  default => sub {
-		  load Nile::Serializer;
-		  Nile::Serializer->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load Nile::Serializer;
+          Nile::Serializer->new;
+      }
   );
 sub serialize {shift->freeze(@_);}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 thaw()
-	
+    
 See L<Nile::Deserializer>.
 
 =cut
@@ -737,116 +815,116 @@ See L<Nile::Deserializer>.
 has 'thaw' => (
       is      => 'rw',
       isa    => 'Nile::Deserializer',
-	  lazy	=> 1,
-	  default => sub {
-		  load Nile::Deserializer;
-		  Nile::Deserializer->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load Nile::Deserializer;
+          Nile::Deserializer->new;
+      }
   );
 sub deserialize {shift->thaw(@_);}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 module()
-	
-	# load module Nile::Module::Home::Contact and create a new object
-	$contact = $me->module("Home::Contact");
+    
+    # load module Nile::Module::Home::Contact and create a new object
+    $contact = $me->module("Home::Contact");
 
-	# to get another new instance
-	$contact1 = $me->module("Home::MyModule")->new();
-	# or
-	$contact2 = $contact->new();
+    # to get another new instance
+    $contact1 = $me->module("Home::MyModule")->new();
+    # or
+    $contact2 = $contact->new();
 
-	# if you are calling from inside the Home module, you can just use
-	$contact = $me->module("Contact");
+    # if you are calling from inside the Home module, you can just use
+    $contact = $me->module("Contact");
 
-	# of course you can load sub classes
-	$send = $me->module("Home::Contact::Send");
+    # of course you can load sub classes
+    $send = $me->module("Home::Contact::Send");
 
-	# if you are calling from inside the Home module, you can just use
-	$send = $me->module("Contact::Send");
+    # if you are calling from inside the Home module, you can just use
+    $send = $me->module("Contact::Send");
 
-	# all the above is the same as
-	use Nile::Module::Home::Contact;
-	$contact = Nile::Module::Home::Contact->new();
-	$contact->main() if ($contact->can("main"));
+    # all the above is the same as
+    use Nile::Module::Home::Contact;
+    $contact = Nile::Module::Home::Contact->new();
+    $contact->main() if ($contact->can("main"));
 
 Load modules classes.
 
 =cut
 
 sub module {
-	
-	my ($self, $module) = @_;
-	
-	my ($package, $script) = caller;
-	my ($class, $method) = $package =~ /^(.*)::(\w+)$/;
-	
-	$module = ucfirst($module);
-	my $name;
+    
+    my ($self, $module) = @_;
+    
+    my ($package, $script) = caller;
+    my ($class, $method) = $package =~ /^(.*)::(\w+)$/;
+    
+    $module = ucfirst($module);
+    my $name;
 
-	if ($module =~ /::/) {
-		# module("Home::Contact") called from any module
-		$name = "Nile::Module::" . $module;
-	}
-	else {
-		# module("Contact") called from Home module
-		$name = $class . "::" . $module;
-	}
+    if ($module =~ /::/) {
+        # module("Home::Contact") called from any module
+        $name = "Nile::Module::" . $module;
+    }
+    else {
+        # module("Contact") called from Home module
+        $name = $class . "::" . $module;
+    }
 
-	return $self->{module}->{$name} if ($self->{module}->{$name});
+    return $self->{module}->{$name} if ($self->{module}->{$name});
 
-	eval "use $name";
-	
-	if ($@) {
-		$self->abort("Module Load Error: $name . $@");
-	}
+    eval "use $name";
+    
+    if ($@) {
+        $self->abort("Module Load Error: $name . $@");
+    }
 
-	$self->{module}->{$name} = $self->object($name, @_);
+    $self->{module}->{$name} = $self->object($name, @_);
 
-	return $self->{module}->{$name};
+    return $self->{module}->{$name};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 hook()
-	
+    
 See L<Nile::Hook>.
 
 =cut
 
 has 'hook' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  default => sub {
-			load Nile::Hook;
-			shift->object("Nile::Hook", @_);
-		}
+      lazy  => 1,
+      default => sub {
+            load Nile::Hook;
+            shift->object("Nile::Hook", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 filter()
-	
+    
 See L<Nile::Filter>.
 
 =cut
 
 has 'filter' => (
       is      => 'rw',
-	  isa    => 'Nile::Filter',
-	  lazy	=> 1,
-	  default => sub {
-			load Nile::Filter;
-			shift->object("Nile::Filter", @_);
-		}
+      isa    => 'Nile::Filter',
+      lazy  => 1,
+      default => sub {
+            load Nile::Filter;
+            shift->object("Nile::Filter", @_);
+        }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 session()
-	
+    
 See session plugin L<Nile::Plugin::Session>.
 
 =cut
 
 has 'session' => (
-	is => 'rw',
-	lazy	=> 1,
-	isa => 'HashRef',
-	default => sub { +{} }
+    is => 'rw',
+    lazy    => 1,
+    isa => 'HashRef',
+    default => sub { +{} }
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'dbh' => (
@@ -855,213 +933,213 @@ has 'dbh' => (
 
 has 'db' => (
       is      => 'rw',
-	  isa    => 'Nile::Database',
-	  lazy	=> 1,
-	  default => sub {
-				my $self = shift;
-				my $db = $self->object("Nile::Database");
-				#my $dbh = $db->connect(@_);
-				#$self->dbh($dbh);
-				return $db;
-		}
+      isa    => 'Nile::Database',
+      lazy  => 1,
+      default => sub {
+                my $self = shift;
+                my $db = $self->object("Nile::Database");
+                #my $dbh = $db->connect(@_);
+                #$self->dbh($dbh);
+                return $db;
+        }
   );
 
 sub connect {
-	my $self = shift;
-	$self->dbh($self->db->connect(@_));
-	$self->db;
+    my $self = shift;
+    $self->dbh($self->db->connect(@_));
+    $self->db;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub new_request {
-	
-	my ($self, $env) = @_;
+    
+    my ($self, $env) = @_;
 
-	if (defined($env) && ref ($env) eq "HASH") {
-		$self->mode("psgi");
-		#load Nile::HTTP::PSGI;
-		$self->request($self->object("Nile::HTTP::Request::PSGI", $env));
-	}
-	else {
-		$self->request($self->object("Nile::HTTP::Request"));
-	}
-	
-	$self->request();
+    if (defined($env) && ref ($env) eq "HASH") {
+        $self->mode("psgi");
+        #load Nile::HTTP::PSGI;
+        $self->request($self->object("Nile::HTTP::Request::PSGI", $env));
+    }
+    else {
+        $self->request($self->object("Nile::HTTP::Request"));
+    }
+    
+    $self->request();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 detect_user_language()
-	
-	$user_lang = $app->detect_user_language;
+    
+    $user_lang = $app->detect_user_language;
 
 Detects and retuns the user langauge.
 
 =cut
 
 sub detect_user_language {
-	my ($self, $default) = @_;
+    my ($self, $default) = @_;
 
-	if ($self->request->param($self->config->get("app/lang_param_key"))) {
-		return $self->request->param($self->config->get("app/lang_param_key"));
-	}
-	
-	if ($self->session->{$self->config->get("app/lang_session_key")}) {
-		return $self->session->{$self->config->get("app/lang_session_key")};
-	}
+    if ($self->request->param($self->config->get("app/lang_param_key"))) {
+        return $self->request->param($self->config->get("app/lang_param_key"));
+    }
+    
+    if ($self->session->{$self->config->get("app/lang_session_key")}) {
+        return $self->session->{$self->config->get("app/lang_session_key")};
+    }
 
-	if ($self->request->cookie($self->config->get("app/lang_cookie_key"))) {
-		return $self->request->cookie($self->config->get("app/lang_cookie_key"));
-	}
+    if ($self->request->cookie($self->config->get("app/lang_cookie_key"))) {
+        return $self->request->cookie($self->config->get("app/lang_cookie_key"));
+    }
 
-	# detect user browser language settings
-	my @langs = $self->lang_list();
-	my $lang = HTTP::AcceptLanguage->new($ENV{HTTP_ACCEPT_LANGUAGE})->match(@langs);
+    # detect user browser language settings
+    my @langs = $self->lang_list();
+    my $lang = HTTP::AcceptLanguage->new($ENV{HTTP_ACCEPT_LANGUAGE})->match(@langs);
 
-	$lang ||= $default ||= $langs[0] ||= "en-US";
+    $lang ||= $default ||= $langs[0] ||= "en-US";
 
-	return $lang;
+    return $lang;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 view()
-	
+    
 Returns L<Nile::View> object.
 
 =cut
 
 sub view {
-	my ($self) = shift;
-	return $self->object("Nile::View", @_);
+    my ($self) = shift;
+    return $self->object("Nile::View", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 database()
-	
+    
 Returns L<Nile::Database> object.
 
 =cut
 
 sub database {
-	my ($self) = shift;
-	return $self->object("Nile::Database", @_);
+    my ($self) = shift;
+    return $self->object("Nile::Database", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 theme_list()
-	
-	@themes = $app->theme_list;
+    
+    @themes = $app->theme_list;
 
 Returns themes names installed.
 
 =cut
 
 sub theme_list {
-	my ($self) = @_;
-	my @folders = ($self->file->folders($self->var->get("themes_dir"), "", 1));
-	return grep (/^[^_]/, @folders);
+    my ($self) = @_;
+    my @folders = ($self->file->folders($self->var->get("themes_dir"), "", 1));
+    return grep (/^[^_]/, @folders);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 lang_list()
-	
-	@langs = $app->lang_list;
+    
+    @langs = $app->lang_list;
 
 Returns languages names installed.
 
 =cut
 
 sub lang_list {
-	my ($self) = @_;
-	my @folders = ($self->file->folders($self->var->get("langs_dir"), "", 1));
-	return grep (/^[^_]/, @folders);
+    my ($self) = @_;
+    my @folders = ($self->file->folders($self->var->get("langs_dir"), "", 1));
+    return grep (/^[^_]/, @folders);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dump()
-	
-	$app->dump({...});
+    
+    $app->dump({...});
 
 Print object to the STDOUT. Same as C<say Dumper (@_);>.
 
 =cut
 
 sub dump {
-	return shift->app->dump(@_);
+    return shift->app->dump(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 is_loaded()
-	
-	if ($app->is_loaded("Nile::SomeModule")) {
-		#...
-	}
-	
-	if ($app->is_loaded("Nile/SomeModule.pm")) {
-		#...
-	}
+    
+    if ($app->is_loaded("Nile::SomeModule")) {
+        #...
+    }
+    
+    if ($app->is_loaded("Nile/SomeModule.pm")) {
+        #...
+    }
 
 Returns true if module is loaded, false otherwise.
 
 =cut
 
 sub is_loaded {
-	shift->app->is_loaded(@_);
+    shift->app->is_loaded(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cli_mode()
-	
-	if ($app->cli_mode) {
-		say "Running from the command line";
-	}
-	else {
-		say "Running from web server";
-	}
+    
+    if ($app->cli_mode) {
+        say "Running from the command line";
+    }
+    else {
+        say "Running from web server";
+    }
 
 Returns true if running from the command line interface, false if called from web server.
 
 =cut
 
 sub cli_mode {
-	shift->app->cli_mode(@_);
+    shift->app->cli_mode(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 utf8_safe()
-	
-	$str_utf8 = $app->utf8_safe($str);
+    
+    $str_utf8 = $app->utf8_safe($str);
 
 Encode data in C<utf8> safely.
 
 =cut
 
 sub utf8_safe {
-	my ($self, $str) = @_;
-	if (utf8::is_utf8($str)) {
-		utf8::encode($str);
-	}
-	$str;
+    my ($self, $str) = @_;
+    if (utf8::is_utf8($str)) {
+        utf8::encode($str);
+    }
+    $str;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 encode()
-	
-	$encoded = $app->encode($data);
+    
+    $encoded = $app->encode($data);
 
 Encode data using the current L</charset>.
 
 =cut
 
 sub encode {
-	my ($self, $data) = @_;
-	return Encode::encode($self->charset, $data);
+    my ($self, $data) = @_;
+    return Encode::encode($self->charset, $data);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 decode()
-	
-	$data = $app->decode($encoded);
+    
+    $data = $app->decode($encoded);
 
 Decode data using the current L</charset>.
 
 =cut
 
 sub decode {
-	my ($self, $data) = @_;
-	return Encode::decode($self->charset, $data);
+    my ($self, $data) = @_;
+    return Encode::decode($self->charset, $data);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 instance_isa()
-	
-	$app->instance_isa($object, $class);
+    
+    $app->instance_isa($object, $class);
 
 Test for an object of a particular class in a strictly correct manner.
 
@@ -1070,27 +1148,27 @@ Returns the object itself or C<undef> if the value provided is not an object of 
 =cut
 
 sub instance_isa ($$) {
-	#my ($self, $object, $class) = @_;
-	(Scalar::Util::blessed($_[1]) and $_[1]->isa($_[2])) ? $_[1] : undef;
+    #my ($self, $object, $class) = @_;
+    (Scalar::Util::blessed($_[1]) and $_[1]->isa($_[2])) ? $_[1] : undef;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub content_type_text {
-	my ($self, $content_type) = @_;
-	return $content_type =~ /(\bx(?:ht)?ml\b|text|json|javascript)/;
+    my ($self, $content_type) = @_;
+    return $content_type =~ /(\bx(?:ht)?ml\b|text|json|javascript)/;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 abort()
-	
-	$app->abort("error message");
+    
+    $app->abort("error message");
 
-	$app->abort("error title", "error message");
+    $app->abort("error title", "error message");
 
 Stop and quit the application and display message to the user. See L<Nile::Abort> module.
 
 =cut
 
 sub abort {
-	shift->app->abort(@_);
+    shift->app->abort(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

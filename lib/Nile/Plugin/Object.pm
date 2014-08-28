@@ -1,13 +1,13 @@
-#	Copyright Infomation
+#   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
-#	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
-#	Email		:	mewsoft@cpan.org, support@mewsoft.com
-#	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
+# Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
+# Website: https://github.com/mewsoft/Nile, http://www.mewsoft.com
+# Email  : mewsoft@cpan.org, support@mewsoft.com
+# Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Object;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod

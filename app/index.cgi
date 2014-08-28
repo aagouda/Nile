@@ -8,7 +8,7 @@
 #	Email		:	mewsoft@cpan.org, support@mewsoft.com
 #	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	#print "Content-type: text/html;charset=utf-8\n\n";
+	print "Content-type: text/html;charset=utf-8\n\n";
 	use Data::Dumper;
 	use utf8;
 	

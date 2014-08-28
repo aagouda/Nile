@@ -1,13 +1,13 @@
-#	Copyright Infomation
+#   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
-#	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
-#	Email		:	mewsoft@cpan.org, support@mewsoft.com
-#	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
+# Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
+# Website: https://github.com/mewsoft/Nile, http://www.mewsoft.com
+# Email  : mewsoft@cpan.org, support@mewsoft.com
+# Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -15,53 +15,58 @@ use DateTime qw();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # plugin action, return content. url is routed direct or from routes files. url: /home
 sub home : GET Action {
-	
-	my ($self, $app) = @_;
-	
-	# $app is set to the application context object, same as $self->app inside any method
-	#my $app = $self->app;
-	
-	my $view = $app->view("home");
-	
-	$view->var(
-		fname			=>	'Ahmed',
-		lname			=>	'Elsheshtawy',
-		email			=>	'sales@mewsoft.com',
-		website		=>	'http://www.mewsoft.com',
-		singleline		=>	'Single line variable <b>Good</b>',
-		multiline		=>	'Multi line variable <b>Nice</b>',
-	);
-	
-	#my $var = $view->block();
-	#say "block: " . $app->dump($view->block("first/second/third/fourth/fifth"));
-	#$view->block("first/second/third/fourth/fifth", "Block Modified ");
-	#say "block: " . $app->dump($view->block("first/second/third/fourth/fifth"));
+    
+    my ($self, $app) = @_;
+    
+    # $app is set to the application context object, same as $self->app inside any method
+    #my $app = $self->app;
+    
+    my $view = $app->view("home");
+    
+    $view->var(
+        fname           =>  'Ahmed',
+        lname           =>  'Elsheshtawy',
+        email           =>  'sales@mewsoft.com',
+        website     =>  'http://www.mewsoft.com',
+        singleline      =>  'Single line variable <b>Good</b>',
+        multiline       =>  'Multi line variable <b>Nice</b>',
+    );
+    
+    #my $var = $view->block();
+    #say "block: " . $app->dump($view->block("first/second/third/fourth/fifth"));
+    #$view->block("first/second/third/fourth/fifth", "Block Modified ");
+    #say "block: " . $app->dump($view->block("first/second/third/fourth/fifth"));
 
-	$view->block("first", "1st Block New Content ");
-	$view->block("six", "6th Block New Content ");
+    $view->block("first", "1st Block New Content ");
+    $view->block("six", "6th Block New Content ");
 
-	#say "dump: " . $app->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
-	
-	# module settings from config files
-	my $setting = $self->setting();
-	
-	# plugin session must be enabled in config.xml
-	if (!$app->session->{first_visit}) {
-		$app->session->{first_visit} = time;
-	}
-	my $dt = DateTime->from_epoch(epoch => $app->session->{first_visit});
-	$view->set("first_visit", $dt->strftime("%a, %d %b %Y %H:%M:%S"));
-	
-	return $view->out();
+    #say "dump: " . $app->dump($view->block->{first}->{second}->{third}->{fourth}->{fifth});
+    
+    # module settings from config files
+    my $setting = $self->setting();
+    
+    # plugin session must be enabled in config.xml
+    if (!$app->session->{first_visit}) {
+        $app->session->{first_visit} = time;
+    }
+    my $dt = DateTime->from_epoch(epoch => $app->session->{first_visit});
+    $view->set("first_visit", $dt->strftime("%a, %d %b %Y %H:%M:%S"));
+    
+    # save visitors count to the cache
+    $app->cache->set("visitor_count", $app->cache->get("visitor_count") + 1, "1 year");
+    $view->set("visitor_count", $app->cache->get("visitor_count"));
+    
+
+    return $view->out();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # run action and capture print statements, no returns. url: /home/news
 sub news: GET Capture {
 
-	my ($self, $app) = @_;
+    my ($self, $app) = @_;
 
-	say qq{Hello world. This content is captured from print statements.
-		The action must be marked by 'Capture' attribute. No returns.};
+    say qq{Hello world. This content is captured from print statements.
+        The action must be marked by 'Capture' attribute. No returns.};
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -69,11 +74,11 @@ sub news: GET Capture {
 # <vars type="module" method="Home::Home->welcome" message="Welcome back!" />
 sub welcome {
 
-	my ($self, %args) = @_;
-	
-	my $app = $self->app();
+    my ($self, %args) = @_;
+    
+    my $app = $self->app();
 
-	return "Nice to see you, " . $args{message};
+    return "Nice to see you, " . $args{message};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Bug in MooseX::Method::Signatures does not support attributes, waiting fix
@@ -81,8 +86,8 @@ sub welcome {
 # MooseX::Declare does not seem to work with "MooseX::MethodAttributes because" they both try to override Moose's default metaclass for methods.
 # MooseX::MethodAttributes would need to be fixed to respect the original method metaclass, rather than imposing one.
 #method hello ($args) : Action {
-#	my $app = $self->app;
-#	return "Nice to say hello";
+#   my $app = $self->app;
+#   return "Nice to say hello";
 #}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

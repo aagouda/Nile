@@ -1,13 +1,13 @@
-#	Copyright Infomation
+#   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
-#	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
-#	Email		:	mewsoft@cpan.org, support@mewsoft.com
-#	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
+# Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
+# Website: https://github.com/mewsoft/Nile, http://www.mewsoft.com
+# Email  : mewsoft@cpan.org, support@mewsoft.com
+# Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Session;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -55,9 +55,11 @@ This plugin uses the cache module L<CHI> for saving sessions. All drivers suppor
 			<autoload>1</autoload>
 			<key>nile_session_key</key>
 			<expire>1 year</expire>
-			<driver>
+			<cache>
 				<driver>File</driver>
-			</driver>
+				<root_dir></root_dir>
+				<namespace>session</namespace>
+			</cache>
 			<cookie>
 				<path>/</path>
 				<secure></secure>
@@ -104,11 +106,11 @@ Returns the L<CHI> cache object instance used by the session. All L<CHI> methods
 
 =head2 get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired
 	
-	$app->plugin->session->set($key, $data, "10 minutes" );
+	$app->plugin->session->set($key, $data, "10 minutes");
 
 	# same as
 
-	$app->plugin->session->cache->set($key, $data, "10 minutes" );
+	$app->plugin->session->cache->set($key, $data, "10 minutes");
 
 These methods are a proxy to the L<CHI> cache object methods. See L<CHI> for details about these methods.
 
