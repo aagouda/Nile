@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::MIME;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,24 +20,24 @@ Nile::MIME - Handle MIME Types
 
 =head1 SYNOPSIS
 
-	# get mime object instance
-	$mime = $app->mime;
+    # get mime object instance
+    $mime = $app->mime;
 
-	# get mime type for a file from its extension
-	$mime_type = $mime->for_file("filename.zip");
-	# application/zip
+    # get mime type for a file from its extension
+    $mime_type = $mime->for_file("filename.zip");
+    # application/zip
 
-	# get mime type by name
-	$mime_type = $mime->for_name('xml');
-	# application/xml
+    # get mime type by name
+    $mime_type = $mime->for_name('xml');
+    # application/xml
 
-	# add custom mime type
-	$mime->add_type(foo => "text/foo");
+    # add custom mime type
+    $mime->add_type(foo => "text/foo");
 
-	# add an alias to an existing type
-	$mime->add_alias(bar => "foo");
+    # add an alias to an existing type
+    $mime->add_alias(bar => "foo");
 
-	@exts = $mime->extensions();
+    @exts = $mime->extensions();
 
 =head1 DESCRIPTION
 
@@ -50,21 +50,21 @@ use MooseX::NonMoose;
 extends 'MIME::Types';
 #=========================================================#
 has 'default' => (
-		is			=> 'rw',
-		default	=> 'application/data',
+        is          => 'rw',
+        default => 'application/data',
   );
 
   
 has 'custom_types' => (
-		is => 'rw',
-		isa => 'HashRef',
-		default =>  sub { +{ } }
-	);
+        is => 'rw',
+        isa => 'HashRef',
+        default =>  sub { +{ } }
+    );
 
 #=========================================================#
 =head2 for_file
 
-	$mime_type = $mime->for_file('filename.pdf');
+    $mime_type = $mime->for_file('filename.pdf');
 
 Returns the mime type for a file, based on a file extension.
 
@@ -79,7 +79,7 @@ sub for_file {
 #=========================================================#
 =head2 for_name
 
-	$mime_type = $mime->for_name('pdf');
+    $mime_type = $mime->for_name('pdf');
 
 Returns the mime type for a standard or a custom mime type.
 
@@ -92,33 +92,33 @@ sub for_name {
 #=========================================================#
 =head2 add_type
 
-	# add nonstandard mime type
-	$mime->add_type(foo => "text/foo");
+    # add nonstandard mime type
+    $mime->add_type(foo => "text/foo");
 
 Add a custom mime type or overrides an existing one.
 
 =cut
 
 sub add_type {
-	my ($self, $name, $type) = @_;
-	$self->custom_types->{$name} = $type;
-	$self;
+    my ($self, $name, $type) = @_;
+    $self->custom_types->{$name} = $type;
+    $self;
 }
 #=========================================================#
 =head2 add_alias
 
-	# add alias to standard or previous alias
-	$mime->add_alias( my_jpg => 'jpg' );
+    # add alias to standard or previous alias
+    $mime->add_alias( my_jpg => 'jpg' );
 
 Adds an alias to an existing mime type.
 
 =cut
 
 sub add_alias {
-	my ($self, $alias, $orig) = @_;
-	my $type = $self->name($orig);
-	$self->add_type($alias, $type);
-	return $type;
+    my ($self, $alias, $orig) = @_;
+    my $type = $self->name($orig);
+    $self->add_type($alias, $type);
+    return $type;
 }
 #=========================================================#
 

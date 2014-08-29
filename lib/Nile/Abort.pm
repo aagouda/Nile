@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Abort;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,10 +19,10 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Abort - Abort the application at anytime with optional message and stacktrace.
 
 =head1 SYNOPSIS
-		
-	$self->app->abort("error message");
+        
+    $self->app->abort("error message");
 
-	$self->app->abort("error title", "error message");
+    $self->app->abort("error title", "error message");
 
 =head1 DESCRIPTION
 
@@ -34,23 +34,23 @@ use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub abort {
 
-	my ($self) = shift;
+    my ($self) = shift;
 
-	my ($title, $msg, $trace, @trace, $out);
+    my ($title, $msg, $trace, @trace, $out);
 
-	#my ($callpackage, $callfile, $callline, $subroutine, $hasargs, $wantarray, $evaltext, $is_require) = caller;
+    #my ($callpackage, $callfile, $callline, $subroutine, $hasargs, $wantarray, $evaltext, $is_require) = caller;
 
-	if (@_ == 2) {
-		($title, $msg) = @_;
-	}
-	else {
-		($msg) = @_;
-		$title = "Application Error";
-	}
-	
-	#@trace = reverse split(/\n/, Carp::longmess());
-	#$trace = join ("<br>\n", @trace);
-	#$trace = Carp::longmess();
+    if (@_ == 2) {
+        ($title, $msg) = @_;
+    }
+    else {
+        ($msg) = @_;
+        $title = "Application Error";
+    }
+    
+    #@trace = reverse split(/\n/, Carp::longmess());
+    #$trace = join ("<br>\n", @trace);
+    #$trace = Carp::longmess();
 
 =cuts
 my $out = <<HTML;
@@ -62,29 +62,29 @@ my $out = <<HTML;
 <body style="background: #ffffff;" >
 
 <div align="center" style="margin-top: 100px;">
-	<table cellpadding="0" cellspacing="0" style="width: 650px; border: 2px #e5e5e5 solid; border-collapse: collapse;">
-	  <tr><td>
-			<table border="0" cellpadding="8" cellspacing="0" style="border-collapse: collapse" width="100%">
-			  <tr><td style="text-align: center; background: #e5e5e5;"><b>$title</b></td></tr>
-			  <tr><td style="background: #f3f3f3;">$msg</td></tr>
-			  <tr><td style="background: #f9f9f9;">$trace</td></tr>
-			</table>
-		</td>
-	  </tr>
-	</table>
+    <table cellpadding="0" cellspacing="0" style="width: 650px; border: 2px #e5e5e5 solid; border-collapse: collapse;">
+      <tr><td>
+            <table border="0" cellpadding="8" cellspacing="0" style="border-collapse: collapse" width="100%">
+              <tr><td style="text-align: center; background: #e5e5e5;"><b>$title</b></td></tr>
+              <tr><td style="background: #f3f3f3;">$msg</td></tr>
+              <tr><td style="background: #f9f9f9;">$trace</td></tr>
+            </table>
+        </td>
+      </tr>
+    </table>
 </div>
 </body>
 </html>
 HTML
 =cut
-	
-	$out = "";
-	#$out .= "$title\n\n";
-	$out .= "$msg\n\n";
-	#$out .= "$trace\n\n";
+    
+    $out = "";
+    #$out .= "$title\n\n";
+    $out .= "$msg\n\n";
+    #$out .= "$trace\n\n";
 
-	die $out;
-	#if ($self->app->db->connected) {$self->app->db->disconnect();}
+    die $out;
+    #if ($self->app->db->connected) {$self->app->db->disconnect();}
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Timer;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,30 +19,30 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Timer - Timer to clock operations.
 
 =head1 SYNOPSIS
-	
-	# start the timer
-	$app->timer->start;
-	
-	# do some operations...
-	
-	# get time elapsed since start called
-	say $app->timer->lap;
+    
+    # start the timer
+    $app->timer->start;
+    
+    # do some operations...
+    
+    # get time elapsed since start called
+    say $app->timer->lap;
 
-	# do some other operations...
+    # do some other operations...
 
-	# get time elapsed since last lap called
-	say $app->timer->lap;
+    # get time elapsed since last lap called
+    say $app->timer->lap;
 
-	# get another timer object, timer automatically starts
-	my $timer = $app->timer->new;
-	say $timer->lap;
-	#...
-	say $timer->lap;
-	#...
-	say $timer->total;
+    # get another timer object, timer automatically starts
+    my $timer = $app->timer->new;
+    say $timer->lap;
+    #...
+    say $timer->lap;
+    #...
+    say $timer->total;
 
-	# get total time elapsed since start
-	say $app->timer->total;
+    # get total time elapsed since start
+    say $app->timer->total;
 
 =head1 DESCRIPTION
 
@@ -54,14 +54,14 @@ use Nile::Base;
 use Time::HiRes qw(gettimeofday tv_interval);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
-	my ($self, $args) = @_;
-	$self->start;
+    my ($self, $args) = @_;
+    $self->start;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 start()
-	
-	# start the timer from now
-	$app->timer->start;
+    
+    # start the timer from now
+    $app->timer->start;
 
 Starts the timer. Timer starts by default when the application is started.
 
@@ -69,14 +69,14 @@ Starts the timer. Timer starts by default when the application is started.
 
 sub start {
     my ($self) = @_;
-	my $now = [gettimeofday()];
+    my $now = [gettimeofday()];
     $self->start_time($now);
-	$self->lap_start_time($now);
+    $self->lap_start_time($now);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 lap()
-	
-	say $app->timer->lap;
+    
+    say $app->timer->lap;
 
 Returns the time period since the last lap or from the start if not called before.
 
@@ -84,17 +84,17 @@ Returns the time period since the last lap or from the start if not called befor
 
 sub lap {
     my ($self) = @_;
-	Time::HiRes::usleep 10000;
+    Time::HiRes::usleep 10000;
     my $now = [gettimeofday()];
     my $lap = tv_interval($self->lap_start_time, $now);
-	$self->lap_start_time([gettimeofday()]);
+    $self->lap_start_time([gettimeofday()]);
     return sprintf("%0f", $lap);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 total()
-	
-	# get total time since start called
-	say $app->timer->total;
+    
+    # get total time since start called
+    say $app->timer->total;
 
 Returns the total time since the last start.
 
@@ -108,8 +108,8 @@ sub total {
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 start_time()
-	
-	say $app->timer->start_time;
+    
+    say $app->timer->start_time;
 
 Returns the last start time.
 
@@ -121,8 +121,8 @@ has 'start_time' => (
 
 
 =head2 lap_start_time()
-	
-	say $app->timer->lap_start_time;
+    
+    say $app->timer->lap_start_time;
 
 Returns the last lap start time.
 
@@ -133,8 +133,8 @@ has 'lap_start_time' => (
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 time()
-	
-	say $app->timer->time;
+    
+    say $app->timer->time;
 
 Returns the current time.
 
@@ -142,7 +142,7 @@ Returns the current time.
 
 sub time {
     my ($self) = @_;
-	return [gettimeofday()];
+    return [gettimeofday()];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

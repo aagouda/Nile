@@ -69,5 +69,6 @@ lib/Nile/XML.pm
 LICENSE
 Makefile.PL
 MANIFEST
+Nile.html
 README
 t/Nile.t

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Object;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,7 +19,7 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Plugin::Object - Plugin base class for the Nile framework.
 
 =head1 SYNOPSIS
-		
+        
 =head1 DESCRIPTION
 
 Nile::Plugin::Object - Plugin base class for the Nile framework.
@@ -29,24 +29,24 @@ Nile::Plugin::Object - Plugin base class for the Nile framework.
 use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub AUTOLOAD {
-	
-	my ($self) = shift;
+    
+    my ($self) = shift;
 
     my ($class, $plugin) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
-	
-	return $self->{$plugin} if ($self->{$plugin});
+    
+    return $self->{$plugin} if ($self->{$plugin});
 
-	my $name = "Nile::Plugin::" . ucfirst($plugin);
+    my $name = "Nile::Plugin::" . ucfirst($plugin);
 
-	eval "use $name";
-	
-	if ($@) {
-		$self->app->abort("Plugin Error: $name. $@");
-	}
+    eval "use $name";
+    
+    if ($@) {
+        $self->app->abort("Plugin Error: $name. $@");
+    }
 
-	$self->{$plugin} = $self->app->object($name, @_);
+    $self->{$plugin} = $self->app->object($name, @_);
 
-	return $self->{$plugin};
+    return $self->{$plugin};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

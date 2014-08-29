@@ -1,12 +1,11 @@
 #!C:\perl\bin\perl.exe
 #!/usr/bin/perl
+#   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Copyright Infomation
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#	Author		:	Dr. Ahmed Amin Elsheshtawy, Ph.D.
-#	Website	:	https://github.com/mewsoft/Nile, http://www.mewsoft.com
-#	Email		:	mewsoft@cpan.org, support@mewsoft.com
-#	Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
+# Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
+# Website: https://github.com/mewsoft/Nile, http://www.mewsoft.com
+# Email  : mewsoft@cpan.org, support@mewsoft.com
+# Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	print "Content-type: text/html;charset=utf-8\n\n";
 	use Data::Dumper;
@@ -63,6 +62,20 @@
 		say $self->encode("أحمد الششتاوى ") ."<br>\n";
 		$self->response->encoded(1); # content already encoded
 	});
+
+    # inline actions, capture print statements and return value. url: /blog/new
+    $app->command("get", "/blog/new", sub {
+        my ($self) = @_;
+        # $self is set to the application context object same as $self->me in plugins
+        say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
+        say "Request method: " . ($self->request->request_method || "") . "<br>\n";
+        say "App Mode: " . $self->mode . "<br>\n";
+        say "Time: ". time . "<br>\n";
+        say "Hello world from inline action with capture /blog/new and return value.", "<br>\n";
+        say $self->encode("أحمد الششتاوى ") ."<br>\n";
+        $self->response->encoded(1); # content already encoded
+        return " This value is returned from the command.";
+    });
 
 	# connect to the database. pass the connection params or try to load it from the config object.
 	#$app->connect();

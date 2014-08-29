@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Hook;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,26 +19,26 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Hook - Hook class for the Nile framework.
 
 =head1 SYNOPSIS
-	
-	# run this hook before the "start"
-	$me->hook->before_start( sub {
-		my ($me, @args) = @_; 
+    
+    # run this hook before the "start"
+    $me->hook->before_start( sub {
+        my ($me, @args) = @_; 
 
-	});
-	
-	# run this hook after the "start"
-	$me->hook->after_start( sub { 
-		my ($me, @args) = @_;
+    });
+    
+    # run this hook after the "start"
+    $me->hook->after_start( sub { 
+        my ($me, @args) = @_;
 
-	});
-	
-	# inside plugins and modules
-	
-	# call the before hook for "start"
-	#$self->me->hook->on_start;
+    });
+    
+    # inside plugins and modules
+    
+    # call the before hook for "start"
+    #$self->me->hook->on_start;
 
-	# call the after hook for "start"
-	#$self->me->hook->off_start;
+    # call the after hook for "start"
+    #$self->me->hook->off_start;
 
 =head1 DESCRIPTION
 
@@ -49,76 +49,76 @@ Nile::Hook - Hook class for the Nile framework.
 use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub AUTOLOAD {
-	
-	my ($self) = shift;
+    
+    my ($self) = shift;
 
     my ($class, $method) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
 
-	if ($self->can($method)) {
-		return $self->$method(@_);
+    if ($self->can($method)) {
+        return $self->$method(@_);
     }
-	
-	# $me->hook->before_start(sub {});
-	my ($action, $name) = $method =~ /^(before|after|on|off)_(.*)/;
+    
+    # $me->hook->before_start(sub {});
+    my ($action, $name) = $method =~ /^(before|after|on|off)_(.*)/;
 
-	if ($action && $name) {
-		$action = "hook_$action";
-		$self->$action($name, @_);
-	}
+    if ($action && $name) {
+        $action = "hook_$action";
+        $self->$action($name, @_);
+    }
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub BUILD {
-	my ($self, $arg) = @_;
-	$self->{hooks}->{before} = +{};
-	$self->{hooks}->{after} = +{};
+    my ($self, $arg) = @_;
+    $self->{hooks}->{before} = +{};
+    $self->{hooks}->{after} = +{};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub hook_before {
-	my ($self, $name, @args) = @_;
-	#say "hook_before $name, @args";
-	push @{$self->{hooks}->{before}->{$name}}, [@args];
+    my ($self, $name, @args) = @_;
+    #say "hook_before $name, @args";
+    push @{$self->{hooks}->{before}->{$name}}, [@args];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub hook_after {
-	my ($self, $name, @args) = @_;
-	push @{$self->{hooks}->{after}->{$name}}, [@args];
+    my ($self, $name, @args) = @_;
+    push @{$self->{hooks}->{after}->{$name}}, [@args];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub hook_on {
-	
-	my ($self, $name, @args) = @_;
+    
+    my ($self, $name, @args) = @_;
 
-	exists $self->{hooks}->{before}->{$name} || return sub {};
+    exists $self->{hooks}->{before}->{$name} || return sub {};
 
-	my @hooks = @{$self->{hooks}->{before}->{$name}};
+    my @hooks = @{$self->{hooks}->{before}->{$name}};
 
-	@hooks || return sub {};
-	
-	my ($code, @hook_args);
+    @hooks || return sub {};
+    
+    my ($code, @hook_args);
 
-	foreach my $hook (@hooks) {
-		($code, @hook_args) = @{$hook};
-		$code->($self->me, @args, @hook_args);
-	}
+    foreach my $hook (@hooks) {
+        ($code, @hook_args) = @{$hook};
+        $code->($self->me, @args, @hook_args);
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub hook_off {
-	
-	my ($self, $name, @args) = @_;
-	
-	exists $self->{hooks}->{after}->{$name} || return sub {};
+    
+    my ($self, $name, @args) = @_;
+    
+    exists $self->{hooks}->{after}->{$name} || return sub {};
 
-	my @hooks = @{$self->{hooks}->{after}->{$name}};
+    my @hooks = @{$self->{hooks}->{after}->{$name}};
 
-	@hooks || return sub {};
-	
-	my ($code, @hook_args);
+    @hooks || return sub {};
+    
+    my ($code, @hook_args);
 
-	foreach my $hook (@hooks) {
-		($code, @hook_args) = @{$hook};
-		$code->($self->me, @args, @hook_args);
-	}
+    foreach my $hook (@hooks) {
+        ($code, @hook_args) = @{$hook};
+        $code->($self->me, @args, @hook_args);
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

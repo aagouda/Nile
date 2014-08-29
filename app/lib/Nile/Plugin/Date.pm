@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Date;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Plugin; # automatically extends Nile::Plugin
@@ -15,21 +15,21 @@ use DateTime qw();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub time {
 my ($self, %args) = @_;
-	my $dt = DateTime->now;
-	return $dt->strftime($args{format});
+    my $dt = DateTime->now;
+    return $dt->strftime($args{format});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub date {
-	my ($self, %args) = @_;
-	my $dt = DateTime->now;
-	return $dt->strftime($args{format});
+    my ($self, %args) = @_;
+    my $dt = DateTime->now;
+    return $dt->strftime($args{format});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub now {
-	my ($self, %args) = @_;
-	my $dt = DateTime->now;
-	print $dt->strftime($args{format});
-	return;
+    my ($self, %args) = @_;
+    my $dt = DateTime->now;
+    print $dt->strftime($args{format});
+    return;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

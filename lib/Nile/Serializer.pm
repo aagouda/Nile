@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Serializer;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,17 +19,17 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Serializer - Data structures Serializer
 
 =head1 SYNOPSIS
-	
-	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
-	$encoded = $app->freeze->json($data);
-	$encoded = $app->freeze->yaml($data);
-	$encoded = $app->freeze->storable($data);
-	$encoded = $app->freeze->dumper($data);
-	$encoded = $app->freeze->xml($data);
+    $encoded = $app->freeze->json($data);
+    $encoded = $app->freeze->yaml($data);
+    $encoded = $app->freeze->storable($data);
+    $encoded = $app->freeze->dumper($data);
+    $encoded = $app->freeze->xml($data);
 
-	# also serialize method is an alias for freeze
-	$encoded = $app->serialize->json($data);
+    # also serialize method is an alias for freeze
+    $encoded = $app->serialize->json($data);
 
 =head1 DESCRIPTION
 
@@ -42,75 +42,75 @@ use Moose;
 extends qw(Nile::Serialization);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 json()
-	
-	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
-	
-	$encoded = $app->freeze->json($data);
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    
+    $encoded = $app->freeze->json($data);
 
-	# returns:
+    # returns:
 
-	# {"lname":"elsheshtawy","fname":"ahmed","phone":{"home":"02222444","mobile":"012222333"}}
+    # {"lname":"elsheshtawy","fname":"ahmed","phone":{"home":"02222444","mobile":"012222333"}}
 
 Serialize a data structure to a JSON structure.
 
 =cut
 
 sub json {
-	return shift->Json->utf8->encode(@_);
+    return shift->Json->utf8->encode(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 yaml()
-	
-	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
-	$encoded = $app->freeze->yaml($data);
+    $encoded = $app->freeze->yaml($data);
 
-	# returns:
+    # returns:
 
-	# ---
-	# fname: ahmed
-	# lname: elsheshtawy
-	# phone:
-	#   home: 02222444
-	#   mobile: 012222333
+    # ---
+    # fname: ahmed
+    # lname: elsheshtawy
+    # phone:
+    #   home: 02222444
+    #   mobile: 012222333
 
 Serialize a data structure to a YAML structure.
 
 =cut
 
 sub yaml {
-	shift->Yaml;
-	return YAML::freeze(@_);
+    shift->Yaml;
+    return YAML::freeze(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 storable()
-	
-	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
-	$encoded = $app->freeze->storable($data);
+    $encoded = $app->freeze->storable($data);
 
-	# returns: binary data
+    # returns: binary data
 
 Serialize a data structure to a Storable structure.
 
 =cut
 
 sub storable {
-	shift->Storable;
-	# using network byte order makes sense to always do, under all circumstances to make it platform neutral
-	return Storable::nfreeze(@_);
-	#return Storable::freeze(@_);
+    shift->Storable;
+    # using network byte order makes sense to always do, under all circumstances to make it platform neutral
+    return Storable::nfreeze(@_);
+    #return Storable::freeze(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dumper()
-	
-	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
-	$encoded = $app->freeze->dumper($data);
+    $encoded = $app->freeze->dumper($data);
 
-	# returns:
+    # returns:
 
-	# $M = {'lname' => 'elsheshtawy','fname' => 'ahmed','phone' => {'home' => '02222444','mobile' => '012222333'}};
+    # $M = {'lname' => 'elsheshtawy','fname' => 'ahmed','phone' => {'home' => '02222444','mobile' => '012222333'}};
 
 Serialize a data structure to a Data::Dumper structure.
 
@@ -118,35 +118,35 @@ Serialize a data structure to a Data::Dumper structure.
 
 sub dumper {
 
-	my ($self, $data) = @_;
+    my ($self, $data) = @_;
 
-	my $d = Data::Dumper->new([$data], ["M"]);
+    my $d = Data::Dumper->new([$data], ["M"]);
 
-	$d->Purity(1);
-	$d->Quotekeys(1);
-	$d->Deepcopy(0);
-	$d->Indent(0);
-	$d->Terse(0);
-	$d->Useqq(0);
+    $d->Purity(1);
+    $d->Quotekeys(1);
+    $d->Deepcopy(0);
+    $d->Indent(0);
+    $d->Terse(0);
+    $d->Useqq(0);
 
-	return $d->Dump;
+    return $d->Dump;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
-	
-	$data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
-	$encoded = $app->freeze->xml($data);
+    $encoded = $app->freeze->xml($data);
 
-	# returns:
+    # returns:
 
-	# <?xml version="1.0" encoding="UTF-8" ?>
-	# <fname>ahmed</fname>
-	# <lname>elsheshtawy</lname>
-	# <phone>
-	# <home>02222444</home>
-	# <mobile>012222333</mobile>
-	# </phone>
+    # <?xml version="1.0" encoding="UTF-8" ?>
+    # <fname>ahmed</fname>
+    # <lname>elsheshtawy</lname>
+    # <phone>
+    # <home>02222444</home>
+    # <mobile>012222333</mobile>
+    # </phone>
 
 
 Serialize a data structure to a XML structure.
@@ -154,10 +154,10 @@ Serialize a data structure to a XML structure.
 =cut
 
 sub xml {
-	my $xml = shift->Xml;
-	$xml->set(output_encoding => 'UTF-8');
-	$xml->set(indent => 0);
-	return $xml->write(@_);
+    my $xml = shift->Xml;
+    $xml->set(output_encoding => 'UTF-8');
+    $xml->set(indent => 0);
+    return $xml->write(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

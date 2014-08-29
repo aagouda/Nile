@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::PSGI;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,9 +20,9 @@ Nile::Handler::PSGI - PSGI Handler.
 
 =head1 SYNOPSIS
 
-	# run the app in PSGI mode and return the PSGI closure subroutine
-	my $psgi = $app->object("Nile::Handler::PSGI")->run();
-		
+    # run the app in PSGI mode and return the PSGI closure subroutine
+    my $psgi = $app->object("Nile::Handler::PSGI")->run();
+        
 =head1 DESCRIPTION
 
 Nile::Handler::PSGI - PSGI Handler.
@@ -35,115 +35,115 @@ use Plack::Builder;
 use Plack::Middleware::Deflater;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
-	
-	my ($self) = shift;
+    
+    my ($self) = shift;
 
-	#$app->log->debug("PSGI app handler start");
-	
-	my $apps = $self->app(); # Nile object
+    #$app->log->debug("PSGI app handler start");
+    
+    my $apps = $self->app(); # Nile object
 
-	# PSGI mode. PSGI app will loop inside this closure, so reset any user session shared data inside it.
-	my $psgi = sub {
+    # PSGI mode. PSGI app will loop inside this closure, so reset any user session shared data inside it.
+    my $psgi = sub {
 
-		my $env = shift;
-		
-		my $app = Nile::App->new(app => $apps);
+        my $env = shift;
+        
+        my $app = Nile::App->new(app => $apps);
 
-		#$app->dump($env);
+        #$app->dump($env);
 
-		#$app->start_logger;
-		#$app->log->debug("PSGI request start");
+        #$app->start_logger;
+        #$app->log->debug("PSGI request start");
 
-		$app->env($env);
-		
-		#*ENV = $env;
-		 #%ENV = %$env;
-		#----------------------------------------------
-		$app->new_request($app->env());
+        $app->env($env);
+        
+        #*ENV = $env;
+         #%ENV = %$env;
+        #----------------------------------------------
+        $app->new_request($app->env());
 
-		my $request = $app->request();
-		$self->dump($request);
+        my $request = $app->request();
+        $self->dump($request);
 
-		$app->response($app->object("Nile::HTTP::Response"));
-		my $response = $app->response();
+        $app->response($app->object("Nile::HTTP::Response"));
+        my $response = $app->response();
 
-		$app->start();
+        $app->start();
 
-		$app->hook->off_request();
-		#----------------------------------------------
-		#my $path = $app->env->{PATH_INFO} || $app->env->{REQUEST_URI};
-		#$path = $app->file->catfile($app->var->get("path"), $path);
-		#if (-f $path) {
-		#	# file response: /favicon.ico
-		#	$response->file_response($path);
-		#	$app->stop_logger;
-		#	return $response->finalize;
-		#}
-		#--------------------------------------------------
-		# dispatch the action
-		my $content = $app->dispatcher->dispatch();
-		#--------------------------------------------------
-		$app->hook->on_response();
+        $app->hook->off_request();
+        #----------------------------------------------
+        #my $path = $app->env->{PATH_INFO} || $app->env->{REQUEST_URI};
+        #$path = $app->file->catfile($app->var->get("path"), $path);
+        #if (-f $path) {
+        #   # file response: /favicon.ico
+        #   $response->file_response($path);
+        #   $app->stop_logger;
+        #   return $response->finalize;
+        #}
+        #--------------------------------------------------
+        # dispatch the action
+        my $content = $app->dispatcher->dispatch();
+        #--------------------------------------------------
+        $app->hook->on_response();
 
-		my $ctype = $response->header('Content-Type');
-		if ($app->charset && $ctype && $app->content_type_text($ctype)) {
-			$response->header('Content-Type' => "$ctype; charset=" . $app->charset) if $ctype !~ /charset/i;
-		}
+        my $ctype = $response->header('Content-Type');
+        if ($app->charset && $ctype && $app->content_type_text($ctype)) {
+            $response->header('Content-Type' => "$ctype; charset=" . $app->charset) if $ctype !~ /charset/i;
+        }
 
-		$response->content($content);
+        $response->content($content);
 
-		if (!$ctype) {
-			$response->content_type('text/html;charset=' . $app->charset || "utf-8");
-		}
+        if (!$ctype) {
+            $response->content_type('text/html;charset=' . $app->charset || "utf-8");
+        }
 
-		if (!defined $response->header('Content-Length')) {
-			use bytes; # turn off character semantics
-			$response->header('Content-Length' => length($content));
-		}
+        if (!defined $response->header('Content-Length')) {
+            use bytes; # turn off character semantics
+            $response->header('Content-Length' => length($content));
+        }
 
-		#$response->code(200) unless ($response->code);
-		#$response->content_type('text/html') unless ($response->content_type);
-		
-		#$response->content_encoding('gzip');
-		#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
-		#$response->header(Content_Base => 'http://www.mewsoft.com/');
-		#$response->header(Accept => "text/html, text/plain, image/*");
-		#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
-		#$response->content("Hello world content.");
+        #$response->code(200) unless ($response->code);
+        #$response->content_type('text/html') unless ($response->content_type);
+        
+        #$response->content_encoding('gzip');
+        #$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
+        #$response->header(Content_Base => 'http://www.mewsoft.com/');
+        #$response->header(Accept => "text/html, text/plain, image/*");
+        #$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
+        #$response->content("Hello world content.");
 
-		$response->content($content);
-		
-		#$app->log->debug("PSGI request end");
-		$app->stop_logger();
-		
-		$app->hook->off_response();
-		# return the PSGI response array ref
-		return $response->finalize();
-	};
-	
-	#return $psgi;
+        $response->content($content);
+        
+        #$app->log->debug("PSGI request end");
+        $app->stop_logger();
+        
+        $app->hook->off_response();
+        # return the PSGI response array ref
+        return $response->finalize();
+    };
+    
+    #return $psgi;
 
-	# support Middleware
-	return builder {
-		# serve static files with Plack
-		#enable "Static", path => qr{^/(web|file|theme)/}, root => './';
-		#Plack::Middleware::Deflater
-		enable "Static", 
-			path => sub {
-				my $path = $_;
-				if ( $path =~ m/^\/(web|file|theme|favicon\.)/ ) {
-					# if matched, the value of $_ is being used as a request path, modify it to your needs
-					$_ = $path;
-					return 1;
-				}
-				return 0;
-			},
-			root => './';
-		
-		#enable "Deflater", content_type => ['text/css','text/html','text/javascript','application/javascript'], vary_user_agent => 1;
+    # support Middleware
+    return builder {
+        # serve static files with Plack
+        #enable "Static", path => qr{^/(web|file|theme)/}, root => './';
+        #Plack::Middleware::Deflater
+        enable "Static", 
+            path => sub {
+                my $path = $_;
+                if ( $path =~ m/^\/(web|file|theme|favicon\.)/ ) {
+                    # if matched, the value of $_ is being used as a request path, modify it to your needs
+                    $_ = $path;
+                    return 1;
+                }
+                return 0;
+            },
+            root => './';
+        
+        #enable "Deflater", content_type => ['text/css','text/html','text/javascript','application/javascript'], vary_user_agent => 1;
 
-		$psgi;
-	}
+        $psgi;
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

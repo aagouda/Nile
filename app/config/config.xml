@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <app>
-	<config></config>
-	<route>route.xml</route>
-	<log_file>log.pm</log_file>
-	<action_name>action,route,cmd</action_name>
-	<default_route>/Home/Home/home</default_route>
-	<charset>utf-8</charset>
-	<theme>default</theme>
-	<lang>en-US</lang>
-	<lang_param_key>lang</lang_param_key>
-	<lang_cookie_key>lang</lang_cookie_key>
-	<lang_session_key>lang</lang_session_key>
-	<lang_file>general</lang_file>
+    <config></config>
+    <route>route.xml</route>
+    <log_file>log.pm</log_file>
+    <action_name>action,route,cmd</action_name>
+    <default_route>/Home/Home/home</default_route>
+    <charset>utf-8</charset>
+    <theme>default</theme>
+    <lang>en-US</lang>
+    <lang_param_key>lang</lang_param_key>
+    <lang_cookie_key>lang</lang_cookie_key>
+    <lang_session_key>lang</lang_session_key>
+    <lang_file>general</lang_file>
 </app>
 
 <admin>
@@ -41,35 +41,35 @@
 </module>
 
 <plugin>
-	<email>
-		<transport>Sendmail</transport>
-		<sendmail>/usr/sbin/sendmail</sendmail>
-	</email>
+    <email>
+        <transport>Sendmail</transport>
+        <sendmail>/usr/sbin/sendmail</sendmail>
+    </email>
 
-	<session>
-		<autoload>1</autoload>
-		<key>nile_session_key</key>
-		<expire>1 year</expire>
-		<cache>
-			<driver>File</driver>
-			<root_dir></root_dir>
-			<namespace>session</namespace>
-		</cache>
-		<cookie>
-			<path>/</path>
-			<secure></secure>
-			<domain></domain>
-			<httponly></httponly>
-		</cookie>
-	</session>
+    <session>
+        <autoload>1</autoload>
+        <key>nile_session_key</key>
+        <expire>1 year</expire>
+        <cache>
+            <driver>File</driver>
+            <root_dir></root_dir>
+            <namespace>session</namespace>
+        </cache>
+        <cookie>
+            <path>/</path>
+            <secure></secure>
+            <domain></domain>
+            <httponly></httponly>
+        </cookie>
+    </session>
 
-	<cache>
-		<autoload>0</autoload>
-		<cache>
-			<driver>File</driver>
-			<root_dir></root_dir>
-			<namespace>cache</namespace>
-		</cache>
-	</cache>
+    <cache>
+        <autoload>0</autoload>
+        <cache>
+            <driver>File</driver>
+            <root_dir></root_dir>
+            <namespace>cache</namespace>
+        </cache>
+    </cache>
 
 </plugin>

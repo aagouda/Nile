@@ -1,6 +1,8 @@
 
 Revision history for Perl extension Nile.
 
+0.44  August 29, 2014
+0.43  August 28, 2014
 0.42  August 27, 2014
 0.41  August 23, 2014
 0.40  August 17, 2014
@@ -31,5 +33,5 @@ Revision history for Perl extension Nile.
 0.13  July 10, 2014
 0.12  July 09, 2014
 0.10  July 08, 2014
-	- original version; created
+        - original version; created
 

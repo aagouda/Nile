@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Config;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,50 +19,50 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Config - Configuration file manager.
 
 =head1 SYNOPSIS
-	
-	# get the app config object
-	$config = $self->app->config;
-	
-	# get a new config object
-	$config = $self->app->config->new;
-	
-	# keep sort order when reading and writing the xml file data. default is off.
-	#$config->keep_order(1);
+    
+    # get the app config object
+    $config = $self->app->config;
+    
+    # get a new config object
+    $config = $self->app->config->new;
+    
+    # keep sort order when reading and writing the xml file data. default is off.
+    #$config->keep_order(1);
 
-	# load config file from the configuration folder, file extension is xml.
-	$config->load("config");
+    # load config file from the configuration folder, file extension is xml.
+    $config->load("config");
 
-	# load and append another configuration file
-	$config->add_file("admins");
-	
-	# get config variables
-	say $config->get("admin/user");
-	say $config->get("admin/password");
-		
-	# get config variable, if not found return the optional provided default value.
-	$var = $config->get($name, $default);
+    # load and append another configuration file
+    $config->add_file("admins");
+    
+    # get config variables
+    say $config->get("admin/user");
+    say $config->get("admin/password");
+        
+    # get config variable, if not found return the optional provided default value.
+    $var = $config->get($name, $default);
 
-	# automatic getter support
-	say $config->email; # same as $config->get('email');
+    # automatic getter support
+    say $config->email; # same as $config->get('email');
 
-	# get a group of config variables.
-	@list = $config->list(@names);
+    # get a group of config variables.
+    @list = $config->list(@names);
 
-	# delete config variables from memory, changes will apply when saving file.
-	$config->delete(@names);
+    # delete config variables from memory, changes will apply when saving file.
+    $config->delete(@names);
 
-	# set config variables.
-	$config->set("admin", 'username');
-	$config->set(%vars);
+    # set config variables.
+    $config->set("admin", 'username');
+    $config->set(%vars);
 
-	# automatic setter support
-	$config->email('ahmed@mewsoft.com'); # same as $config->set('email', 'ahmed@mewsoft.com');
-	
-	# save changes to file.
-	$config->save();
+    # automatic setter support
+    $config->email('ahmed@mewsoft.com'); # same as $config->set('email', 'ahmed@mewsoft.com');
+    
+    # save changes to file.
+    $config->save();
 
-	# write to another output file.
-	$config->save($file);
+    # write to another output file.
+    $config->save($file);
 
 =head1 DESCRIPTION
 
@@ -79,8 +79,8 @@ use Nile::Base;
 extends 'Nile::XML';
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 around 'load' => sub {
-	my ($orig, $self, $file) = @_;
-	return $self->$orig($self->app->file->catfile($self->app->var->get("config_dir"), $file));
+    my ($orig, $self, $file) = @_;
+    return $self->$orig($self->app->file->catfile($self->app->var->get("config_dir"), $file));
 };
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

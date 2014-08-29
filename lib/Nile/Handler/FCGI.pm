@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::FCGI;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,9 +19,9 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Handler::FCGI - FCGI Handler.
 
 =head1 SYNOPSIS
-	
-	# run the app in FCGI standalone mode
-	$app->object("Nile::Handler::FCGI")->run();
+    
+    # run the app in FCGI standalone mode
+    $app->object("Nile::Handler::FCGI")->run();
 
 =head1 DESCRIPTION
 
@@ -32,64 +32,64 @@ Nile::Handler::FCGI - FCGI Handler.
 use Nile::Base;
 use FCGI;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	our $fcgi_request_count = 0; # the number of requests this fcgi process handled.
-	our $handling_request = 0;
-	our $exit_requested = 0;
-	our $app_quit_request = 0; # End the application but not the FCGI process
+    our $fcgi_request_count = 0; # the number of requests this fcgi process handled.
+    our $handling_request = 0;
+    our $exit_requested = 0;
+    our $app_quit_request = 0; # End the application but not the FCGI process
 
-	# workaround for known bug in libfcgi
-	while ((our $ignore) = each %ENV) { }
+    # workaround for known bug in libfcgi
+    while ((our $ignore) = each %ENV) { }
 
-	our $fcgi_request = FCGI::Request();
-	#$fcgi_request = FCGI::Request(\*STDIN, \*STDOUT, \*STDERR, \%ENV, $socket);
+    our $fcgi_request = FCGI::Request();
+    #$fcgi_request = FCGI::Request(\*STDIN, \*STDOUT, \*STDERR, \%ENV, $socket);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
 
-	my ($self) = shift;
+    my ($self) = shift;
 
-	my $app = $self->app;
+    my $app = $self->app;
 
-	# The goal of fast cgi is to load the program once, and iterate in a loop for every request.
+    # The goal of fast cgi is to load the program once, and iterate in a loop for every request.
 
-	while ($handling_request = ($fcgi_request->Accept() >= 0)) {
-		
-		#$app->log->debug("FCGI request start");
+    while ($handling_request = ($fcgi_request->Accept() >= 0)) {
+        
+        #$app->log->debug("FCGI request start");
 
-		# handle it as the normal CGI request
-		$app->object("Nile::Handler::CGI")->run();
+        # handle it as the normal CGI request
+        $app->object("Nile::Handler::CGI")->run();
 
-		$handling_request = 0;
-		last if $exit_requested;
-		#exit if -M $ENV{SCRIPT_FILENAME} < 0; # Autorestart
-		
-		#$app->log->debug("FCGI request end");
-		#$app->stop_logger;
-	}
+        $handling_request = 0;
+        last if $exit_requested;
+        #exit if -M $ENV{SCRIPT_FILENAME} < 0; # Autorestart
+        
+        #$app->log->debug("FCGI request end");
+        #$app->stop_logger;
+    }
 
-	$fcgi_request->Finish();
+    $fcgi_request->Finish();
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub request {
-	$fcgi_request;
+    $fcgi_request;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub is_fcgi {
-	my ($self) = shift;
-	if (defined($fcgi_request) && ref($fcgi_request) && $fcgi_request->IsFastCGI()) {
-		return 1;
-	} else {
-		return 0;
-	}
+    my ($self) = shift;
+    if (defined($fcgi_request) && ref($fcgi_request) && $fcgi_request->IsFastCGI()) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub accept {
-	my ($self) = shift;
-	$fcgi_request->Accept() >= 0;
+    my ($self) = shift;
+    $fcgi_request->Accept() >= 0;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub finish {
-	my ($self) = shift;
-	$exit_requested = 1;
+    my ($self) = shift;
+    $exit_requested = 1;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

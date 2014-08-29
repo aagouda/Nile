@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Serialization;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,9 +19,9 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Serialization - Base class for L<Nile::Serializer> and L<Nile::Deserializer>
 
 =head1 SYNOPSIS
-	
-	$app->freeze;
-	$app->thaw;
+    
+    $app->freeze;
+    $app->thaw;
 
 =head1 DESCRIPTION
 
@@ -36,9 +36,9 @@ use Moose;
 use Module::Load;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 Json
-	
-	$json = $app->freeze->Json;
-	$encoded = $json->utf8->encode($data);
+    
+    $json = $app->freeze->Json;
+    $encoded = $json->utf8->encode($data);
 
 Returns L<JSON> object.
 
@@ -47,16 +47,16 @@ Returns L<JSON> object.
 has 'Json' => (
       is      => 'rw',
       isa    => 'JSON',
-	  lazy	=> 1,
-	  default => sub {
-		  load JSON;
-		  JSON->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load JSON;
+          JSON->new;
+      }
   );
 
 =head2 Yaml
-	
-	$yaml = $app->freeze->Yaml;
+    
+    $yaml = $app->freeze->Yaml;
 
 Returns L<YAML> object.
 
@@ -65,16 +65,16 @@ Returns L<YAML> object.
 has 'Yaml' => (
       is      => 'rw',
       isa    => 'YAML',
-	  lazy	=> 1,
-	  default => sub {
-		  load YAML;
-		  YAML->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load YAML;
+          YAML->new;
+      }
   );
 
 =head2 Storable
-	
-	$json = $app->freeze->Storable;
+    
+    $json = $app->freeze->Storable;
 
 Returns "Storable" string. L<Storable> deos not suppot new method.
 
@@ -82,16 +82,16 @@ Returns "Storable" string. L<Storable> deos not suppot new method.
 
 has 'Storable' => (
       is      => 'ro',
-	  lazy	=> 1,
-	  default => sub {
-		  load Storable;
-		  "Storable";
-	  }
+      lazy  => 1,
+      default => sub {
+          load Storable;
+          "Storable";
+      }
   );
 
 =head2 Dumper
-	
-	$dumper = $app->freeze->Dumper;
+    
+    $dumper = $app->freeze->Dumper;
 
 Returns L<Data::Dumper> object.
 
@@ -100,16 +100,16 @@ Returns L<Data::Dumper> object.
 has 'Dumper' => (
       is      => 'rw',
       isa    => 'Data::Dumper',
-	  lazy	=> 1,
-	  default => sub {
-		  load Data::Dumper;
-		  Data::Dumper->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load Data::Dumper;
+          Data::Dumper->new;
+      }
   );
 
 =head2 Xml
-	
-	$xml = $app->freeze->Xml;
+    
+    $xml = $app->freeze->Xml;
 
 Returns L<XML::TreePP> object.
 
@@ -118,11 +118,11 @@ Returns L<XML::TreePP> object.
 has 'Xml' => (
       is      => 'ro',
       #isa    => 'Data::Dumper',
-	  lazy	=> 1,
-	  default => sub {
-		  load XML::TreePP;
-		  XML::TreePP->new;
-	  }
+      lazy  => 1,
+      default => sub {
+          load XML::TreePP;
+          XML::TreePP->new;
+      }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

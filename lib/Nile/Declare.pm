@@ -7,17 +7,17 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Declare;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Moose;
 extends 'MooseX::Declare';
-	
-	no warnings 'redefine';
-	no strict 'refs';
-	# disable the auto immutable feature of Moosex::Declare, or use class Nile::Home is mutable {...}
-	*{"MooseX::Declare::Syntax::Keyword::Class" . '::' . "auto_make_immutable"} = sub { 0 };
-	#around auto_make_immutable => sub { 0 };
+    
+    no warnings 'redefine';
+    no strict 'refs';
+    # disable the auto immutable feature of Moosex::Declare, or use class Nile::Home is mutable {...}
+    *{"MooseX::Declare::Syntax::Keyword::Class" . '::' . "auto_make_immutable"} = sub { 0 };
+    #around auto_make_immutable => sub { 0 };
 
 =pod
 

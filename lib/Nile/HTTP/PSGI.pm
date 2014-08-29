@@ -10,7 +10,7 @@ package Nile::HTTP::PSGI;
 use strict;
 use 5.008_001;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use base qw(CGI::Simple);
@@ -36,7 +36,7 @@ if ($CGI::Simple::VERSION lt '1.111') {
 sub new {
     my ($class, $env) = @_;
 
-	my $self = bless {
+    my $self = bless {
         psgi_env => $env,
         use_tempfile => 1,
     }, $class;
@@ -45,8 +45,8 @@ sub new {
 
     $self->_initialize_globals;
     $self->_store_globals;
-	
-	no strict 'refs';
+    
+    no strict 'refs';
     $self->_read_parse($self->{psgi_env}->{'psgi.input'});
 
     $self;
@@ -189,69 +189,69 @@ for my $method (qw(
 }
 
 sub script_name {
-	my ($self) = @_;
-	#$ENV{'SCRIPT_NAME'} || $0 || '' 
-	$self->env->{SCRIPT_NAME} || '' 
+    my ($self) = @_;
+    #$ENV{'SCRIPT_NAME'} || $0 || '' 
+    $self->env->{SCRIPT_NAME} || '' 
 }
 
 sub url {
-	my ( $self, @p ) = @_;
-	use CGI::Simple::Util 'rearrange';
-	my ( $relative, $absolute, $full, $path_info, $query, $base )
-	= rearrange(
-		[
-		  'RELATIVE', 'ABSOLUTE', 'FULL',
-		  [ 'PATH',  'PATH_INFO' ],
-		  [ 'QUERY', 'QUERY_STRING' ], 'BASE'
-		],
-		@p
-	);
+    my ( $self, @p ) = @_;
+    use CGI::Simple::Util 'rearrange';
+    my ( $relative, $absolute, $full, $path_info, $query, $base )
+    = rearrange(
+        [
+          'RELATIVE', 'ABSOLUTE', 'FULL',
+          [ 'PATH',  'PATH_INFO' ],
+          [ 'QUERY', 'QUERY_STRING' ], 'BASE'
+        ],
+        @p
+    );
 
-	my $url;
+    my $url;
 
-	local *ENV = $self->{psgi_env};
+    local *ENV = $self->{psgi_env};
 
-	$full++ if $base || !( $relative || $absolute );
+    $full++ if $base || !( $relative || $absolute );
 
-	my $path = $self->path_info;
+    my $path = $self->path_info;
 
-	my $script_name = $self->script_name;
+    my $script_name = $self->script_name;
 
-	if ($full) {
-		my $protocol = $self->protocol();
-		$url = "$protocol://";
-		my $vh = $self->http( 'host' );
+    if ($full) {
+        my $protocol = $self->protocol();
+        $url = "$protocol://";
+        my $vh = $self->http( 'host' );
 
-		if ($vh) {
-			$url .= $vh;
-		}
-		else {
-			$url .= server_name();
-			my $port = $self->server_port;
-			$url .= ":" . $port
-			unless ( lc( $protocol ) eq 'http' && $port == 80 )
-					or ( lc( $protocol ) eq 'https' && $port == 443 );
-		}
+        if ($vh) {
+            $url .= $vh;
+        }
+        else {
+            $url .= server_name();
+            my $port = $self->server_port;
+            $url .= ":" . $port
+            unless ( lc( $protocol ) eq 'http' && $port == 80 )
+                    or ( lc( $protocol ) eq 'https' && $port == 443 );
+        }
 
-		return $url if $base;
-		#$url .= $script_name;
-		#$url .= $path;
-	}
-	elsif ($relative) {
-		($url) = $script_name =~ m#([^/]+)$#;
-	}
-	elsif ($absolute) {
-		#$url = $script_name;
-		$url = $path;
-	}
+        return $url if $base;
+        #$url .= $script_name;
+        #$url .= $path;
+    }
+    elsif ($relative) {
+        ($url) = $script_name =~ m#([^/]+)$#;
+    }
+    elsif ($absolute) {
+        #$url = $script_name;
+        $url = $path;
+    }
 
-	$url .= $path if $path_info and defined $path;
-	$url .= "?" . $self->query_string if $query and $self->query_string;
-	$url = '' unless defined $url;
+    $url .= $path if $path_info and defined $path;
+    $url .= "?" . $self->query_string if $query and $self->query_string;
+    $url = '' unless defined $url;
 
-	$url	=~ s/([^a-zA-Z0-9_.%;&?\/\\:+=~-])/uc sprintf("%%%02x",ord($1))/eg;
+    $url    =~ s/([^a-zA-Z0-9_.%;&?\/\\:+=~-])/uc sprintf("%%%02x",ord($1))/eg;
 
-	return $url;
+    return $url;
 }
 
 sub DESTROY {

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,10 +20,10 @@ Nile::Module - Module base class for the Nile framework.
 
 =head1 SYNOPSIS
 
-	package Nile::Module::Home::Home;
+    package Nile::Module::Home::Home;
 
-	use Nile::Module; # automatically extends Nile::Module
-	
+    use Nile::Module; # automatically extends Nile::Module
+    
 =head1 DESCRIPTION
 
 Nile::Module - Module base class for the Nile framework.
@@ -40,71 +40,71 @@ use Module::Runtime qw(use_module);
 use MooseX::MethodAttributes;
 
 our @EXPORT_MODULES = (
-		Moose => [],
-		utf8 => [],
-		'Nile::Say' => [],
-		'MooseX::MethodAttributes' => [],
-	);
+        Moose => [],
+        utf8 => [],
+        'Nile::Say' => [],
+        'MooseX::MethodAttributes' => [],
+    );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
 
-	my ($class, @args) = @_;
+    my ($class, @args) = @_;
 
-	my ($caller, $script) = caller;
+    my ($caller, $script) = caller;
 
-	my $package = __PACKAGE__;
-	
-	# ignore calling from child import
-	return if ($class ne $package);
+    my $package = __PACKAGE__;
+    
+    # ignore calling from child import
+    return if ($class ne $package);
 
-	my @modules = @EXPORT_MODULES;
+    my @modules = @EXPORT_MODULES;
 
-	while (@modules) {
-		my $module = shift @modules;
-		my $imports = ref($modules[0]) eq 'ARRAY' ? shift @modules : [];
-		use_module($module)->import::into($caller, @{$imports});
-	}
+    while (@modules) {
+        my $module = shift @modules;
+        my $imports = ref($modules[0]) eq 'ARRAY' ? shift @modules : [];
+        use_module($module)->import::into($caller, @{$imports});
+    }
 
-	{
-		no strict 'refs';
-		@{"${caller}::ISA"} = ($package, @{"${caller}::ISA"});
-	}
+    {
+        no strict 'refs';
+        @{"${caller}::ISA"} = ($package, @{"${caller}::ISA"});
+    }
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 setting()
-	
-	# inside modules, return current modules config settings
-	my $setting = $self->setting();
-	my %setting = $self->setting();
+    
+    # inside modules, return current modules config settings
+    my $setting = $self->setting();
+    my %setting = $self->setting();
 
-	# inside modules, return specific modules config settings
-	my $setting = $self->setting("payment");
-	my %setting = $self->setting("payment");
+    # inside modules, return specific modules config settings
+    my $setting = $self->setting("payment");
+    my %setting = $self->setting("payment");
 
 Returns module settings from configuration files loaded.
 Module settings in config files must be in inside the module tag. The module name must be lower case tag, so module C<Payment> should be C<payment>.
 
 Exampler settings for C<payment> module below:
 
-	<module>
-		<payment>
-			<url>localhost</url>
-			<user>merchant</user>
-			<pass>1234</pass>
-		</payment>
-	</module>
+    <module>
+        <payment>
+            <url>localhost</url>
+            <user>merchant</user>
+            <pass>1234</pass>
+        </payment>
+    </module>
 
 =cut
 
 sub setting {
-	my ($self, $module) = @_;
+    my ($self, $module) = @_;
 
-	$module ||= caller();
-	$module =~ s/^(.*):://;
-	$module = lc($module);
+    $module ||= caller();
+    $module =~ s/^(.*):://;
+    $module = lc($module);
 
-	return wantarray ? %{ $self->app->config->var->{module}->{$module} } : $self->app->config->var->{module}->{$module};
+    return wantarray ? %{ $self->app->config->var->{module}->{$module} } : $self->app->config->var->{module}->{$module};
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

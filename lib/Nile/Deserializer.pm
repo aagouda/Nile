@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Deserializer;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,15 +19,15 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Deserializer - Data structures deserializer
 
 =head1 SYNOPSIS
-	
-	$data = $app->thaw->json($encoded);
-	$data = $app->thaw->yaml($encoded);
-	$data = $app->thaw->storable($encoded);
-	$data = $app->thaw->dumper($encoded);
-	$data = $app->thaw->xml($encoded);
+    
+    $data = $app->thaw->json($encoded);
+    $data = $app->thaw->yaml($encoded);
+    $data = $app->thaw->storable($encoded);
+    $data = $app->thaw->dumper($encoded);
+    $data = $app->thaw->xml($encoded);
 
-	# also deserialize method is an alias for freeze
-	$data = $app->deserialize->json($encoded);
+    # also deserialize method is an alias for freeze
+    $data = $app->deserialize->json($encoded);
 
 =head1 DESCRIPTION
 
@@ -39,60 +39,60 @@ use Nile::Base;
 extends qw(Nile::Serialization);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 json()
-	
-	$encoded = qq!{"lname":"elsheshtawy","fname":"ahmed","phone":{"home":"02222444","mobile":"012222333"}}!;
+    
+    $encoded = qq!{"lname":"elsheshtawy","fname":"ahmed","phone":{"home":"02222444","mobile":"012222333"}}!;
 
-	$data = $app->thaw->json($encoded);
+    $data = $app->thaw->json($encoded);
 
-	# returns:
-	# $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    # returns:
+    # $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
 Deserialize a JSON structure to a data structure.
 
 =cut
 
 sub json {
-	return shift->Json->utf8->decode(@_);
+    return shift->Json->utf8->decode(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 yaml()
-	
-	$data = $app->thaw->yaml($encoded);
+    
+    $data = $app->thaw->yaml($encoded);
 
-	# returns:
-	# $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    # returns:
+    # $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
 Deserialize a YAML structure to a data structure
 
 =cut
 
 sub yaml {
-	shift->Yaml;
-	return YAML::thaw(@_);
+    shift->Yaml;
+    return YAML::thaw(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 storable()
-	
-	$data = $app->thaw->storable($encoded);
+    
+    $data = $app->thaw->storable($encoded);
 
-	# returns:
-	# $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    # returns:
+    # $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
 Deserialize a Storable structure to a data structure.
 
 =cut
 
 sub storable {
-	shift->Storable;
-	return Storable::thaw(@_);
+    shift->Storable;
+    return Storable::thaw(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dumper()
-	
-	$data = $app->thaw->dumper($encoded);
+    
+    $data = $app->thaw->dumper($encoded);
 
-	# returns:
-	# $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    # returns:
+    # $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
 Deserialize a Data::Dumper structure to a data structure.
 
@@ -103,28 +103,28 @@ sub dumper {
     return undef unless defined $data;
     my $M = "";
     # clearify hashref's as perl may treat it as a block
-	$data = '+'.$data if ($data =~ /^\{/);
-	my $res = eval($data);
-	if ($@) {
-		$self->me->abort("Unable to deserialize : $@. $data");
-	}
+    $data = '+'.$data if ($data =~ /^\{/);
+    my $res = eval($data);
+    if ($@) {
+        $self->me->abort("Unable to deserialize : $@. $data");
+    }
     return $M ? $M : $res;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 xml()
-	
-	$data = $app->thaw->xml($encoded);
+    
+    $data = $app->thaw->xml($encoded);
 
-	# returns:
-	# $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+    # returns:
+    # $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
 
 Deserialize a XML structure to a data structure
 
 =cut
 
 sub xml {
-	my $xml = shift->Xml->parse(@_);
-	return $xml;
+    my $xml = shift->Xml->parse(@_);
+    return $xml;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Say;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,12 +19,12 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Say -  Compatibility layer to use say().
 
 =head1 SYNOPSIS
-		
-	print "hello world\n";
+        
+    print "hello world\n";
 
-	# same as:
+    # same as:
 
-	say "hello world";
+    say "hello world";
 
 =head1 DESCRIPTION
 
@@ -45,8 +45,8 @@ sub import {
 
     if( $] < 5.010 ) {
         no strict 'refs';
-		*{caller() . '::say'} = \&say; 
-		use strict 'refs';
+        *{caller() . '::say'} = \&say; 
+        use strict 'refs';
     }
     else {
         require feature;

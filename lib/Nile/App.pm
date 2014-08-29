@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -706,9 +706,9 @@ sub helper {
     
     # add attribute "PI"
     $app->attr("PI" => 4 * atan2(1, 1));
-	
-	# or
-	$app->attr("PI" => sub{4 * atan2(1, 1)});
+    
+    # or
+    $app->attr("PI" => sub{4 * atan2(1, 1)});
 
     # get the attribute value
     say $app->PI;

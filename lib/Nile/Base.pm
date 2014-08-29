@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Base;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,12 +19,12 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Base - Base class for the Nile framework.
 
 =head1 SYNOPSIS
-		
-	package Nile::MyModule;
+        
+    package Nile::MyModule;
 
-	use Nile::Base;
+    use Nile::Base;
 
-	1;
+    1;
 
 =head1 DESCRIPTION
 
@@ -51,24 +51,24 @@ no strict 'refs';
 #around auto_make_immutable => sub { 0 };
 
 our @EXPORT_MODULES = (
-		#strict => [],
-		#warnings => [],
-		Moose => [],
-		utf8 => [],
-		#true => [],
-		'Nile::Say' => [],
-		#'Nile::Declare' => ['method' => 'method', 'function' => 'function', 'invocant'=>'$self', 'inject'=>'my ($me) = $self->me;'],
-		'MooseX::Declare' => [],
-		#'Nile::Declare' => [],
-		'MooseX::MethodAttributes' => [],
-		#'MooseX::ClassAttribute' => [],
-		#'Module::Load' => [()], # will emit error for methods load redefined
-	);
+        #strict => [],
+        #warnings => [],
+        Moose => [],
+        utf8 => [],
+        #true => [],
+        'Nile::Say' => [],
+        #'Nile::Declare' => ['method' => 'method', 'function' => 'function', 'invocant'=>'$self', 'inject'=>'my ($me) = $self->me;'],
+        'MooseX::Declare' => [],
+        #'Nile::Declare' => [],
+        'MooseX::MethodAttributes' => [],
+        #'MooseX::ClassAttribute' => [],
+        #'Module::Load' => [()], # will emit error for methods load redefined
+    );
 
 sub import {
-	my ($class, %args) = @_;
-	my $caller = caller;
-	my @modules = @EXPORT_MODULES;
+    my ($class, %args) = @_;
+    my $caller = caller;
+    my @modules = @EXPORT_MODULES;
     while (@modules) {
         my $module = shift @modules;
         my $imports = ref $modules[0] eq 'ARRAY' ? shift @modules : [];

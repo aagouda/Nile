@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::SendFile;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,7 +19,7 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::HTTP::SendFile - Send files to browser.
 
 =head1 SYNOPSIS
-		
+        
 =head1 DESCRIPTION
 
 Nile::HTTP::SendFile - Send files to browser.
@@ -47,9 +47,9 @@ sub send_file  {
         $res->header(Expires => "Sat, 01 Jan 2000 00:00:00 GMT");
     }
     else {
-		$res->remove_header("Expires");
+        $res->remove_header("Expires");
         if (!ref($file)) {
-			my $lastmod = $res->http_date((stat $file)[9]);
+            my $lastmod = $res->http_date((stat $file)[9]);
             my $ifmod = $ENV{HTTP_IF_MODIFIED_SINCE};
             if ($ifmod && $ifmod eq $lastmod) {
                 $res->header(Status => "304 Not Modified";
@@ -63,31 +63,31 @@ sub send_file  {
 
     my $len = ref($file) ? length(${$file}) : -s $file;
 
-	my ($start, $end) = (0, $len-1);
-	
-	#if ($options{range}) {
-	#	($start, $end) = $self->parse_range($ENV{HTTP_RANGE}, $len);
-	#}
-	#require PerlIO::subfile;
-	#open my $fh, "<:raw:subfile(start=$start,end=".($end+1).")", $file or return $self->return_403;
+    my ($start, $end) = (0, $len-1);
+    
+    #if ($options{range}) {
+    #   ($start, $end) = $self->parse_range($ENV{HTTP_RANGE}, $len);
+    #}
+    #require PerlIO::subfile;
+    #open my $fh, "<:raw:subfile(start=$start,end=".($end+1).")", $file or return $self->return_403;
 
 
-	if ($options{range} && defined $ENV{HTTP_RANGE} && $ENV{HTTP_RANGE} =~ /\Abytes=(\d*)-(\d*)\z/ixms) {
-		my ($from, $to) = ($1, $2);
-		if ($from ne "" && $to ne "" && $from <= $to && $to < $len) {
-			# 0-0, 0-499, 500-999
-			$start = $from;
-			$end = $to;
-		}
-		elsif ($from ne "" && $to eq "" && $from < $len) {
-			# 0-, 500-, 999-
-			$start  = $from;
-		}
-		elsif ($from eq "" && $to ne "" && $to > 0 && $to <= $len) {
-			# -1, -500, -1000
-			$start  = $len - $to;
-		}
-	}
+    if ($options{range} && defined $ENV{HTTP_RANGE} && $ENV{HTTP_RANGE} =~ /\Abytes=(\d*)-(\d*)\z/ixms) {
+        my ($from, $to) = ($1, $2);
+        if ($from ne "" && $to ne "" && $from <= $to && $to < $len) {
+            # 0-0, 0-499, 500-999
+            $start = $from;
+            $end = $to;
+        }
+        elsif ($from ne "" && $to eq "" && $from < $len) {
+            # 0-, 500-, 999-
+            $start  = $from;
+        }
+        elsif ($from eq "" && $to ne "" && $to > 0 && $to <= $len) {
+            # -1, -500, -1000
+            $start  = $len - $to;
+        }
+    }
 
     my $size = $end - $start + 1;
 
@@ -95,8 +95,8 @@ sub send_file  {
     $res->header("Content-Length" => $size);
     $res->header("Content-Type" => $options{type});
 
-	# Content-Disposition: attachment; filename="filename.jpg"
-	if (!$options{inline}) {
+    # Content-Disposition: attachment; filename="filename.jpg"
+    if (!$options{inline}) {
         $res->header("Content-Disposition" => "attachment");
     }
 

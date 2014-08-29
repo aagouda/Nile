@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,7 +19,7 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Plugin - Plugin base class for the Nile framework.
 
 =head1 SYNOPSIS
-		
+        
 =head1 DESCRIPTION
 
 Nile::Plugin - Plugin base class for the Nile framework.
@@ -30,76 +30,76 @@ the method setting which has the plugin setting loaded automatically from the co
 Creating your first plugin C<Hello> is simple like that, just create a module file called C<Hello.pm> in the folder C<Nile/Plugin> and 
 put the following code in it:
 
-	package Nile::Plugin::Hello;
-	
-	our $VERSION = '0.43';
-	
-	# this also extends Nile::Plugin, the plugin base class
-	use Nile::Plugin;
-	
-	# optional our alternative for sub new {} called automaticall on object creation
-	sub main {
+    package Nile::Plugin::Hello;
+    
+    our $VERSION = '0.44';
+    
+    # this also extends Nile::Plugin, the plugin base class
+    use Nile::Plugin;
+    
+    # optional our alternative for sub new {} called automaticall on object creation
+    sub main {
 
-		my ($self, $arg) = @_;
-		
-		# plugin settings from config files section
-		my $setting = $self->setting();
-		#same as
-		#my $setting = $self->setting("hello");
-		
-		# get app context
-		my $me = $self->me;
+        my ($self, $arg) = @_;
+        
+        # plugin settings from config files section
+        my $setting = $self->setting();
+        #same as
+        #my $setting = $self->setting("hello");
+        
+        # get app context
+        my $me = $self->me;
 
-		# good to setup hooks here
-		# run this hook after the "start" method
-		$app->hook->after_start( sub { 
-			my ($me, @args) = @_;
-			#...
-		});
-		
-	}
-	
-	sub welcome {
-		my ($self) = @_;
-		return "Hello world";
-	}
+        # good to setup hooks here
+        # run this hook after the "start" method
+        $app->hook->after_start( sub { 
+            my ($me, @args) = @_;
+            #...
+        });
+        
+    }
+    
+    sub welcome {
+        my ($self) = @_;
+        return "Hello world";
+    }
 
-	1;
+    1;
 
 Then inside other modules or plugins you can access this plugin as
-	
-	say $app->plugin->hello->welcome;
+    
+    say $app->plugin->hello->welcome;
 
-	# in general, you access plugins like this:
-	$app->plugin->your_plugin_name->your_plugin_method([args]);
+    # in general, you access plugins like this:
+    $app->plugin->your_plugin_name->your_plugin_method([args]);
 
 Plugins will be loaded automatically on the first time it is used and can be load on application startup in the C<init> method:
 
-	$app->init({
-		plugin	=> [ qw(hello) ],
-	});
+    $app->init({
+        plugin  => [ qw(hello) ],
+    });
 
 Plugins also can be loaded on application startup by setting the C<autoload> variable in the plugin configuration in the
 config files. 
 
 Example of plugin configuration to auto load on application startup:
 
-	<plugin>
+    <plugin>
 
-		<hello>
-			<autoload>1</autoload>
-		</hello>
+        <hello>
+            <autoload>1</autoload>
+        </hello>
 
-	</plugin>
+    </plugin>
 
 At the plugin load, the plugin optional method C<main> will be called automatically if it exists, this is an alternative for the method C<new>.
 
 Inside the plugin methods, you access the application context by the injected method C<me> and you use it in this way:
 
-	my $me = $self->me;
-	$app->request->param("name");
-	...
-	$app->config->get("email");
+    my $me = $self->me;
+    $app->request->param("name");
+    ...
+    $app->config->get("email");
 
 Plugins that setup C<hooks> must be set to autoload on startup for hooks works as expected.
 
@@ -121,49 +121,49 @@ no strict 'refs';
 #around auto_make_immutable => sub { 0 };
 
 our @EXPORT_MODULES = (
-		Moose => [],
-		utf8 => [],
-		'Nile::Say' => [],
-		'MooseX::Declare' => [],
-		'MooseX::MethodAttributes' => [],
-	);
+        Moose => [],
+        utf8 => [],
+        'Nile::Say' => [],
+        'MooseX::Declare' => [],
+        'MooseX::MethodAttributes' => [],
+    );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub import {
 
-	my ($class, @args) = @_;
+    my ($class, @args) = @_;
 
-	my ($caller, $script) = caller;
+    my ($caller, $script) = caller;
 
-	my $package = __PACKAGE__;
-	
-	# ignore calling from child import
-	return if ($class ne $package);
+    my $package = __PACKAGE__;
+    
+    # ignore calling from child import
+    return if ($class ne $package);
 
-	my @modules = @EXPORT_MODULES;
+    my @modules = @EXPORT_MODULES;
 
-	while (@modules) {
-		my $module = shift @modules;
-		my $imports = ref($modules[0]) eq 'ARRAY' ? shift @modules : [];
-		use_module($module)->import::into($caller, @{$imports});
-	}
+    while (@modules) {
+        my $module = shift @modules;
+        my $imports = ref($modules[0]) eq 'ARRAY' ? shift @modules : [];
+        use_module($module)->import::into($caller, @{$imports});
+    }
 
-	{
-		no strict 'refs';
-		@{"${caller}::ISA"} = ($package, @{"${caller}::ISA"});
-	}
+    {
+        no strict 'refs';
+        @{"${caller}::ISA"} = ($package, @{"${caller}::ISA"});
+    }
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 setting()
-	
-	# inside plugin classes, return current plugin class config settings
-	my $setting = $self->setting();
-	my %setting = $self->setting();
+    
+    # inside plugin classes, return current plugin class config settings
+    my $setting = $self->setting();
+    my %setting = $self->setting();
 
-	# 
-	# inside plugin classes, return specific plugin class config settings
-	my $setting = $self->setting("email");
-	my %setting = $self->setting("email");
+    # 
+    # inside plugin classes, return specific plugin class config settings
+    my $setting = $self->setting("email");
+    my %setting = $self->setting("email");
 
 Returns plugin class settings from configuration files loaded.
 
@@ -171,38 +171,38 @@ Helper plugin settings in config files must be in inside the plugin tag. The plu
 
 Exampler settings for C<email> and  C<cache> plugins class below:
 
-	<plugin>
-		<email>
-			<transport>Sendmail</transport>
-			<sendmail>/usr/sbin/sendmail</sendmail>
-		</email>
-		<cache>
-			<autoload>1</autoload>
-		</cache>
-	</plugin>
+    <plugin>
+        <email>
+            <transport>Sendmail</transport>
+            <sendmail>/usr/sbin/sendmail</sendmail>
+        </email>
+        <cache>
+            <autoload>1</autoload>
+        </cache>
+    </plugin>
 
 =cut
 
 sub setting {
 
-	my ($self, $plugin) = @_;
+    my ($self, $plugin) = @_;
 
-	$plugin ||= caller();
-	$plugin =~ s/^(.*):://;
-	$plugin = lc($plugin);
+    $plugin ||= caller();
+    $plugin =~ s/^(.*):://;
+    $plugin = lc($plugin);
 
-	my $app = $self->app;
-	
-	# access plugin name as "email" or "Email"
-	if (!exists $app->config->get("plugin")->{$plugin} && exists $app->config->get("plugin")->{ucfirst($plugin)}) {
-		$plugin = ucfirst($plugin);
-	}
-	
-	my $setting = $app->config->get("plugin")->{$plugin};
+    my $app = $self->app;
+    
+    # access plugin name as "email" or "Email"
+    if (!exists $app->config->get("plugin")->{$plugin} && exists $app->config->get("plugin")->{ucfirst($plugin)}) {
+        $plugin = ucfirst($plugin);
+    }
+    
+    my $setting = $app->config->get("plugin")->{$plugin};
 
-	delete $setting->{autoload};
+    delete $setting->{autoload};
 
-	return wantarray ? %{$setting} : $setting;
+    return wantarray ? %{$setting} : $setting;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

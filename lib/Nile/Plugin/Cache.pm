@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Cache;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,37 +19,37 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Plugin::Cache - Cache plugin for the Nile framework.
 
 =head1 SYNOPSIS
-	
-	# save visitors count to the cache
-	$app->cache->set("visitor_count", $app->cache->get("visitor_count") + 1, "1 year");
+    
+    # save visitors count to the cache
+    $app->cache->set("visitor_count", $app->cache->get("visitor_count") + 1, "1 year");
 
-	# retrieve visitors count from the cache
-	$view->set("visitor_count", $app->cache->get("visitor_count"));
-		
+    # retrieve visitors count from the cache
+    $view->set("visitor_count", $app->cache->get("visitor_count"));
+        
 =head1 DESCRIPTION
-	
+    
 Nile::Plugin::Cache - Cache plugin for the Nile framework.
 
 Plugin settings in th config file under C<plugin> section. The C<autoload> variable is must be set to true value for the plugin to be loaded
 on application startup to setup hooks to work before actions dispatch:
 
-	<plugin>
+    <plugin>
 
-		<cache>
-			<autoload>0</autoload>
-			<driver>File</driver>
-			<root_dir></root_dir>
-			<namespace>cache</namespace>
-		</cache>
+        <cache>
+            <autoload>0</autoload>
+            <driver>File</driver>
+            <root_dir></root_dir>
+            <namespace>cache</namespace>
+        </cache>
 
-	</plugin>
+    </plugin>
 
 For DBI driver configuration example:
 
-		<driver>DBI</driver>
-		<namespace>cache</namespace>
-		<table_prefix>cache_</table_prefix>
-		<create_table>1</create_table>
+        <driver>DBI</driver>
+        <namespace>cache</namespace>
+        <table_prefix>cache_</table_prefix>
+        <create_table>1</create_table>
 
 The DBI create table example:
 
@@ -68,16 +68,16 @@ use Nile::Plugin; # also extends Nile::Plugin
 use CHI;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cache()
-	
-	$app->cache();
+    
+    $app->cache();
 
 Returns the L<CHI> cache object instance used. All L<CHI> methods can be accessed through this method.
 
 =head2 get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired
-	
-	$app->cache->set($key, $data, "10 minutes");
+    
+    $app->cache->set($key, $data, "10 minutes");
 
-	$value = $app->cache->get($key);
+    $value = $app->cache->get($key);
 
 These methods are a proxy to the L<CHI> cache object methods. See L<CHI> for details about these methods.
 
@@ -85,35 +85,35 @@ These methods are a proxy to the L<CHI> cache object methods. See L<CHI> for det
 
 has 'cache' => (
       is      => 'rw',
-	  lazy	=> 1,
-	  #isa	=> "CHI",
-	  default => undef,
-	  handles => [qw(get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired)],
+      lazy  => 1,
+      #isa  => "CHI",
+      default => undef,
+      handles => [qw(get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired)],
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main { # our sub new {}
 
-	my ($self, $arg) = @_;
-	
-	my $app = $self->app;
-	my $setting = $self->setting();
+    my ($self, $arg) = @_;
+    
+    my $app = $self->app;
+    my $setting = $self->setting();
 
-	my $driver = $setting->{cache} || +{};
+    my $driver = $setting->{cache} || +{};
 
-	$driver->{driver} ||= "File";
-	$driver->{namespace} ||= "cache"; # default namespace is Default
+    $driver->{driver} ||= "File";
+    $driver->{namespace} ||= "cache"; # default namespace is Default
 
-	if (!$driver->{root_dir}) {
-		$driver->{root_dir} = $app->file->catdir($app->var->get("cache_dir"), $driver->{namespace});
-	}
+    if (!$driver->{root_dir}) {
+        $driver->{root_dir} = $app->file->catdir($app->var->get("cache_dir"), $driver->{namespace});
+    }
 
-	if ($driver->{driver} eq "DBI") {
-		$driver->{dbh} = $app->dbh();
-	}
+    if ($driver->{driver} eq "DBI") {
+        $driver->{dbh} = $app->dbh();
+    }
 
-	if (!$self->cache) {
-		$self->cache(CHI->new(%{$driver}));
-	}
+    if (!$self->cache) {
+        $self->cache(CHI->new(%{$driver}));
+    }
 
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::CGI;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,9 +19,9 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Handler::CGI - CGI Handler.
 
 =head1 SYNOPSIS
-		
-	# run the app in CGI standalone mode
-	$app->object("Nile::Handler::CGI")->run();
+        
+    # run the app in CGI standalone mode
+    $app->object("Nile::Handler::CGI")->run();
 
 =head1 DESCRIPTION
 
@@ -33,87 +33,87 @@ use Nile::Base;
 use Nile::App;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub run {
-	
-	my ($self) = shift;
-	
-	my $app = Nile::App->new(app => $self->app());
-	
-	# direct CGI mode.
-	my $request = $app->new_request();
+    
+    my ($self) = shift;
+    
+    my $app = Nile::App->new(app => $self->app());
+    
+    # direct CGI mode.
+    my $request = $app->new_request();
 
-	$app->response($app->object("Nile::HTTP::Response"));
-	my $response = $app->response();
-	
-	#$app->log->debug("CGI/FCGI request start");
+    $app->response($app->object("Nile::HTTP::Response"));
+    my $response = $app->response();
+    
+    #$app->log->debug("CGI/FCGI request start");
 
-	$app->start();
+    $app->start();
 
-	#$app->hook->on_request();
-	$app->hook->off_request();
-	#------------------------------------------------------
-	# dispatch the action
-	my $content = $app->dispatcher->dispatch;
-	#------------------------------------------------------
-	$app->hook->on_response;
+    #$app->hook->on_request();
+    $app->hook->off_request();
+    #------------------------------------------------------
+    # dispatch the action
+    my $content = $app->dispatcher->dispatch;
+    #------------------------------------------------------
+    $app->hook->on_response;
 
-	# assume OK response if not set
-	$response->code(200) unless ($response->code);
+    # assume OK response if not set
+    $response->code(200) unless ($response->code);
 
-	if (ref($content) eq 'GLOB') {
-		# response is file handle
-		if (!defined $response->header('Content-Length')) {
-			my $size = (stat($content))[7];
-			$response->header('Content-Length' => $size);
-		}
-		$response->content($content);
-	}
-	else {
+    if (ref($content) eq 'GLOB') {
+        # response is file handle
+        if (!defined $response->header('Content-Length')) {
+            my $size = (stat($content))[7];
+            $response->header('Content-Length' => $size);
+        }
+        $response->content($content);
+    }
+    else {
 
-		my $ctype = $response->header('Content-Type');
-		if ($app->charset && $ctype && $app->content_type_text($ctype)) {
-			$response->header('Content-Type' => "$ctype; charset=" . $app->charset) if $ctype !~ /charset/i;
-		}
+        my $ctype = $response->header('Content-Type');
+        if ($app->charset && $ctype && $app->content_type_text($ctype)) {
+            $response->header('Content-Type' => "$ctype; charset=" . $app->charset) if $ctype !~ /charset/i;
+        }
 
-		$response->content($content);
+        $response->content($content);
 
-		if (!$ctype) {
-			$response->content_type('text/html;charset=' . $app->charset);
-		}
+        if (!$ctype) {
+            $response->content_type('text/html;charset=' . $app->charset);
+        }
 
-		if (!defined $response->header('Content-Length')) {
-			use bytes; # turn off character semantics
-			$response->header('Content-Length' => length($content));
-		}
-	}
+        if (!defined $response->header('Content-Length')) {
+            use bytes; # turn off character semantics
+            $response->header('Content-Length' => length($content));
+        }
+    }
 
-	# run any plugin action or route
-	#$app->dispatcher->dispatch('/accounts/register/create');
-	#$app->dispatcher->dispatch('/accounts/register/create', 'POST');
+    # run any plugin action or route
+    #$app->dispatcher->dispatch('/accounts/register/create');
+    #$app->dispatcher->dispatch('/accounts/register/create', 'POST');
 
-	#$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
-	#$response->content_type('text/html;charset=utf-8');
-	#$response->content_encoding('utf-8');
-	#$response->header('Content-Type' => 'text/html');
-	#$response->header(Content_Base => 'http://www.mewsoft.com/');
-	#$response->header(Accept => "text/html, text/plain, image/*");
-	#$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
-	#$response->content("Hello world content.");
-	#my $res = $response->finalize;
-	#my $res = $response->headers_as_string;
-	
-	$app->hook->off_response;
+    #$response->cookies->{username} = {value => 'mewsoft', path  => "/", domain => '.mewsoft.com', expires => time + 24 * 60 * 60,};
+    #$response->content_type('text/html;charset=utf-8');
+    #$response->content_encoding('utf-8');
+    #$response->header('Content-Type' => 'text/html');
+    #$response->header(Content_Base => 'http://www.mewsoft.com/');
+    #$response->header(Accept => "text/html, text/plain, image/*");
+    #$response->header(MIME_Version => '1.0', User_Agent   => 'Nile Web Client/0.26');
+    #$response->content("Hello world content.");
+    #my $res = $response->finalize;
+    #my $res = $response->headers_as_string;
+    
+    $app->hook->off_response;
 
-	my $res = $response->as_string;
-	
-	#print "Content-type: text/html;charset=utf-8\n\n";
-	#print $res, "\n", $response->content;
-	#binmode STDOUT, ":UTF8";
-	#binmode STDOUT, ':encoding(utf8)';
+    my $res = $response->as_string;
+    
+    #print "Content-type: text/html;charset=utf-8\n\n";
+    #print $res, "\n", $response->content;
+    #binmode STDOUT, ":UTF8";
+    #binmode STDOUT, ':encoding(utf8)';
 
-	#$app->log->debug("CGI/FCGI request end");
-	#$app->stop_logger;
+    #$app->log->debug("CGI/FCGI request end");
+    #$app->stop_logger;
 
-	print $res;
+    print $res;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

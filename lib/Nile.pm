@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -63,6 +63,20 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
         say "Hello world from inline action with capture /accounts/login", "<br>\n";
         say $self->encode("أحمد الششتاوى ") ."<br>\n";
         $self->response->encoded(1); # content already encoded
+    });
+
+    # inline actions, capture print statements and return value. url: /blog/new
+    $app->command("get", "/blog/new", sub {
+        my ($self) = @_;
+        # $self is set to the application context object same as $self->me in plugins
+        say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
+        say "Request method: " . ($self->request->request_method || "") . "<br>\n";
+        say "App Mode: " . $self->mode . "<br>\n";
+        say "Time: ". time . "<br>\n";
+        say "Hello world from inline action with capture /blog/new and return value.", "<br>\n";
+        say $self->encode("أحمد الششتاوى ") ."<br>\n";
+        $self->response->encoded(1); # content already encoded
+        return " This value is returned from the command.";
     });
 
     # run the application and return the PSGI response or print to the output
@@ -149,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.43';
+    our $VERSION = '0.44';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
@@ -208,6 +222,17 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
         say qq{Hello world. This content is captured from print statements.
             The action must be marked by 'Capture' attribute. No returns.};
 
+    }
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # run action and capture print statements and the return value. url: /home/info
+    sub info: GET Command {
+
+        my ($self, $app) = @_;
+
+        say qq{This content is captured from print statements.
+            The action marked by 'Command' attribute. };
+        
+        return qq{This content is the return value on the action.};
     }
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     # regular method, can be invoked by views:
@@ -491,7 +516,7 @@ Example config file path/config/config.xml:
 =head1 APPLICATION INSTANCE SHARED DATA
 
 The framework is fully Object-oriented to allow multiple separate instances. Inside any module or plugin
-you will be able to access the application instance by calling the method C<$self->app> which is automatically
+you will be able to access the application instance by calling the method B<$self-E<gt>app> which is automatically
 injected into all modules with the application instance.
 
 The plugins and modules files will have the following features.
@@ -986,17 +1011,7 @@ Add inline action, return content to the dispatcher.
 
 sub action {
     my $self = shift;
-    my ($method, $route, $action) = $self->action_args(@_);
-    $self->router->add_route(
-                            name  => "",
-                            path  => $route,
-                            target  => $action,
-                            method  => $method,
-                            defaults  => {
-                                    #id => 1
-                                },
-                            attributes => undef,
-                        );
+    $self->add_action_route(undef, @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 capture()
@@ -1020,6 +1035,37 @@ Add inline action, capture print statements, no returns to the dispatcher.
 
 sub capture {
     my $self = shift;
+    $self->add_action_route("capture", @_);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 command()
+    
+    # inline actions, capture print statements and return value. url: /blog/new
+    $app->command("get", "/blog/new", sub {
+        my ($self) = @_;
+        # $self is set to the application context object same as $self->me in plugins
+        say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
+        say "Request method: " . ($self->request->request_method || "") . "<br>\n";
+        say "App Mode: " . $self->mode . "<br>\n";
+        say "Time: ". time . "<br>\n";
+        say "Hello world from inline action with capture /blog/new and return value.", "<br>\n";
+        say $self->encode("أحمد الششتاوى ") ."<br>\n";
+        $self->response->encoded(1); # content already encoded
+        return " This value is returned from the command.";
+    });
+
+Add inline action, capture print statements and returns to the dispatcher.
+
+=cut
+
+sub command {
+    my $self = shift;
+    $self->add_action_route("command", @_);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub add_action_route {
+    my $self = shift;
+    my $type = shift;
     my ($method, $route, $action) = $self->action_args(@_);
     $self->router->add_route(
                             name  => "",
@@ -1029,9 +1075,8 @@ sub capture {
                             defaults  => {
                                     #id => 1
                                 },
-                            attributes => "capture",
+                            attributes => $type,
                         );
-
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub action_args {
