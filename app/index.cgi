@@ -1,5 +1,5 @@
-#!C:\perl\bin\perl.exe
 #!/usr/bin/perl
+#!C:\perl\bin\perl.exe
 #   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
@@ -7,7 +7,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	print "Content-type: text/html;charset=utf-8\n\n";
+	#print "Content-type: text/html;charset=utf-8\n\n";
 	use Data::Dumper;
 	use utf8;
 	
@@ -39,7 +39,7 @@
 	# inline actions, return content. url: /forum/home
 	$app->action("get", "/forum/home", sub {
 		my ($self) = @_;
-		# $self is set to the application context object same as $self->me in plugins
+		# $self is set to the application context object same as $self->app in plugins
 		my $content = "Host: " . ($self->request->virtual_host || "") ."<br>\n";
 		$content .= "Request method: " . ($self->request->request_method || "") . "<br>\n";
 		$content .= "App Mode: " . $self->mode . "<br>\n";
@@ -50,10 +50,10 @@
 		return $content;
 	});
 
-	# inline actions, capture print statements, no returns. url: /accounts/login
+	# inline actions, capture print statements, ignore the return value. url: /accounts/login
 	$app->capture("get", "/accounts/login", sub {
 		my ($self) = @_;
-		# $self is set to the application context object same as $self->me in plugins
+		# $self is set to the application context object same as $self->app in plugins
 		say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
 		say "Request method: " . ($self->request->request_method || "") . "<br>\n";
 		say "App Mode: " . $self->mode . "<br>\n";
@@ -63,10 +63,10 @@
 		$self->response->encoded(1); # content already encoded
 	});
 
-    # inline actions, capture print statements and return value. url: /blog/new
+    # inline actions, capture print statements and the return value. url: /blog/new
     $app->command("get", "/blog/new", sub {
         my ($self) = @_;
-        # $self is set to the application context object same as $self->me in plugins
+        # $self is set to the application context object same as $self->app in plugins
         say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
         say "Request method: " . ($self->request->request_method || "") . "<br>\n";
         say "App Mode: " . $self->mode . "<br>\n";

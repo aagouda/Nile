@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod

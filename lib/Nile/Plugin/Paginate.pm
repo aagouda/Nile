@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Paginate;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 # pagination - pag·i·na·tion

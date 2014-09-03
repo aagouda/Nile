@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -44,6 +44,7 @@ use Time::Local;
 use File::Slurp;
 use Time::HiRes qw(gettimeofday tv_interval);
 use MIME::Base64 3.11 qw(encode_base64 decode_base64 decode_base64url encode_base64url);
+use DateTime ();
 
 use Nile::Plugin;
 use Nile::Plugin::Object;
@@ -64,6 +65,7 @@ use Nile::HTTP::Response;
 
 use Nile::Base;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Application 'Nile' object instance
 has 'app' => (
     is => 'rw',
     default => undef
@@ -926,6 +928,49 @@ has 'session' => (
     isa => 'HashRef',
     default => sub { +{} }
 );
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 date()
+    
+	# set time from epoch unix time
+	my $dt = $self->app->date(epoch => time());
+	
+	# set time component
+    my $dt = $self->app->date(
+            year       => 2014,
+            month      => 9,
+            day        => 3,
+            hour       => 22,
+            minute     => 12,
+            second     => 24,
+            nanosecond => 500000000,
+            time_zone  => 'Africa/Cairo',
+        );
+	
+	# set time to now
+    my $dt = $self->app->date;
+
+	# then all methods of DateTime module is available
+	$dt->set_time_zone('America/Chicago');
+	$dt->strftime("%a, %d %b %Y %H:%M:%S");
+	$ymd = $dt->ymd('/');
+
+Date and time object wrapper around L<DateTime> module.
+
+=cut
+
+sub date {
+	my ($self, %arg) = @_;
+	if (exists $arg{epoch}) {
+		$arg{epoch} ||=  time;
+		return DateTime->from_epoch(epoch => $arg{epoch});
+	}
+	elsif (%arg) {
+		return DateTime->new(%arg);
+	}
+	else {
+		return DateTime->now;
+	}
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'dbh' => (
       is      => 'rw',

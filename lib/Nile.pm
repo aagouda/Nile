@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -52,7 +52,7 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
         return $content;
     });
 
-    # inline actions, capture print statements, no returns. url: /accounts/login
+    # inline actions, capture print statements, ignore the return value. url: /accounts/login
     $app->capture("get", "/accounts/login", sub {
         my ($self) = @_;
         # $self is set to the application context object same as $self->app in plugins
@@ -65,10 +65,10 @@ Nile - Android Like Visual Web App Framework Separating Code From Design Multi L
         $self->response->encoded(1); # content already encoded
     });
 
-    # inline actions, capture print statements and return value. url: /blog/new
+    # inline actions, capture print statements and the return value. url: /blog/new
     $app->command("get", "/blog/new", sub {
         my ($self) = @_;
-        # $self is set to the application context object same as $self->me in plugins
+        # $self is set to the application context object same as $self->app in plugins
         say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
         say "Request method: " . ($self->request->request_method || "") . "<br>\n";
         say "App Mode: " . $self->mode . "<br>\n";
@@ -163,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.44';
+    our $VERSION = '0.45';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
@@ -516,7 +516,7 @@ Example config file path/config/config.xml:
 =head1 APPLICATION INSTANCE SHARED DATA
 
 The framework is fully Object-oriented to allow multiple separate instances. Inside any module or plugin
-you will be able to access the application instance by calling the method B<$self-E<gt>app> which is automatically
+you will be able to access the application instance by calling the method C<< $self->app >> which is automatically
 injected into all modules with the application instance.
 
 The plugins and modules files will have the following features.
@@ -1043,7 +1043,7 @@ sub capture {
     # inline actions, capture print statements and return value. url: /blog/new
     $app->command("get", "/blog/new", sub {
         my ($self) = @_;
-        # $self is set to the application context object same as $self->me in plugins
+        # $self is set to the application context object same as $self->app in plugins
         say "Host: " . ($self->request->virtual_host || "") . "<br>\n";
         say "Request method: " . ($self->request->request_method || "") . "<br>\n";
         say "App Mode: " . $self->mode . "<br>\n";
@@ -1210,7 +1210,7 @@ has 'lang' => (
 
     #...
 
-    $me = $obj->me;
+    $me = $obj->app;
     
 Creates and returns an object. This automatically adds the method L<me> to the object
 and sets it to the current context so your object or class can access the current instance.

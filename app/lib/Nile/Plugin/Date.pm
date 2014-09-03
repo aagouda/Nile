@@ -7,27 +7,35 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Date;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Plugin; # automatically extends Nile::Plugin
-use DateTime qw();
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub time {
-my ($self, %args) = @_;
-    my $dt = DateTime->now;
+    my ($self, %args) = @_;
+    my $dt = $self->app->date(
+            year       => 2014,
+            month      => 9,
+            day        => 3,
+            hour       => 22,
+            minute     => 12,
+            second     => 24,
+            nanosecond => 500000000,
+            time_zone  => 'Africa/Cairo',
+        );
     return $dt->strftime($args{format});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub date {
     my ($self, %args) = @_;
-    my $dt = DateTime->now;
+    my $dt = $self->app->date(epoch => time());
     return $dt->strftime($args{format});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub now {
     my ($self, %args) = @_;
-    my $dt = DateTime->now;
+    my $dt = $self->app->date;
     print $dt->strftime($args{format});
     return;
 }

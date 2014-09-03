@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.44';
+our $VERSION = '0.45';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -74,12 +74,10 @@ sub news: GET Capture {
 sub info: GET Command {
 
     my ($self, $app) = @_;
-
-    say qq{This content is captured from print statements.
-        The action marked by 'Command' attribute. };
+	
+    say qq{This content is captured from print statements. The action marked by 'Command' attribute. };
 	
 	return qq{This content is the return value on the action.};
-
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # regular method, can be invoked by views:
