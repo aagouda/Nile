@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -661,13 +661,73 @@ See L<Nile::Plugin>.
 
 =cut
 
-has 'plugin' => (
+has 'plugin_object' => (
       is      => 'rw',
       lazy  => 1,
       default => sub {
             shift->object("Nile::Plugin::Object", @_);
         }
   );
+
+has 'plugin_loaded' => (
+    is => 'rw',
+    lazy    => 1,
+    isa => 'HashRef',
+    default => sub { +{} }
+  );
+
+sub plugin {
+
+    my ($self, $plugin) = @_;
+
+    if (!$plugin) {
+        return $self->plugin_object;
+    }
+
+    if ($plugin !~ /::/) {
+        return $self->plugin_object->$plugin;
+    }
+
+    my $name = "Nile::Plugin::" . ucfirst($plugin);
+
+	
+	return $self->plugin_loaded->{$plugin} if ($self->plugin_loaded->{$plugin});
+
+    eval "use $name";
+    
+    if ($@) {
+        $self->abort("Plugin Error: $name. $@");
+    }
+
+    $self->plugin_loaded->{$plugin}= $self->object($name, @_);
+
+    return $self->plugin_loaded->{$plugin};
+}
+
+sub plugins {
+    my ($self, $plugin) = @_;
+    say "plugin: $plugin";
+    if ($plugin !~ /::/) {
+        return $self->plugin->$plugin;
+    }
+
+    my $name = "Nile::Plugin::" . ucfirst($plugin);
+
+	
+	return $self->plugin_loaded->{$plugin} if ($self->plugin_loaded->{$plugin});
+
+    eval "use $name";
+    
+    if ($@) {
+        $self->abort("Plugins Error: $name. $@");
+    }
+
+    $self->plugin_loaded->{$plugin}= $self->object($name, @_);
+
+    return $self->plugin_loaded->{$plugin};
+
+    #$self->object("Nile::Plugin::Object", $plugin);
+}
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 helper()
     
@@ -930,12 +990,15 @@ has 'session' => (
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 date()
+
+    # get date object with time set to from epoch time
+    my $dt = $app->date(time());
     
-	# set time from epoch unix time
-	my $dt = $self->app->date(epoch => time());
-	
-	# set time component
-    my $dt = $self->app->date(
+    # the same
+    my $dt = $app->date(epoch => time());
+    
+    # object with time component
+    my $dt = $app->date(
             year       => 2014,
             month      => 9,
             day        => 3,
@@ -945,31 +1008,35 @@ has 'session' => (
             nanosecond => 500000000,
             time_zone  => 'Africa/Cairo',
         );
-	
-	# set time to now
-    my $dt = $self->app->date;
+    
+    # get date object with time set to now
+    my $dt = $app->date;
 
-	# then all methods of DateTime module is available
-	$dt->set_time_zone('America/Chicago');
-	$dt->strftime("%a, %d %b %Y %H:%M:%S");
-	$ymd = $dt->ymd('/');
+    # then all methods of DateTime module is available
+    $dt->set_time_zone('America/Chicago');
+    $dt->strftime("%a, %d %b %Y %H:%M:%S");
+    $ymd = $dt->ymd('/');
 
 Date and time object wrapper around L<DateTime> module.
 
 =cut
 
 sub date {
-	my ($self, %arg) = @_;
-	if (exists $arg{epoch}) {
-		$arg{epoch} ||=  time;
-		return DateTime->from_epoch(epoch => $arg{epoch});
-	}
-	elsif (%arg) {
-		return DateTime->new(%arg);
-	}
-	else {
-		return DateTime->now;
-	}
+    my ($self) = shift;
+    if (scalar @_ == 1) {
+        return DateTime->from_epoch(epoch => shift);
+    }
+    elsif (scalar @_ > 1) {
+        my %arg = @_;
+        if (exists $arg{epoch}) {
+            return DateTime->from_epoch(epoch => $arg{epoch});
+        }
+        return DateTime->new(%arg);
+        
+    }
+    else {
+        return DateTime->now;
+    }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 has 'dbh' => (

@@ -32,6 +32,8 @@ WriteMakefile(
             XML::TreePP => 0,
             IO::Compress::Gzip => 0,
             DBI => 0,
+            DBI::Profile => 0,
+            DBI::ProfileDumper => 0,
             Hash::AsObject => 0,
             DateTime => 0,
             Tie::IxHash => 0,
@@ -53,6 +55,7 @@ WriteMakefile(
             Email::Valid => 0,
             Data::Validate::URI => 0,
             HTML::Entities => 0,
+            Cache::Redis => 0,
 
     }, # e.g., Module::Name => 1.1
 

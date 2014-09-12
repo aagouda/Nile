@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -32,7 +32,7 @@ put the following code in it:
 
     package Nile::Plugin::Hello;
     
-    our $VERSION = '0.45';
+    our $VERSION = '0.46';
     
     # this also extends Nile::Plugin, the plugin base class
     use Nile::Plugin;
@@ -48,7 +48,7 @@ put the following code in it:
         #my $setting = $self->setting("hello");
         
         # get app context
-        my $me = $self->me;
+        my $app = $self->app;
 
         # good to setup hooks here
         # run this hook after the "start" method
@@ -68,6 +68,16 @@ put the following code in it:
 
 Then inside other modules or plugins you can access this plugin as
     
+	# get the plugin object
+	$hello = $app->plugin->hello;
+	
+	# or
+	$hello = $app->plugin("Hello");
+	
+	# if plugin name has sub modules
+	my $redis = $app->plugin("Cache::Redis");
+	
+	# call plugin method
     say $app->plugin->hello->welcome;
 
     # in general, you access plugins like this:
@@ -94,14 +104,14 @@ Example of plugin configuration to auto load on application startup:
 
 At the plugin load, the plugin optional method C<main> will be called automatically if it exists, this is an alternative for the method C<new>.
 
-Inside the plugin methods, you access the application context by the injected method C<me> and you use it in this way:
+Inside the plugin methods, you access the application context by the injected method C<app> and you use it in this way:
 
-    my $me = $self->me;
+    my $app = $self->app;
     $app->request->param("name");
     ...
     $app->config->get("email");
 
-Plugins that setup C<hooks> must be set to autoload on startup for hooks works as expected.
+Plugins that setup C<hooks> must be set to autoload on startup for hooks to work as expected.
 
 =cut
 
@@ -188,7 +198,12 @@ sub setting {
     my ($self, $plugin) = @_;
 
     $plugin ||= caller();
-    $plugin =~ s/^(.*):://;
+    
+	#$plugin =~ s/^(.*):://;
+
+	$plugin =~ s/^Nile::Plugin:://;
+	$plugin =~ s/::/_/g;
+
     $plugin = lc($plugin);
 
     my $app = $self->app;

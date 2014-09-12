@@ -1,5 +1,5 @@
-#!/usr/bin/perl
 #!C:\perl\bin\perl.exe
+#!/usr/bin/perl
 #   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Database;
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -38,6 +38,8 @@ Nile::Database - SQL database manager.
 
 use Nile::Base;
 use DBI;
+use DBI::Profile;
+use DBI::ProfileDumper;
 use Hash::AsObject;
 #my $hash = Hash::AsObject->new(\%hash); $hash->foo(27); print $hash->foo; print $hash->baz->quux;
 
@@ -359,6 +361,49 @@ Returns the last insert id from auto increment.
 sub insertid {
     my ($self) = @_;
     return $self->dbh->{mysql_insertid};
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 profile()
+    
+	# level:
+	# 0x01=DBI, 0x02=!Statement ,0x04=!MethodName, 0x06=!Statement:!Method, 
+	# 0x08=!MethodClass, 0x10=!Caller2, 0=disable
+
+    $app->db->profile($level);
+
+	# this will generate the reports file app/log/dbi.prof
+	# then run the command dbiprof to view it:
+	# dbiprof --number 15 --sort count
+
+
+Enable DBI profiling. See L<DBI::Profile> and L<DBI::ProfileDumper>.
+
+=cut
+
+sub profile {
+    
+	my ($self, $level) = @_;
+
+	if (!$level) {
+		$self->dbh->{Profile} = 0;
+		return;
+	}
+	# level: ,0x01=DBI, 0x02=!Statement ,0x04=!MethodName, 0x06=!Statement:!Method, 
+	# 0x08=!MethodClass, 0x10=!Caller2, 0=disable
+
+	my $file = $self->app->file->catfile($self->app->var->get("log_dir"), "dbi.prof");
+
+    $self->dbh->{Profile} = "$level/DBI::ProfileDumper/File:$file";
+	#then run % dbiprof --number 15 --sort count
+
+	#shell: >set DBI_PROFILE=2/DBI::ProfileDumper then %perl program.pl
+
+	#$sth->{Profile} = 4;
+	#$sth->execute; while (@array = $sth->fetchrow_array()) {};
+	#print $sth->{Profile}->format;
+	#finally, disable the profile status, so it does nothing at DESTROY time
+    #$sth->{Profile} = 0;
+	#mysql: mysql>SET profiling=1;mysql>show profiles;mysql>show profile for query 1;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 db_error()

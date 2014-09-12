@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Object;
 
-our $VERSION = '0.45';
+our $VERSION = '0.46';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -34,7 +34,7 @@ sub AUTOLOAD {
 
     my ($class, $plugin) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
     
-    return $self->{$plugin} if ($self->{$plugin});
+	return $self->{$plugin} if ($self->{$plugin});
 
     my $name = "Nile::Plugin::" . ucfirst($plugin);
 

@@ -52,9 +52,11 @@ lib/Nile/HTTP/SendFile.pm
 lib/Nile/Lang.pm
 lib/Nile/MIME.pm
 lib/Nile/Module.pm
+lib/Nile/Module/.exists
 lib/Nile/Plugin.pm
 lib/Nile/Plugin/.exists
 lib/Nile/Plugin/Cache.pm
+lib/Nile/Plugin/Cache/Redis.pm
 lib/Nile/Plugin/Email.pm
 lib/Nile/Plugin/Object.pm
 lib/Nile/Plugin/Paginate.pm
@@ -71,6 +73,5 @@ lib/Nile/XML.pm
 LICENSE
 Makefile.PL
 MANIFEST
-Nile.html
 README
 t/Nile.t

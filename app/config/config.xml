@@ -72,4 +72,10 @@
         </cache>
     </cache>
 
+    <cache_redis>
+		<server>localhost:6379</server>
+		<namespace>cache:</namespace>
+		<default_expires_in>2592000</default_expires_in>
+    </cache_redis>
+
 </plugin>
