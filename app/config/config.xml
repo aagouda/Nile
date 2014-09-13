@@ -78,4 +78,21 @@
 		<default_expires_in>2592000</default_expires_in>
     </cache_redis>
 
+    <mongodb>
+		<host>localhost:</host>
+		<db_name></db_name>
+		<username></username>
+		<password></password>
+    </mongodb>
+
+	<redis>
+		<server>localhost:6379</server>
+		<sock></sock>
+		<password></password>
+		<name></name>
+		<reconnect>60</reconnect>
+		<every>1000000</every>
+		<encoding></encoding>
+	</redis>
+
 </plugin>

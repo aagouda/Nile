@@ -5,7 +5,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Plugin::Cache::Redis;
+package Nile::Plugin::MongoDB;
 
 our $VERSION = '0.47';
 our $AUTHORITY = 'cpan:MEWSOFT';
@@ -16,96 +16,64 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Plugin::Cache::Redis - Cache plugin for the Nile framework using Redis.
+Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
 
 =head1 SYNOPSIS
     
-    my $cache = $app->plugin("Cache::Redis");
+    # connect to MongoDB server
+    $client = $app->plugin->MongoDB->client;
     
-    $cache->set("fullname", "Ahmed Amin Elsheshtawy");
+    # connect to database
+    my $db = $client->get_database("db_name");
 
-    $cache->get("fullname");
+    # connect to collection/table
+    my $table = $db->get_collection("users");
 
-    $cache->remove("fullname");
+    my $id = $table->insert({ some => 'data' });
+    my $data = $table->find_one({ _id => $id });
 
 =head1 DESCRIPTION
     
-Nile::Plugin::Cache::Redis - Cache plugin for the Nile framework using Redis.
+Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
 
 Plugin settings in th config file under C<plugin> section.
 
     <plugin>
 
-        <cache_redis>
-            <server>localhost:6379</server>
-            <namespace>cache:</namespace>
-            <default_expires_in>2592000</default_expires_in>
-        </cache_redis>
+        <mongodb>
+            <server>localhost</server>
+            <port>27017</port>
+            <database></database>
+            <collection></collection>
+        </mongodb>
 
     </plugin>
 
 =cut
 
 use Nile::Plugin;
-use Cache::Redis;
+use MongoDB;
+use MongoDB::MongoClient;
+use MongoDB::OID;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 set()
 
-    $cache->set($key, $value, $expire)
-
-Set a stuff to cache.
-
-=head2 set_multi()
-
-    $cache->set_multi([$key, $value, $expire], [$key, $value])
-
-Set multiple stuffs to cache. stuffs is array reference.
-
-=head2 get()
-
-    my $stuff = $cache->get($key)
-
-Get a stuff from cache.
-
-=head2 get_multi()
+=head2 client()
     
-    my $res = $cache->get_multi(@keys)
-
-Get multiple stuffs as hash reference from cache. @keys should be array. A key is not stored on cache don't be contain $res.
-
-=head2 remove()
-
-    $cache->remove($key)
+    # connect to MongoDB server
+    $client = $app->plugin->MongoDB->client;
     
-Remove stuff of key from cache.
-
-=head2 get_or_set()
-
-    $cache->get_or_set($key, $code, $expire)
-
-Get a cache value for $key if it's already cached. If it's not cached then, run $code and cache $expiration seconds and return the value.
-
-=head2 nowait_push()
-    
-    $cache->nowait_push
-
-Wait all response from Redis. This is intended for $cache->nowait.
-
-=head2 cache()
-    
-    $cache->cache();
-
-Returns the L<Cache::Redis> object instance used. All L<Cache::Redis> methods can be accessed through this method.
+Returns the L<MongoDB::MongoClient> object instance used. All L<MongoDB::MongoClient> methods can be accessed through this method.
 
 =cut
 
-has 'cache' => (
+has 'client' => (
       is      => 'rw',
       lazy  => 1,
       #isa  => "Cache::Redis",
       default => undef,
-      handles => [qw(get set remove set_multi get_multi get_or_set nowait_push)],
+      handles => [qw(get_database )],
   );
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main {
 
@@ -114,10 +82,17 @@ sub main {
     my $app = $self->app;
     my $setting = $self->setting();
 
-    if (!$self->cache) {
-        $self->cache(Cache::Redis->new(%{$setting}));
-    }
+    $setting->{host} ||= "localhost:27017";
 
+    if (!$self->client) {
+        $self->client(MongoDB::MongoClient->new(%{$setting}));
+    }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub connect {
+    my ($self, %setting) = @_;
+    $self->client(MongoDB::MongoClient->new(%setting));
+    return $self->client;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

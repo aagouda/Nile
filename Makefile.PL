@@ -56,6 +56,10 @@ WriteMakefile(
             Data::Validate::URI => 0,
             HTML::Entities => 0,
             Cache::Redis => 0,
+            Redis => 0,
+            MongoDB => 0,
+            MongoDB::MongoClient => 0,
+            MongoDB::OID => 0,
 
     }, # e.g., Module::Name => 1.1
 
