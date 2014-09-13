@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Deserializer;
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -36,6 +36,7 @@ Nile::Deserializer - Data structures deserializer
 =cut
 
 use Nile::Base;
+use Module::Load;
 extends qw(Nile::Serialization);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 json()
@@ -125,6 +126,35 @@ Deserialize a XML structure to a data structure
 sub xml {
     my $xml = shift->Xml->parse(@_);
     return $xml;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+has 'SerealDecoder' => (
+      is      => 'rw',
+      isa    => 'Sereal::Decoder',
+      lazy  => 1,
+      default => sub {
+          load Sereal::Decoder;
+          Sereal::Decoder->new;
+      }
+  );
+
+=head2 sereal()
+    
+    # $encoded: binary data
+
+    $data = $app->thaw->sereal($encoded);
+
+    # returns:
+    # $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+
+
+Deserialize binary data to data structure to using L<Sereal::Decoder>.
+
+=cut
+
+sub sereal {
+    my ($self) = shift;
+    return $self->SerealDecoder->decode(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

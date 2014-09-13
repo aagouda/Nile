@@ -56,6 +56,7 @@ lib/Nile/Plugin/.exists
 lib/Nile/Plugin/Cache.pm
 lib/Nile/Plugin/Cache/Redis.pm
 lib/Nile/Plugin/Email.pm
+lib/Nile/Plugin/Memcached.pm
 lib/Nile/Plugin/MongoDB.pm
 lib/Nile/Plugin/Object.pm
 lib/Nile/Plugin/Paginate.pm

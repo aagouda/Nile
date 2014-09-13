@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Serializer;
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -39,6 +39,7 @@ Nile::Serializer - Data structures Serializer
 
 #use Nile::Base;
 use Moose;
+use Module::Load;
 extends qw(Nile::Serialization);
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 json()
@@ -158,6 +159,33 @@ sub xml {
     $xml->set(output_encoding => 'UTF-8');
     $xml->set(indent => 0);
     return $xml->write(@_);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+has 'SerealEncoder' => (
+      is      => 'rw',
+      isa    => 'Sereal::Encoder',
+      lazy  => 1,
+      default => sub {
+          load Sereal::Encoder;
+          Sereal::Encoder->new;
+      }
+  );
+
+=head2 sereal()
+    
+    $data = {fname=>"ahmed", lname=>"elsheshtawy", phone=>{mobile=>"012222333", home=>"02222444"}};
+
+    $encoded = $app->freeze->sereal($data);
+
+    # returns: binary data
+
+Serialize a data structure to a binary data using L<Sereal::Encoder>.
+
+=cut
+
+sub sereal {
+    my ($self) = shift;
+    return $self->SerealEncoder->encode(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

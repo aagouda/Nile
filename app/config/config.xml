@@ -73,26 +73,31 @@
     </cache>
 
     <cache_redis>
-		<server>localhost:6379</server>
-		<namespace>cache:</namespace>
-		<default_expires_in>2592000</default_expires_in>
+        <server>localhost:6379</server>
+        <namespace>cache:</namespace>
+        <default_expires_in>2592000</default_expires_in>
     </cache_redis>
 
     <mongodb>
-		<host>localhost:</host>
-		<db_name></db_name>
-		<username></username>
-		<password></password>
+        <host>localhost:</host>
+        <db_name></db_name>
+        <username></username>
+        <password></password>
     </mongodb>
 
-	<redis>
-		<server>localhost:6379</server>
-		<sock></sock>
-		<password></password>
-		<name></name>
-		<reconnect>60</reconnect>
-		<every>1000000</every>
-		<encoding></encoding>
-	</redis>
+    <redis>
+        <server>localhost:6379</server>
+        <sock></sock>
+        <password></password>
+        <name></name>
+        <reconnect>60</reconnect>
+        <every>1000000</every>
+        <encoding></encoding>
+    </redis>
+
+    <memcached>
+        <servers>localhost:11211</servers>
+        <namespace></namespace>
+    </memcached>
 
 </plugin>

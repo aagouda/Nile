@@ -5,7 +5,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Plugin::MongoDB;
+package Nile::Plugin::Memcached;
 
 our $VERSION = '0.48';
 our $AUTHORITY = 'cpan:MEWSOFT';
@@ -16,62 +16,58 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
+Nile::Plugin::Memcached - Memcached client plugin for the Nile framework.
 
 =head1 SYNOPSIS
     
-    # connect to MongoDB server
-    $client = $app->plugin->MongoDB->client;
+    # connect to Memcached servers
+    my $client = $app->plugin->memcached;
     
-    # connect to database
-    my $db = $client->get_database("db_name");
+    # store some data
+    $client->set("Name"=>"Ahmed Amin Elsheshtawy Gouda");
 
-    # connect to collection/table
-    my $table = $db->get_collection("users");
+    # get some data
+    my $name = $client->get("Name");
+    
+    # delete some data
+    $client->delete("Name");
 
-    my $id = $table->insert({ some => 'data' });
-    my $data = $table->find_one({ _id => $id });
+	# get the Memcached::Client object used
+    $object = $client->client;
 
 =head1 DESCRIPTION
     
-Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
+Nile::Plugin::Memcached - Memcached client plugin for the Nile framework.
+
+This is a client for the memcached protocol using L<Memcached::Client> module. All methods of the L<Memcached::Client> module are supported.
 
 Plugin settings in th config file under C<plugin> section.
 
     <plugin>
 
-        <mongodb>
-            <server>localhost</server>
-            <port>27017</port>
-            <database></database>
-            <collection></collection>
-        </mongodb>
+        <memcached>
+            <servers>localhost:11211</servers>
+            <namespace></namespace>
+        </memcached>
 
     </plugin>
 
 =cut
 
 use Nile::Plugin;
-use MongoDB;
-use MongoDB::MongoClient;
-use MongoDB::OID;
+use Memcached::Client;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-=head2 client()
-    
-    # connect to MongoDB server
-    $client = $app->plugin->MongoDB->client;
-    
-Returns the L<MongoDB::MongoClient> object instance used. All L<MongoDB::MongoClient> methods can be accessed through this method.
-
-=cut
-
 has 'client' => (
       is      => 'rw',
       lazy  => 1,
-      #isa  => "Cache::Redis",
+      isa  => "Memcached::Client",
       default => undef,
-      handles => [qw(get_database )],
+      handles => [qw(
+                    log compress_threshold namespace hash_namespace set_preprocessor set_servers
+                    connect disconnect add add_multi append append_multi decr decr_multi delete
+                    delete_multi flush_all get get_multi incr incr_multi prepend prepend_multi
+                    remove replace replace_multi set set_multi stats version
+                   )],
   );
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -82,17 +78,11 @@ sub main {
     my $app = $self->app;
     my $setting = $self->setting();
 
-    $setting->{host} ||= "localhost:27017";
+	if (defined($setting->{servers}) && (ref($setting->{servers}) ne "ARRAY")) {
+		$setting->{servers} = [$setting->{servers}];
+	}
 
-    if (!$self->client) {
-        $self->client(MongoDB::MongoClient->new(%{$setting}));
-    }
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub connect {
-    my ($self, %setting) = @_;
-    $self->client(MongoDB::MongoClient->new(%setting));
-    return $self->client;
+    $self->client(Memcached::Client->new($setting));
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

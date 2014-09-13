@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.47';
+our $VERSION = '0.48';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -163,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.47';
+    our $VERSION = '0.48';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
@@ -1484,6 +1484,8 @@ Paginatation L<Nile::Plugin::Paginate>.
 MongoDB L<Nile::Plugin::MongoDB>.
 
 Redis L<Nile::Plugin::Redis>.
+
+Memcached L<Nile::Plugin::Memcached>.
 
 Module L<Nile::Module>.
 
