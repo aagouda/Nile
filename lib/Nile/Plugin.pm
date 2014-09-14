@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin;
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -32,7 +32,7 @@ put the following code in it:
 
     package Nile::Plugin::Hello;
     
-    our $VERSION = '0.48';
+    our $VERSION = '0.49';
     
     # this also extends Nile::Plugin, the plugin base class
     use Nile::Plugin;

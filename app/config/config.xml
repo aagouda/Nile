@@ -100,4 +100,8 @@
         <namespace></namespace>
     </memcached>
 
+    <elasticsearch>
+        <nodes>localhost:9200</nodes>
+    </elasticsearch>
+
 </plugin>

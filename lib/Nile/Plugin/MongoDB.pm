@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::MongoDB;
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod

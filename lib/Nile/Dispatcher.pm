@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Dispatcher;
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod

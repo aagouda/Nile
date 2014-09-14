@@ -60,7 +60,8 @@ WriteMakefile(
             MongoDB => 0,
             MongoDB::MongoClient => 0,
             MongoDB::OID => 0,
-			Memcached::Client => 0,
+            Memcached::Client => 0,
+            Search::Elasticsearch => 0,
 
     }, # e.g., Module::Name => 1.1
 

@@ -2,6 +2,8 @@ app/.htaccess
 app/.htaccessFCGI
 app/api/.exists
 app/cache/.exists
+app/cache/cache/cache/8/2/visitor_count.dat
+app/cache/session/session/c/3/b54a28f92d42d3ef4ef8f8090e1d5452ac785998.dat
 app/cmd/.exists
 app/config/config.xml
 app/cron/.exists
@@ -52,9 +54,9 @@ lib/Nile/MIME.pm
 lib/Nile/Module.pm
 lib/Nile/Module/.exists
 lib/Nile/Plugin.pm
-lib/Nile/Plugin/.exists
 lib/Nile/Plugin/Cache.pm
 lib/Nile/Plugin/Cache/Redis.pm
+lib/Nile/Plugin/Elasticsearch.pm
 lib/Nile/Plugin/Email.pm
 lib/Nile/Plugin/Memcached.pm
 lib/Nile/Plugin/MongoDB.pm
