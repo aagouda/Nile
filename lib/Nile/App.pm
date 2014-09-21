@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -121,10 +121,13 @@ sub object {
 
     # add method "me" or one of its alt
     $self->add_object_context($object, $meta);
-
+    
     # if class has defined "main" method, then call it
     if ($object->can("main")) {
-        $object->main(@args);
+        my %ret = $object->main(@args);
+        if ($ret{rebless}) {
+            $object = $ret{rebless};
+        }
     }
         
     #no strict 'refs';
@@ -148,6 +151,18 @@ sub add_object_context {
     }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub result {
+    my ($self, @data) = @_;
+    use Nile::Result;
+    Nile::Result->new(@data);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub is_result {
+    my ($self, $result) = @_;
+    ref($result) eq "Nile::Result";
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 =head2 start()
     
     $app->start;
@@ -292,22 +307,6 @@ has 'lang' => (
       default => sub {
             #shift->app->lang(@_);
             shift->object("Nile::Lang", @_);
-        }
-  );
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 lang()
-    
-See L<Nile::Lang>.
-
-=cut
-
-has 'cache' => (
-      is      => 'rw',
-      isa    => 'Nile::Plugin::Cache',
-      lazy  => 1,
-      default => sub {
-            load Nile::Plugin::Cache;
-            shift->object("Nile::Plugin::Cache", @_);
         }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -617,15 +616,35 @@ has 'var' => (
     
     $request_uri = $app->env->{REQUEST_URI};
 
-Plack/PSGI env object.
+Application env object for CGI and Plack/PSGI.
 
 =cut
 
 has 'env' => (
     is => 'rw',
     isa => 'HashRef',
+    default => sub { \%ENV }
+);
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 browser()
+    
+    $browser = $app->browser;
+    say $browser->version;
+    say $browser->browser_string;
+    say $browser->os_string;
+    if ($browser->mobile) { say "Mobile device"; }
+
+Determine Web browser, version, and platform. Returns L<HTTP::BrowserDetect> object.
+
+=cut
+
+has 'browsers' => (
+    is      => 'rw',
     lazy    => 1,
-    default => sub { +{} }
+    default => sub {
+        load HTTP::BrowserDetect;
+        HTTP::BrowserDetect->new(shift->env->{HTTP_USER_AGENT})
+    }
 );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 request()

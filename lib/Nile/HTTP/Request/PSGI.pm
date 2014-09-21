@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::HTTP::Request::PSGI;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -116,7 +116,7 @@ sub url_path {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub request_base {
     my  $self = shift;
-     return $self->env->{REQUEST_BASE} ||  $self->env->{HTTP_REQUEST_BASE} || "";
+     return $self->env->{REQUEST_BASE} || $self->env->{HTTP_REQUEST_BASE} || "";
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

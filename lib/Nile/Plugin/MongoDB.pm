@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::MongoDB;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,7 +21,7 @@ Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
 =head1 SYNOPSIS
     
     # connect to MongoDB server
-    $client = $app->plugin->MongoDB->client;
+    $client = $app->plugin->MongoDB;
     
     # connect to database
     my $db = $client->get_database("db_name");
@@ -35,6 +35,11 @@ Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
 =head1 DESCRIPTION
     
 Nile::Plugin::MongoDB - MongoDB plugin for the Nile framework.
+
+    # connect to MongoDB server
+    $client = $app->plugin->MongoDB;
+    
+Returns the L<MongoDB::MongoClient> object. All L<MongoDB::MongoClient> methods are supported.
 
 Plugin settings in th config file under C<plugin> section.
 
@@ -56,43 +61,12 @@ use MongoDB;
 use MongoDB::MongoClient;
 use MongoDB::OID;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-=head2 client()
-    
-    # connect to MongoDB server
-    $client = $app->plugin->MongoDB->client;
-    
-Returns the L<MongoDB::MongoClient> object instance used. All L<MongoDB::MongoClient> methods can be accessed through this method.
-
-=cut
-
-has 'client' => (
-      is      => 'rw',
-      lazy  => 1,
-      #isa  => "Cache::Redis",
-      default => undef,
-      handles => [qw(get_database )],
-  );
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main {
-
     my ($self, $arg) = @_;
-    
     my $app = $self->app;
     my $setting = $self->setting();
-
     $setting->{host} ||= "localhost:27017";
-
-    if (!$self->client) {
-        $self->client(MongoDB::MongoClient->new(%{$setting}));
-    }
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub connect {
-    my ($self, %setting) = @_;
-    $self->client(MongoDB::MongoClient->new(%setting));
-    return $self->client;
+    rebless => MongoDB::MongoClient->new(%{$setting});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

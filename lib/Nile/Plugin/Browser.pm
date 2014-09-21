@@ -5,7 +5,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Plugin::Memcached;
+package Nile::Plugin::Browser;
 
 our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
@@ -16,55 +16,42 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Plugin::Memcached - Memcached client plugin for the Nile framework.
+Nile::Plugin::Browser - Browser detection plugin for the Nile framework.
 
 =head1 SYNOPSIS
     
-    # connect to Memcached servers
-    my $client = $app->plugin->memcached;
+    my $browser = $app->plugin->browser;
+    say $browser->version;
+    say $browser->browser_string;
+    say $browser->os_string;
+    if ($browser->mobile) { say "Mobile device"; }
     
-    # store some data
-    $client->set("Name"=>"Ahmed Amin Elsheshtawy Gouda");
-
-    # get some data
-    my $name = $client->get("Name");
-    
-    # delete some data
-    $client->delete("Name");
-
-	# get the Memcached::Client object used
-    $object = $client->client;
-
 =head1 DESCRIPTION
     
-Nile::Plugin::Memcached - Memcached client plugin for the Nile framework.
+Nile::Plugin::Browser - Browser detection plugin for the Nile framework.
 
-Returns L<Memcached::Client> object. All methods of L<Memcached::Client> are supported.
+Determine Web browser, version, and platform. Returns L<HTTP::BrowserDetect> object.
 
 Plugin settings in th config file under C<plugin> section.
 
     <plugin>
 
-        <memcached>
-            <servers>localhost:11211</servers>
-            <namespace></namespace>
-        </memcached>
+        <browser>
+            <autoload>1</autoload>
+        </browser>
 
-    </plugin>
+    </browser>
 
 =cut
 
 use Nile::Plugin;
-use Memcached::Client;
+use HTTP::BrowserDetect;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main {
     my ($self, $arg) = @_;
     my $app = $self->app;
     my $setting = $self->setting();
-	if (defined($setting->{servers}) && (ref($setting->{servers}) ne "ARRAY")) {
-		$setting->{servers} = [$setting->{servers}];
-	}
-    rebless => Memcached::Client->new($setting);
+    rebless => HTTP::BrowserDetect->new($app->env->{HTTP_USER_AGENT});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

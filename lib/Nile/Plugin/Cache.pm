@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Cache;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -19,16 +19,20 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 Nile::Plugin::Cache - Cache plugin for the Nile framework.
 
 =head1 SYNOPSIS
-    
+        
+    my $cash = $app->plugin->cache;
+
     # save visitors count to the cache
-    $app->cache->set("visitor_count", $app->cache->get("visitor_count") + 1, "1 year");
+    $cash->set("visitor_count", $cash->get("visitor_count") + 1, "1 year");
 
     # retrieve visitors count from the cache
-    $view->set("visitor_count", $app->cache->get("visitor_count"));
+    $view->set("visitor_count", $cash->get("visitor_count"));
         
 =head1 DESCRIPTION
     
 Nile::Plugin::Cache - Cache plugin for the Nile framework.
+
+Returns the L<CHI> object. All L<CHI> methods are supported.
 
 Plugin settings in th config file under C<plugin> section. The C<autoload> variable is must be set to true value for the plugin to be loaded
 on application startup to setup hooks to work before actions dispatch:
@@ -67,31 +71,7 @@ use Nile::Plugin; # also extends Nile::Plugin
 
 use CHI;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 cache()
-    
-    $app->cache();
-
-Returns the L<CHI> cache object instance used. All L<CHI> methods can be accessed through this method.
-
-=head2 get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired
-    
-    $app->cache->set($key, $data, "10 minutes");
-
-    $value = $app->cache->get($key);
-
-These methods are a proxy to the L<CHI> cache object methods. See L<CHI> for details about these methods.
-
-=cut
-
-has 'cache' => (
-      is      => 'rw',
-      lazy  => 1,
-      #isa  => "CHI",
-      default => undef,
-      handles => [qw(get set compute remove expire is_valid add replace append clear purge get_keys exists_and_is_expired)],
-  );
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub main { # our sub new {}
+sub main {
 
     my ($self, $arg) = @_;
     
@@ -111,10 +91,7 @@ sub main { # our sub new {}
         $driver->{dbh} = $app->dbh();
     }
 
-    if (!$self->cache) {
-        $self->cache(CHI->new(%{$driver}));
-    }
-
+    rebless => CHI->new(%{$driver});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -5,7 +5,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Plugin::Memcached;
+package Nile::Result;
 
 our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
@@ -16,55 +16,44 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Plugin::Memcached - Memcached client plugin for the Nile framework.
+Nile::Result - Result class for the Nile framework.
 
 =head1 SYNOPSIS
     
-    # connect to Memcached servers
-    my $client = $app->plugin->memcached;
-    
-    # store some data
-    $client->set("Name"=>"Ahmed Amin Elsheshtawy Gouda");
+    sub main {
+        my ($self, $arg) = @_;
+        
+        my $app = $self->app;
+        my $setting = $self->setting();
+        
+        # delegate to HTTP::BrowserDetect new object
+        $app->result( HTTP::BrowserDetect->new($app->env->{HTTP_USER_AGENT}) );
+    }
 
-    # get some data
-    my $name = $client->get("Name");
-    
-    # delete some data
-    $client->delete("Name");
+    $result = $obj->main;
+    if ($app->is_result($result)) {
+        (@data) = $result->get;
+    }
 
-	# get the Memcached::Client object used
-    $object = $client->client;
-
+        
 =head1 DESCRIPTION
-    
-Nile::Plugin::Memcached - Memcached client plugin for the Nile framework.
 
-Returns L<Memcached::Client> object. All methods of L<Memcached::Client> are supported.
-
-Plugin settings in th config file under C<plugin> section.
-
-    <plugin>
-
-        <memcached>
-            <servers>localhost:11211</servers>
-            <namespace></namespace>
-        </memcached>
-
-    </plugin>
+Nile::Result - Result base class for the Nile framework.
 
 =cut
 
-use Nile::Plugin;
-use Memcached::Client;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub main {
-    my ($self, $arg) = @_;
-    my $app = $self->app;
-    my $setting = $self->setting();
-	if (defined($setting->{servers}) && (ref($setting->{servers}) ne "ARRAY")) {
-		$setting->{servers} = [$setting->{servers}];
-	}
-    rebless => Memcached::Client->new($setting);
+sub new {
+    my ($class, @arg) = @_;
+    my $self = bless {}, $class;
+    $self->{arg} = [@arg];
+    return $self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub get {
+    my ($self) = @_;
+    my @arg = @{$self->{arg}};
+    return wantarray? @arg : $arg[0];
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

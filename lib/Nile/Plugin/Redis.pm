@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Redis;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -39,7 +39,7 @@ Nile::Plugin::Redis - Redis database server plugin for the Nile framework.
     
 Nile::Plugin::Redis - Redis database server plugin for the Nile framework.
 
-This module supports L<Redis> databases. All methods of the L<Redis> module are supported.
+Returns L<Redis> object. All methods of the L<Redis> module are supported.
 
 Plugin settings in th config file under C<plugin> section.
 
@@ -62,41 +62,11 @@ Plugin settings in th config file under C<plugin> section.
 use Nile::Plugin;
 use Redis;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-has 'redis' => (
-      is      => 'rw',
-      lazy  => 1,
-      isa  => "Redis",
-      default => undef,
-      #default => sub {Redis->new},
-      #handles => qr/.*/,
-      handles => [qw(
-                    connect quit ping client_list client_getname client_setname 
-                    wait_all_responses wait_one_response 
-                    multi discard exec 
-                    set get mget incr decr exists del type
-                    keys randomkey rename dbsize 
-                    rpush lpush llen lrange ltrim lindex lset lrem lpop rpop 
-                    sadd scard sdiff sdiffstore sinter sinterstore sismember smembers smove
-                    spop srandmemeber srem sunion sunionstore
-                    hset hget hexists hdel hincrby hsetnx hmset hmget hgetall hkeys hvals hlen
-                    sort
-                    publish subscribe unsubscribe psubscribe punsubscribe is_subscriber wait_for_messages
-                    save bgsave lastsave
-                    eval evalsha script_load script_exists script_kill script_flush
-                    info shutdown slowlog
-                    select move flushdb flushall 
-                   )],
-  );
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main {
-
     my ($self, $arg) = @_;
-    
     my $app = $self->app;
     my $setting = $self->setting();
-
-    $self->redis(Redis->new(%{$setting}));
+    rebless => Redis->new(%{$setting});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

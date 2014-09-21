@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -53,9 +53,11 @@ sub home : GET Action {
     $view->set("first_visit", $dt->strftime("%a, %d %b %Y %H:%M:%S"));
     
     # save visitors count to the cache
-    $app->cache->set("visitor_count", $app->cache->get("visitor_count") + 1, "1 year");
-    $view->set("visitor_count", $app->cache->get("visitor_count"));
+    my $cache = $app->plugin->cache;
+    $cache->set("visitor_count", $cache->get("visitor_count") + 1, "1 year");
+    $view->set("visitor_count", $cache->get("visitor_count"));
     #----------------------------------
+
     #----------------------------------
     return $view->out();
 }

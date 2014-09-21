@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Cache::Redis;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -20,6 +20,7 @@ Nile::Plugin::Cache::Redis - Cache plugin for the Nile framework using Redis.
 
 =head1 SYNOPSIS
     
+    # get Cache::Redis object
     my $cache = $app->plugin("Cache::Redis");
     
     $cache->set("fullname", "Ahmed Amin Elsheshtawy");
@@ -31,6 +32,8 @@ Nile::Plugin::Cache::Redis - Cache plugin for the Nile framework using Redis.
 =head1 DESCRIPTION
     
 Nile::Plugin::Cache::Redis - Cache plugin for the Nile framework using Redis.
+
+Returns the L<Cache::Redis> object. All methods of L<Cache::Redis> are supported.
 
 Plugin settings in th config file under C<plugin> section.
 
@@ -91,33 +94,14 @@ Get a cache value for $key if it's already cached. If it's not cached then, run 
 
 Wait all response from Redis. This is intended for $cache->nowait.
 
-=head2 cache()
-    
-    $cache->cache();
-
-Returns the L<Cache::Redis> object instance used. All L<Cache::Redis> methods can be accessed through this method.
-
 =cut
 
-has 'cache' => (
-      is      => 'rw',
-      lazy  => 1,
-      #isa  => "Cache::Redis",
-      default => undef,
-      handles => [qw(get set remove set_multi get_multi get_or_set nowait_push)],
-  );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main {
-
     my ($self, $arg) = @_;
-    
     my $app = $self->app;
     my $setting = $self->setting();
-
-    if (!$self->cache) {
-        $self->cache(Cache::Redis->new(%{$setting}));
-    }
-
+    rebless => Cache::Redis->new(%{$setting});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

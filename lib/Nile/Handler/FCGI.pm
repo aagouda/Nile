@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Handler::FCGI;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -54,6 +54,8 @@ sub run {
     while ($handling_request = ($fcgi_request->Accept() >= 0)) {
         
         #$app->log->debug("FCGI request start");
+
+        $app->env(\%ENV);
 
         # handle it as the normal CGI request
         $app->object("Nile::Handler::CGI")->run();

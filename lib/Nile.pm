@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -163,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.49';
+    our $VERSION = '0.50';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
@@ -1246,7 +1246,10 @@ sub object {
 
     # if class has defined "main" method, then call it
     if ($object->can("main")) {
-        $object->main(@args);
+        my %ret = $object->main(@args);
+        if ($ret{rebless}) {
+            $object = $ret{rebless};
+        }
     }
         
     #no strict 'refs';

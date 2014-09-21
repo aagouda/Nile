@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Elasticsearch;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -63,7 +63,7 @@ Nile::Plugin::Elasticsearch - Elasticsearch client plugin for the Nile framework
     
 Nile::Plugin::Elasticsearch - Elasticsearch client plugin for the Nile framework.
 
-This is a client for Elasticsearch using L<Search::Elasticsearch> module. All methods of the L<Search::Elasticsearch> module are supported.
+Returns L<Search::Elasticsearch> object. All methods of L<Search::Elasticsearch> are supported.
 
 Plugin settings in th config file under C<plugin> section.
 
@@ -80,47 +80,14 @@ Plugin settings in th config file under C<plugin> section.
 use Nile::Plugin;
 use Search::Elasticsearch;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 client()
-    
-    # connect to Elasticsearch server
-    my $es = $app->plugin->elasticsearch;
-    my $client = $es->client;
-    
-Returns the L<Search::Elasticsearch> client object instance used. All L<Search::Elasticsearch> methods can be accessed through this method.
-The default client is L<Search::Elasticsearch::Client::Direct>.
-
-=cut
-
-has 'client' => (
-      is      => 'rw',
-      lazy  => 1,
-      #isa  => "Search::Elasticsearch::Client::Direct",
-      default => undef,
-      handles => [qw(
-                    info ping indices cluster nodes snapshot cat
-                    index create get get_source exists delete update termvector 
-                    bulk bulk_helper mget delete_by_query mtermvectors 
-                    search count search_template scroll clear_scroll scroll_helper
-                    msearch explain search_shards 
-                    percolate count_percolate mpercolate suggest mlt put_script get_script delete_script
-                    put_template get_template delete_template 
-                    benchmark list_benchmarks abort_benchmark
-                   )],
-  );
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub main {
-
     my ($self, $arg) = @_;
-    
     my $app = $self->app;
     my $setting = $self->setting();
-
     if (defined($setting->{nodes}) && (ref($setting->{nodes}) ne "ARRAY")) {
         $setting->{nodes} = [$setting->{nodes}];
     }
-
-    $self->client(Search::Elasticsearch->new(%{$setting}));
+    rebless => Search::Elasticsearch->new(%{$setting});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
