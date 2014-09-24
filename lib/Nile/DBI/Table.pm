@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::DBI::Table;
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -173,10 +173,10 @@ sub describe {
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 struct()
     
-    my $table = $table->struct;
+    my $struct = $table->struct;
     
-    say "Table name: " . $table->{"Table"};
-    say "Table struct: " . $table->{"Create Table"};
+    say "Table name: " . $struct->{"Table"};
+    say "Table struct: " . $struct->{"Create Table"};
 
 Shows the CREATE TABLE statement that creates the named table. To use this statement, you must have some privilege for the table.
 
@@ -274,9 +274,10 @@ sub restore {
 
     return unless ($table and $file);
 
+     my ($name, $dir, $ext, $filename) = $self->path_info($file);
+
     if ($file =~ /\.zip$/i) {
         $self->app->file->unzip($file);
-        my ($name, $dir, $ext, $filename) = $self->path_info($input);
         $file = $self->file->catfile($dir, $zipname);
     }
     elsif ($file =~ /\.gzip$/i) {
@@ -291,6 +292,15 @@ sub restore {
     $self->app->db->run("load data infile ".$self->app->db->quote($file)." into table ".$self->name.$format);
 
     $self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub copy {
+    my ($self, $new) = @_;
+    $new || return;
+    #create table newtable like oldtable; 
+    #insert newtable select * from oldtable
+    $self->app->db->run("create table ".$new." like ".$self->name);
+    $self->app->db->run("insert ".$new." select * from ".$self->name);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

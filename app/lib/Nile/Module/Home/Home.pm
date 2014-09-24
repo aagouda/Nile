@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -57,7 +57,17 @@ sub home : GET Action {
     $cache->set("visitor_count", $cache->get("visitor_count") + 1, "1 year");
     $view->set("visitor_count", $cache->get("visitor_count"));
     #----------------------------------
-    #$app->connect;
+
+    $app->connect;
+    my $file = $app->file->catfile($app->var->get("log_dir"),"users.pm");
+    #my @table = $app->db->table("users")->backup($file, compress => "gzip");
+    #$app->file->gunzip("$file.gz", "$file.cgi");
+    #$app->file->zip("$file.cgi");
+    #$app->file->unzip("$file.zip");
+    #$app->dump(\@table);
+    
+    $app->db->table("users")->copy("uses_new");
+
     #----------------------------------
     return $view->out();
 }
