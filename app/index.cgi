@@ -1,5 +1,5 @@
-#!/usr/bin/perl
 #!C:\perl\bin\perl.exe
+#!/usr/bin/perl
 #   Copyright Infomation
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Author : Dr. Ahmed Amin Elsheshtawy, Ph.D.
@@ -77,12 +77,6 @@
         return " This value is returned from the command.";
     });
 
-	# connect to the database. pass the connection params or try to load it from the config object.
-	#$app->connect();
-	#$app->connect(%params);
-	# disconnect from database
-	#$app->disconnect();
-	
 	# run the application and return the PSGI response or print to the output
 	# the run process will also run plugins with matched routes files loaded
 	$app->run();

@@ -5,9 +5,9 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Database;
+package Nile::DBI;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -16,7 +16,7 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Database - SQL database manager.
+Nile::DBI - SQL database manager.
 
 =head1 SYNOPSIS
     
@@ -32,7 +32,7 @@ Nile::Database - SQL database manager.
     
 =head1 DESCRIPTION
 
-Nile::Database - SQL database manager.
+Nile::DBI - SQL database manager.
 
 =cut
 
@@ -72,7 +72,9 @@ sub connect {
     
     $app = $self->app;
     
-    %args = (%{$app->config->var->{database}}, %args);
+    $app->config->var->{dbi} ||= {};
+
+    %args = (%{$app->config->var->{dbi}}, %args);
     
     $args{driver} ||= "mysql";
     $args{dsn} ||= "";
@@ -116,6 +118,12 @@ sub disconnect {
     $self->dbh->disconnect if ($self->dbh);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub table {
+    my ($self, $name) = @_;
+    $self->app->load_once("Nile::DBI::Table");
+    $self->app->object("Nile::DBI::Table", (name => $name));
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 run()
     
     $app->db->run($qry);
@@ -157,15 +165,15 @@ sub exec {
     return $sth;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 begin_work()
+=head2 begin()
     
-    $app->db->begin_work;
+    $app->db->begin;
 
 Enable transactions (by turning AutoCommit off) until the next call to commit or rollback. After the next commit or rollback, AutoCommit will automatically be turned on again.
 
 =cut
 
-sub begin_work {
+sub begin {
     my ($self) = @_;
     return $self->dbh->begin_work or $self->db_error();
 }

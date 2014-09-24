@@ -20,7 +20,7 @@
     <password>admin_pass</password>
 </admin>
 
-<database>
+<dbi>
     <driver>mysql</driver>
     <host>localhost</host>
     <dsn></dsn>
@@ -31,7 +31,7 @@
     <attr>
     </attr>
     <encoding>utf8</encoding>
-</database>
+</dbi>
 
 <module>
     <home>

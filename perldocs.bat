@@ -29,3 +29,5 @@ call perldoc -o html lib/Nile/Var.pm > Var.html
 call perldoc -o html lib/Nile/View.pm > View.html
 call perldoc -o html lib/Nile/XML.pm > XML.html
 call perldoc -o html lib/Nile/Timer.pm > Timer.html
+
+call perldoc -o html lib/Nile/DBI/Table.pm > Table.html

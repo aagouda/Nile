@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -163,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.50';
+    our $VERSION = '0.51';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
@@ -465,7 +465,7 @@ Example config file path/config/config.xml:
         <password>admin_pass</password>
     </admin>
 
-    <database>
+    <dbi>
         <driver>mysql</driver>
         <host>localhost</host>
         <dsn></dsn>
@@ -476,7 +476,7 @@ Example config file path/config/config.xml:
         <attr>
         </attr>
         <encoding>utf8</encoding>
-    </database>
+    </dbi>
 
     <module>
         <home>
@@ -668,11 +668,11 @@ Loads xml files into hash tree using L<XML::TreePP>
     
     $xml = $app->xml->load("configs.xml");
 
-=head1 DATABASE
+=head1 DBI
 
-See L<Nile::Database>
+See L<Nile::DBI>
 
-The database class provides methods for connecting to the sql database and easy methods for sql operations.
+The DBI class provides methods for connecting to the sql database and easy methods for sql operations.
 
 =head1 METHODS
 
@@ -736,7 +736,7 @@ use Nile::Lang;
 use Nile::Config;
 use Nile::Router;
 use Nile::Dispatcher;
-use Nile::Database;
+use Nile::DBI;
 use Nile::Setting;
 use Nile::Timer;
 use Nile::HTTP::Request;
@@ -1311,6 +1311,43 @@ sub is_loaded {
     #return UNIVERSAL::can($module,'can');
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+has 'loaded_modules' => (
+    is => 'rw',
+    isa => 'HashRef',
+    default => sub { +{} }
+);
+=head2 load_once()
+    
+    $app->load_once("Module::SomeModule");
+
+Load modules if not already loaded.
+
+=cut
+
+sub load_once {
+    my ($self, $module, @arg) = @_;
+    if (!exists $self->loaded_modules->{$module}) {
+        load $module;
+        $self->loaded_modules->{$module} = 1;
+    }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 load_class()
+    
+    $app->load_class("Module::SomeModule");
+
+Load modules if not already loaded.
+
+=cut
+
+sub load_class {
+    my ($self, $module, @arg) = @_;
+
+    if (!$self->is_loaded($module)) {
+        load $module;
+    }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cli_mode()
     
     if ($app->cli_mode) {
@@ -1454,7 +1491,7 @@ Router L<Nile::Router>.
 
 File Utils L<Nile::File>.
 
-Database L<Nile::Database>.
+DBI L<Nile::DBI>.
 
 XML L<Nile::XML>.
 

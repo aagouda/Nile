@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::File;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -78,6 +78,9 @@ use File::Slurp;
 use File::Find::Rule;
 use File::Basename ();
 use File::Temp ();
+use IO::Compress::Gzip qw($GzipError);
+use IO::Uncompress::Gunzip qw($GunzipError) ;
+use Archive::Zip qw(:ERROR_CODES :CONSTANTS);
 
 our ($OS, %DS, $DS);
 
@@ -460,6 +463,122 @@ sub tempdir {
     else {
         return File::Temp::tempdir(@_);
     }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 gzip()
+    
+    $file = "file.txt";
+    $app->file->gzip($file);
+    # creates file.txt.gz
+    
+    $input = "file.txt";
+    $output = "file.gz";
+    $app->file->gzip($input, $output);
+    # creates file.gz
+    
+    # rename file in gzip header to file1.txt
+    $app->file->gzip($input, $output, "file1.txt");
+
+Compress and create gzip files from input files.
+
+=cut
+
+sub gzip {
+    my ($self, $input, $output, $outname) = @_;
+    $output ||= "$input.gz";
+    my ($name, $dir, $ext, $filename) = $self->path_info($input);
+    $outname ||= $filename;
+    IO::Compress::Gzip::gzip $input => $output, Name => $outname or $self->app->abort("Gzip failed for $input => $output: $GzipError");
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 gunzip()
+    
+    $file = "file.txt";
+    $app->file->gzip($file);
+    # creates file.txt.gz
+    
+    $input = "file.txt";
+    $output = "file.gz";
+    $app->file->gzip($input, $output);
+    # creates file.gz
+    
+    # rename file in gzip header to file1.txt
+    $app->file->gzip($input, $output, "file1.txt");
+
+Extract gzip files.
+
+=cut
+
+sub gunzip {
+    my ($self, $input, $output) = @_;
+    $output ||= $input;
+    $output =~ s/\.gz//i ;
+    IO::Uncompress::Gunzip::gunzip $input => $output or $self->app->abort("Gunzip failed for $input => $output: $GunzipError");
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 zip()
+    
+    $file = "file.txt";
+    $app->file->zip($file);
+    # creates file.zip
+    
+    $input = "file.txt";
+    $output = "file1.zip";
+    $app->file->gzip($input, $output);
+    # creates file1.zip
+    
+    # rename file in zip header to file1.txt
+    $app->file->zip($input, $output, "file1.txt");
+
+Compress and create zip files from input files.
+
+=cut
+
+sub zip {
+    my ($self, $input, $output, $outname) = @_;
+    unless ($output) {
+        $output = $input;
+        $output =~ s/\.[^.]*$//;
+        $output .= ".zip";
+    }
+    my ($name, $dir, $ext, $filename) = $self->path_info($input);
+    $outname ||= $filename;
+    my $zip = Archive::Zip->new();
+    my $file_member = $zip->addFile($input, $outname);
+    unless ($zip->writeToFileNamed($output) == AZ_OK) {
+       $self->app->abort("Zip failed for $input => $output $!");
+    }
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 unzip()
+    
+    $file = "/path/file.zip";
+    $app->file->unzip($file);
+    # extracts files to /path/
+    
+    $app->file->unzip($file, $dest);
+    # extracts files to $dest
+    
+Extract zip files.
+
+=cut
+
+sub unzip {
+    my ($self, $input, $dest) = @_;
+    
+    my $zip = Archive::Zip->new();
+
+    unless ($zip->read($input) == AZ_OK) {
+       $self->app->abort("Unzip failed for $input $!");
+    }
+  	
+    unless ($dest) {
+        my ($name, $dir, $ext, $filename) = $self->path_info($input);
+	    $dest = $dir; # =~ s/[^\\\/]+$//;
+    }
+
+	#$zip->extractTree($root, $dest, $volume);
+	$zip->extractTree("", $dest, "");
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

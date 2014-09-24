@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.50';
+our $VERSION = '0.51';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -57,7 +57,7 @@ use Nile::Lang;
 use Nile::Config;
 use Nile::Router;
 use Nile::Dispatcher;
-use Nile::Database;
+use Nile::DBI;
 use Nile::Setting;
 use Nile::Timer;
 use Nile::HTTP::Request;
@@ -1064,19 +1064,11 @@ has 'dbh' => (
 
 has 'db' => (
       is      => 'rw',
-      isa    => 'Nile::Database',
-      lazy  => 1,
-      default => sub {
-                my $self = shift;
-                my $db = $self->object("Nile::Database");
-                #my $dbh = $db->connect(@_);
-                #$self->dbh($dbh);
-                return $db;
-        }
   );
 
 sub connect {
     my $self = shift;
+    $self->db($self->object("Nile::DBI"));
     $self->dbh($self->db->connect(@_));
     $self->db;
 }
@@ -1140,15 +1132,15 @@ sub view {
     return $self->object("Nile::View", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 database()
+=head2 dbi()
     
-Returns L<Nile::Database> object.
+Returns L<Nile::DBI> object.
 
 =cut
 
-sub database {
+sub dbi {
     my ($self) = shift;
-    return $self->object("Nile::Database", @_);
+    return $self->object("Nile::DBI", @_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 theme_list()
@@ -1207,6 +1199,10 @@ Returns true if module is loaded, false otherwise.
 
 sub is_loaded {
     shift->app->is_loaded(@_);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub load_once {
+    shift->app->load_once(@_);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 cli_mode()

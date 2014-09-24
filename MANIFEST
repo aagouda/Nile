@@ -15,6 +15,9 @@ app/lib/Nile/Module/Home/Contact.pm
 app/lib/Nile/Module/Home/Home.pm
 app/lib/Nile/Plugin/Date.pm
 app/log/log.pm
+app/log/users.pm.cgi
+app/log/users.pm.cgi.txt
+app/log/users.pm.zip
 app/route/route.xml
 app/run.bat
 app/temp/.exists
@@ -32,7 +35,8 @@ lib/Nile/Abort.pm
 lib/Nile/App.pm
 lib/Nile/Base.pm
 lib/Nile/Config.pm
-lib/Nile/Database.pm
+lib/Nile/DBI.pm
+lib/Nile/DBI/Table.pm
 lib/Nile/Declare.pm
 lib/Nile/Deserializer.pm
 lib/Nile/Dispatcher.pm
