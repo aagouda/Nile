@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -66,8 +66,14 @@ sub home : GET Action {
     #$app->file->unzip("$file.zip");
     #$app->dump(\@table);
     
-    $app->db->table("users")->copy("uses_new");
+    #$app->db->table("users")->copy("users_new")
 
+    #my $table = $app->db->table("users");#->clone("users1");
+    #$table->clone("users1");
+    #$table->add("count int");
+    #$table->drop("count");
+    #$app->dump($table);
+    
     #----------------------------------
     return $view->out();
 }

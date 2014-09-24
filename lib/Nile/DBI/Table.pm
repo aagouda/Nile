@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::DBI::Table;
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -78,7 +78,7 @@ sub BUILD {
     $self->name($arg->{name});
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-=head2 delete() or drop()
+=head2 delete()
     
     my $table = $app->db->table("users");
 
@@ -88,7 +88,7 @@ sub BUILD {
 
     $app->db->table("users")->delete;
 
-Drops database table. Method drop() is a shortcut for delete();
+Deletes database table completely.
 
 =cut
 
@@ -97,7 +97,6 @@ sub delete {
     $self->app->db->do("drop table ".$self->name);
     $self;
 }
-*drop =\&delete;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 rename()
     
@@ -126,6 +125,48 @@ sub optimize {
     my ($self) = @_;
     $self->app->db->do("optimize table ".$self->name);
     $self;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 analyze()
+    
+    my $table = $table->analyze;
+    $app->dump($table);
+    
+    {
+        'Table' => 'blogs.users',
+        'Op' => 'analyze',
+        'Msg_type' => 'status',
+        'Msg_text' => 'OK'
+    }
+
+analyze database table.
+
+=cut
+
+sub analyze {
+    my ($self) = @_;
+    $self->app->db->hash("analyze table ".$self->name);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 check()
+    
+    my $table = $table->check;
+    $app->dump($table);
+    
+    {
+        'Table' => 'blogs.users',
+        'Op' => 'analyze',
+        'Msg_type' => 'status',
+        'Msg_text' => 'OK'
+    }
+
+Check database table for errors.
+
+=cut
+
+sub check {
+    my ($self) = @_;
+    $self->app->db->hash("check table ".$self->name);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 empty()
@@ -294,13 +335,131 @@ sub restore {
     $self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 copy()
+    
+    # copy table with contents to new table 'users_new'
+    $table->copy("users_new");
+
+Copy an existing table with contents to a new table.
+
+=cut
+
 sub copy {
     my ($self, $new) = @_;
     $new || return;
-    #create table newtable like oldtable; 
-    #insert newtable select * from oldtable
     $self->app->db->run("create table ".$new." like ".$self->name);
     $self->app->db->run("insert ".$new." select * from ".$self->name);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 clone()
+    
+    # clone table to new empty table 'users_new'
+    $table->clone("users_new");
+
+Create a new empty table like existing table with the structure and indexes.
+
+=cut
+
+sub clone {
+    my ($self, $new) = @_;
+    $new || return;
+    $self->app->db->run("create table ".$new." like ".$self->name);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 add()
+    
+    # add column to table
+    $table->add("count SMALLINT(6) DEFAULT 0");
+
+    $table->add("count SMALLINT(6) DEFAULT 0 FIRST");
+
+    $table->add("count SMALLINT(6) DEFAULT 0 AFTER email");
+
+    $table->add("INDEX userid_idx(UserID)");
+
+Shortcut for C<"ALTER TABLE table_name ADD ..."> which changes the structure of a table.
+
+Use this to add to the table a column, index, primary key, unique, fulltext, spatial, foreign key, etc.
+ 
+=cut
+
+sub add {
+    my ($self, $qry) = @_;
+    $qry || return;
+    $self->app->db->run("alter table ".$self->name." add ".$qry);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 drop()
+    
+    # drop column 'count' from the table
+    $table->drop("count");
+    
+    $table->drop("PRIMARY KEY");
+
+    $table->drop("FOREIGN KEY fk_name");
+
+    $table->drop("INDEX index_name");
+
+Shortcut for C<"ALTER TABLE table_name DROP ..."> which changes the structure of a table.
+
+Use this to drop from the table a column, index, primary key, foreign key, partition, etc.
+ 
+=cut
+
+sub drop {
+    my ($self, $qry) = @_;
+    $qry || return;
+    $self->app->db->run("alter table ".$self->name." drop ".$qry);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 change()
+    
+    # change column 'count' to 'count1'
+    # CHANGE col_name new_col_name column_definition [FIRST|AFTER col_name]
+    $table->change("count count1 INT DEFAULT 0");
+    
+Shortcut for C<"ALTER TABLE table_name CHANGE ..."> which changes the structure of a table.
+
+Use this to change a column name and definition.
+ 
+=cut
+
+sub change {
+    my ($self, $qry) = @_;
+    $qry || return;
+    $self->app->db->run("alter table ".$self->name." change ".$qry);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 modify()
+    
+    # MODIFY [COLUMN] col_name column_definition [FIRST | AFTER col_name]
+    # modify column 'count' definition
+    $table->modify("count INT DEFAULT 0");
+    
+Shortcut for C<"ALTER TABLE table_name MODIFY ..."> which changes the structure of a table.
+
+Use this to modify a column definition.
+ 
+=cut
+
+sub modify {
+    my ($self, $qry) = @_;
+    $qry || return;
+    $self->app->db->run("alter table ".$self->name." modify ".$qry);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 alter()
+    
+    $table->alter("ADD count INT DEFAULT 0");
+
+Shortcut for C<"ALTER TABLE table_name ..."> which changes the structure of a table.
+
+=cut
+
+sub alter {
+    my ($self, $qry) = @_;
+    $qry || return;
+    $self->app->db->run("alter table ".$self->name." ".$qry);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

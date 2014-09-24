@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -163,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.52';
+    our $VERSION = '0.53';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
