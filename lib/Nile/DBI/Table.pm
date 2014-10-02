@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::DBI::Table;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod

@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Setting;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -157,6 +157,12 @@ sub AUTOLOAD {
     }
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub main {
+    my ($self, $arg) = @_;
+    my $app = $self->app;
+    $self->load;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 load()
     
     # load settings from database to the setting object.
@@ -168,10 +174,16 @@ Load the settings from database table to the setting object. This method can be 
 
 sub load {
     my ($self, $table, $name, $value) = @_;
+    
+    $table ||= $self->app->config->get("settings/table");
+    $name ||= $self->app->config->get("settings/name");
+    $value ||= $self->app->config->get("settings/value");
+
     $self->table($table) if ($table);
     $self->name($name) if ($name);
     $self->value($value) if ($value);
-    $self->{vars} = $self->app->db->colhash(qq{select $self->name($name), $self->value($value) from $self->table($table)});
+
+    $self->{vars} = $self->app->db->colhash("select ".$self->name.", ".$self->value." from ".$self->table);
     $self;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

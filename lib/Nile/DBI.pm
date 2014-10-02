@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::DBI;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -21,14 +21,14 @@ Nile::DBI - SQL database manager.
 =head1 SYNOPSIS
     
     # set database connection params to connect
-    # $args{driver}, $args{host}, $args{dsn}, $args{port}, $args{attr}
-    # $args{name}, $args{user}, $args{pass}
+    # $arg{driver}, $arg{host}, $arg{dsn}, $arg{port}, $arg{attr}
+    # $arg{name}, $arg{user}, $arg{pass}
     # if called without params, it will try to load from the default config vars.
 
     # get app context
     $app = $self->app;
 
-    $dbh = $app->db->connect(%args);
+    $dbh = $app->db->connect(%arg);
     
 =head1 DESCRIPTION
 
@@ -58,44 +58,46 @@ has 'dbh' => (
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 connect()
     
-    $dbh = $app->db->connect(%args);
+    $dbh = $app->db->connect(%arg);
 
-Connect to the database. If %args empty, it will try to get args from the config object.
+Connect to the database. If %arg empty, it will try to get arg from the config object.
 Returns the database connection handle is success.
 
 =cut
 
 sub connect {
 
-    my ($self, %args) = @_;
+    my ($self, %arg) = @_;
     my ($dbh, $dsn, $app);
     
     $app = $self->app;
     
-    $app->config->var->{dbi} ||= {};
+    my $default = $app->config->get("dbi");
+    $default ||= +{};
 
-    %args = (%{$app->config->var->{dbi}}, %args);
+    %arg = (%{$default}, %arg);
     
-    $args{driver} ||= "mysql";
-    $args{dsn} ||= "";
-    $args{host} ||= "localhost";
-    $args{port} ||= 3306;
-    $args{attr} ||= +{};
+    $arg{driver} ||= "mysql";
+    $arg{dsn} ||= "";
+    $arg{host} ||= "localhost";
+    $arg{port} ||= 3306;
+    $arg{attr} ||= +{};
+    #$arg{attr} = {RaiseError => 0, PrintError => 0, mysql_enable_utf8 => 1}
 
-    if (!$args{name}) {
+    if (!$arg{name}) {
         $app->abort("Database error: Empty database name.");
     }
 
     #$self->dbh->disconnect if ($self->dbh);
 
-    if ($args{driver} =~ m/ODBC/i) {
-        $dbh = DBI->connect("DBI:ODBC:$args{dsn}", $args{user}, $args{pass}, $args{attr})
-                or $self->db_error("$DBI::errstr, DSN: $args{dsn}");
+    if ($arg{driver} =~ m/ODBC/i) {
+        $dbh = DBI->connect("DBI:ODBC:$arg{dsn}", $arg{user}, $arg{pass}, $arg{attr})
+                or $self->db_error("$DBI::errstr, DSN: $arg{dsn}");
     }
     else {
-        $args{dsn} = "DBI:$args{driver}:database=$args{name};host=$args{host};port=$args{port}";
-        $dbh = DBI->connect($args{dsn}, $args{user}, $args{pass}, $args{attr}) 
-                or $self->db_error("$DBI::errstr, DSN: $args{dsn}");
+        $arg{dsn} ||= "DBI:$arg{driver}:database=$arg{name};host=$arg{host};port=$arg{port}";
+        $dbh = DBI->connect($arg{dsn}, $arg{user}, $arg{pass}, $arg{attr}) 
+                or $self->db_error("$DBI::errstr, DSN: $arg{dsn}");
     }
 
     $self->dbh($dbh);
@@ -214,8 +216,8 @@ contained within the string and adding the required type of outer quotation mark
 =cut
 
 sub quote {
-    my ($self, @args) = @_;
-    return $self->dbh->quote(@args);
+    my ($self, @arg) = @_;
+    return $self->dbh->quote(@arg);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 col()
@@ -337,7 +339,7 @@ sub colhash {
     my ($self, $qry) = @_;
     # select id, user from users
     my %list = map {$_->[0], $_->[1]} @{$self->dbh->selectall_arrayref($qry)};
-    return %list;
+    return wantarray? %list : \%list;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 value()

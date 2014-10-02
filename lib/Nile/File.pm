@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::File;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -579,6 +579,50 @@ sub unzip {
 
 	#$zip->extractTree($root, $dest, $volume);
 	$zip->extractTree("", $dest, "");
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 view()
+    
+    my $file = $app->file->view($view, $theme);
+
+    # get view file name in the current theme
+    my $file = $app->file->view("home");
+    # /app/theme/default/view/home.html
+
+    my $file = $app->file->view("home", "Arabic");
+    # /app/theme/Arabic/view/home.html
+
+Returns the full file path for a view name.
+
+=cut
+
+sub view {
+    my ($self, $view, $theme) = @_;
+    $view .= ".html" unless ($view =~ /\.html$/i);
+    $theme ||= $self->app->var->get("theme");
+    $self->app->file->catfile($self->app->var->get("themes_dir"), $theme, "view", $view);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 lang()
+    
+    my $file = $app->file->lang($filename, $lang);
+
+    # get language file pth in the current language
+    my $file = $app->file->lang("general");
+    # /app/lang/en-US/general.xml
+
+    my $file = $app->file->lang("general", "ar");
+    # /app/lang/ar/general.xml
+
+Returns the full file path for a language file name.
+
+=cut
+
+sub lang {
+    my ($self, $file, $lang) = @_;
+    $lang ||= $self->app->var->get("lang");
+    $file .= ".xml" unless ($file =~ /\.xml$/i);
+    $self->app->file->catfile($self->app->var->get("langs_dir"), $lang, $file);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

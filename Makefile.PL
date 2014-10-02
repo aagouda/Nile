@@ -62,6 +62,9 @@ WriteMakefile(
             MongoDB::OID => 0,
             Memcached::Client => 0,
             Search::Elasticsearch => 0,
+            Archive::Zip => 0,
+            IO::Compress::Gzip => 0,
+            IO::Uncompress::Gunzip => 0,
 
     }, # e.g., Module::Name => 1.1
 

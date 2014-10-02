@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Base;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod

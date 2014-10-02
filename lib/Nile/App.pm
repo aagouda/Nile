@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -58,7 +58,6 @@ use Nile::Config;
 use Nile::Router;
 use Nile::Dispatcher;
 use Nile::DBI;
-use Nile::Setting;
 use Nile::Timer;
 use Nile::HTTP::Request;
 use Nile::HTTP::Response;
@@ -245,6 +244,11 @@ sub start {
             load $class;
             $self->plugin->$name;
         }
+    }
+    #------------------------------------------------------
+    # connect to database
+    if ($self->config->get("db_connect")) {
+        $self->connect;
     }
     #------------------------------------------------------
     #$self->hook->off_start;
@@ -438,10 +442,10 @@ See L<Nile::Setting>.
 
 has 'setting' => (
       is      => 'rw',
-      isa    => 'Nile::Setting',
       lazy  => 1,
       default => sub {
             my $self = shift;
+            load Nile::Setting;
             $self->object("Nile::Setting", @_);
         }
   );

@@ -20,18 +20,24 @@
     <password>admin_pass</password>
 </admin>
 
+<db_connect>1</db_connect>
 <dbi>
+    <dsn></dsn>
     <driver>mysql</driver>
     <host>localhost</host>
-    <dsn></dsn>
     <port>3306</port>
     <name>auctions</name>
     <user>auctions</user>
     <pass>auctions</pass>
     <attr>
     </attr>
-    <encoding>utf8</encoding>
 </dbi>
+
+<settings>
+    <table>AuctionConfig</table>
+    <name>name</name>
+    <value>value</value>
+</settings>
 
 <module>
     <home>
