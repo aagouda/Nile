@@ -5,7 +5,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Result;
+package Nile::Plugin::Minify::Html;
 
 our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
@@ -16,44 +16,66 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Result - Result class for the Nile framework.
+Nile::Plugin::Minify::Html - Html minifier plugin for the Nile framework.
 
 =head1 SYNOPSIS
-    
-    sub main {
-        my ($self, $arg) = @_;
-        
-        my $app = $self->app;
-        my $setting = $self->setting();
-        
-        # delegate to HTTP::BrowserDetect new object
-        $app->result( HTTP::BrowserDetect->new($app->env->{HTTP_USER_AGENT}) );
-    }
-
-    $result = $obj->main;
-    if ($app->is_result($result)) {
-        (@data) = $result->get;
-    }
-
         
 =head1 DESCRIPTION
 
-Nile::Result - Result base class for the Nile framework.
+Nile::Plugin::Minify::Html - Html minifier plugin for the Nile framework.
+    
+    $app->plugin->minify->html($output_file => $file1, $file2, $url1, $url2, ...);
+
+    $app->plugin->minify->html('home.html' => '/menu.html', '/body.html');
+    
+    my $path = $app->var->html("views_dir");
+
+    $app->plugin->minify->html(
+         $app->file->catfile($path, "home.html") => 
+         $app->file->catfile($path, "header.html"),
+         $app->file->catfile($path, "body.html"),
+         $app->file->catfile($path, "footer.html"),
+         "http://domain.com/ads/ads.html",
+         );
 
 =cut
 
+use Nile::Base;
+use HTML::Packer;
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub new {
-    my ($class, @arg) = @_;
-    my $self = bless {}, $class;
-    $self->{arg} = [@arg];
-    return $self;
+sub process {
+
+    my ($self, $out, @files) = @_;
+
+    my $content = "";
+
+    foreach my $file (@files) {
+        $content .= $self->process_file($file);
+    }
+
+    $self->app->file->put($out, $content);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub get {
-    my ($self) = @_;
-    my @arg = @{$self->{arg}};
-    return wantarray? @arg : $arg[0];
+sub process_file {
+    
+    my ($self, $file) = @_;
+    
+    my $content = $self->app->file->get($file);
+    
+    my $packer = HTML::Packer->init();
+
+    $packer->minify(\$content, 
+                {
+                    remove_newlines => 0,
+                    remove_comments => 0,
+                    do_javascript => 'best',
+                    do_stylesheet => 'minify',
+                    no_compress_comment => 1,
+                    html5 => 0,
+                }
+            );
+    
+    return $content;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

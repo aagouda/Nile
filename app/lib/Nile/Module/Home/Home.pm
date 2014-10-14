@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Module::Home::Home;
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Module; # automatically extends Nile::Module
@@ -57,8 +57,7 @@ sub home : GET Action {
     $cache->set("visitor_count", $cache->get("visitor_count") + 1, "1 year");
     $view->set("visitor_count", $cache->get("visitor_count"));
     #----------------------------------
-
-    
+     
     #----------------------------------
     return $view->out();
 }

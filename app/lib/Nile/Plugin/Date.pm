@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::Plugin::Date;
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 use Nile::Plugin; # automatically extends Nile::Plugin

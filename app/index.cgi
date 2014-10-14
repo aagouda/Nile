@@ -35,7 +35,7 @@
 		# force run mode if not auto detected by default. modes: "psgi", "fcgi" (direct), "cgi" (direct)
 		#mode	=>	"fcgi", # psgi, cgi, fcgi
 	});
-
+    
 	# inline actions, return content. url: /forum/home
 	$app->action("get", "/forum/home", sub {
 		my ($self) = @_;

@@ -65,6 +65,11 @@ WriteMakefile(
             Archive::Zip => 0,
             IO::Compress::Gzip => 0,
             IO::Uncompress::Gunzip => 0,
+            Data::Validate::URI => 0,
+            CSS::Minifier => 0,
+            JavaScript::Minifier => 0,
+            HTML::Packer => 0,
+            Perl::Tidy => 0,
 
     }, # e.g., Module::Name => 1.1
 

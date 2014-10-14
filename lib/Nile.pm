@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile;
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -163,7 +163,7 @@ C</path/lib/Nile/Module/Home>, then create the module Controller file say B<Home
 
     package Nile::Module::Home::Home;
 
-    our $VERSION = '0.54';
+    our $VERSION = '0.55';
 
     use Nile::Module; # automatically extends Nile::Module
     use DateTime qw();
@@ -901,12 +901,13 @@ sub run {
     }
 
     $self->var->set(
-            'path'                  =>  $arg->{path},
+            'path'              =>  $arg->{path},
+            'base_dir'          =>  $arg->{path},
             'langs_dir'         =>  $file->catdir($arg->{path}, "lang"),
             'themes_dir'        =>  $file->catdir($arg->{path}, "theme"),
-            'log_file'              =>  $arg->{log_file} || "log.pm",
+            'log_file'          =>  $arg->{log_file} || "log.pm",
             'action_name'       =>  $arg->{action_name} || "action,route,cmd",
-            'default_route' =>  $arg->{default_route} || "/Home/Home/index",
+            'default_route'     =>  $arg->{default_route} || "/Home/Home/index",
         );
     
     push @INC, $self->var->get("lib_dir");
@@ -989,6 +990,23 @@ sub run {
     return $psgi;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=head2 prefix()
+    
+    # from here, any route handler is defined to /forum/*:
+    $app->prefix("/forum");
+    
+    # will match '/forum/login'
+    $app->action("get", "/login", sub {return "Forum login"});
+
+Defines a prefix for each route handler from now on.
+
+=cut
+
+has 'prefix' => (
+      is      => 'rw',
+      default => "",
+  );
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 action()
     
     # inline actions, return content. url: /forum/home
@@ -1067,6 +1085,9 @@ sub add_action_route {
     my $self = shift;
     my $type = shift;
     my ($method, $route, $action) = $self->action_args(@_);
+    if ($self->prefix) {
+        $route = $self->prefix.$route;
+    }
     $self->router->add_route(
                             name  => "",
                             path  => $route,
@@ -1152,7 +1173,6 @@ See L<Nile::File>.
 
 has 'file' => (
       is      => 'rw',
-      isa    => 'Nile::File',
       default => sub {
             shift->object("Nile::File", @_);
         }
@@ -1220,7 +1240,7 @@ and sets it to the current context so your object or class can access the curren
 sub object {
 
     my ($self, $class, @args) = @_;
-    my ($object, $app);
+    my ($object);
     
     #if (@args == 1 && ref($args[0]) eq "HASH") {
     #   # Moose single arguments must be hash ref
@@ -1235,15 +1255,13 @@ sub object {
         $object = $class->new(@args);
     }
 
-    my $meta = $object->meta;
-
     #$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
     #$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
     #$meta->add_class_attribute( 'cash', ());
 
-    # add method "me" or one of its alt
-    $self->add_object_context($object, $meta);
-
+    # add attribute "app" to the object
+    $self->add_object_context($object);
+    
     # if class has defined "main" method, then call it
     if ($object->can("main")) {
         my %ret = $object->main(@args);
@@ -1252,25 +1270,17 @@ sub object {
         }
     }
         
-    #no strict 'refs';
-    #*{"$object"."::app"} = \&app;
-    #${"${package}::$apps"} = 1;
-    
     return $object;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub add_object_context {
-    my ($self, $object, $meta) = @_;
-    $meta ||= $object->meta;
-    # add method "me" or one of its alt
-    #foreach (qw(app APP _app)) {
-    foreach (qw(app)) {
-        unless ($object->can($_)) {
-            $meta->add_attribute($_ => (is => 'rw', default => sub{$self}));
-            $object->$_($self);
-            last;
-        }
+    my ($self, $object) = @_;
+    my $meta = $object->meta;
+    # add method "app" or one of its alt
+    if (!$object->can("app")) {
+        $meta->add_attribute(app => (is => 'rw', default => sub{$self}));
     }
+    $object->app($self);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 dump()

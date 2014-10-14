@@ -5,7 +5,7 @@
 # Email  : mewsoft@cpan.org, support@mewsoft.com
 # Copyrights (c) 2014-2015 Mewsoft Corp. All rights reserved.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-package Nile::Say;
+package Nile::Plugin::Minify;
 
 our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
@@ -16,65 +16,54 @@ our $AUTHORITY = 'cpan:MEWSOFT';
 
 =head1 NAME
 
-Nile::Say -  Compatibility layer to use say().
+Nile::Plugin::Minify - Minifier base class for the Nile framework.
 
 =head1 SYNOPSIS
-        
-    print "hello world\n";
 
-    # same as:
-
-    say "hello world";
+    $app->plugin->minify->css($output_file => $file1, $file2, $url1, $url2, ...);
+    $app->plugin->minify->js($output_file => $file1, $file2, $url1, $url2, ...);
+    $app->plugin->minify->html($output_file => $file1, $file2, $url1, $url2, ...);
+    $app->plugin->minify->perl($output_file => $file1, $file2, $url1, $url2, ...);
 
 =head1 DESCRIPTION
+    
+Nile::Plugin::Minify - Minifier base class for the Nile framework.
 
-Nile::Say -  Compatibility layer to use say().
+See sub modules for details
+
+L<Nile::Plugin::Minify::Css>
+
+L<Nile::Plugin::Minify::Js>
+
+L<Nile::Plugin::Minify::Html>
+
+L<Nile::Plugin::Minify::Perl>
 
 =cut
 
-use strict;
-use warnings;
-use IO::Handle;
-use Scalar::Util 'openhandle';
-use Carp;
+use Nile::Plugin;
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub AUTOLOAD {
+    
+    my ($self) = shift;
 
-# modified code from Say::Compat
-sub import {
-    my $class = shift;
-    my $caller = caller;
+    my ($class, $plugin) = our $AUTOLOAD =~ /^(.*)::(\w+)$/;
+    
+	return $self->{$plugin}->process(@_) if ($self->{$plugin});
 
-    if( $] < 5.010 ) {
-        no strict 'refs';
-        *{caller() . '::say'} = \&say; 
-        use strict 'refs';
+    my $name = "Nile::Plugin::Minify::" . ucfirst($plugin);
+    
+	eval "use $name";
+    
+    if ($@) {
+        $self->app->abort("Plugin Error: $name. $@");
     }
-    else {
-        require feature;
-        feature->import("say");
-    }
+
+    $self->{$plugin} = $self->app->object($name, @_);
+
+    return $self->{$plugin}->process(@_);
 }
-
-# code from Perl6::Say
-sub say {
-    my $currfh = select();
-    my $handle;
-    {
-        no strict 'refs';
-        $handle = openhandle($_[0]) ? shift : \*$currfh;
-        use strict 'refs';
-    }
-    @_ = $_ unless @_;
-    my $warning;
-    local $SIG{__WARN__} = sub { $warning = join q{}, @_ };
-    my $res = print {$handle} @_, "\n";
-    return $res if $res;
-    $warning =~ s/[ ]at[ ].*//xms;
-    croak $warning;
-}
-
-# Handle OO calls:
-*IO::Handle::say = \&say if ! defined &IO::Handle::say;
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 =pod
 

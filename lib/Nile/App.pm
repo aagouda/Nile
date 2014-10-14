@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::App;
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -97,7 +97,7 @@ and sets it to the current context so your object or class can access the curren
 sub object {
 
     my ($self, $class, @args) = @_;
-    my ($object, $me);
+    my ($object);
     
     #if (@args == 1 && ref($args[0]) eq "HASH") {
     #   # Moose single arguments must be hash ref
@@ -112,14 +112,12 @@ sub object {
         $object = $class->new(@args);
     }
 
-    my $meta = $object->meta;
-
     #$meta->add_method( 'hello' => sub { return "Hello inside hello method. @_" } );
     #$meta->add_class_attribute( $_, %options ) for @{$attrs}; #MooseX::ClassAttribute
     #$meta->add_class_attribute( 'cash', ());
 
-    # add method "me" or one of its alt
-    $self->add_object_context($object, $meta);
+    # add attribute "app" to the object
+    $self->add_object_context($object);
     
     # if class has defined "main" method, then call it
     if ($object->can("main")) {
@@ -129,39 +127,19 @@ sub object {
         }
     }
         
-    #no strict 'refs';
-    #*{"$object"."::me"} = \&me;
-    #${"${package}::$var_name"} = 1;
-    
     return $object;
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 sub add_object_context {
-    my ($self, $object, $meta) = @_;
-    $meta ||= $object->meta;
+    my ($self, $object) = @_;
+    my $meta = $object->meta;
     # add method "app" or one of its alt
-    #foreach (qw(app APP _app)) {
-    foreach (qw(app)) {
-        unless ($object->can($_)) {
-            $meta->add_attribute($_ => (is => 'rw', default => sub{$self}));
-            $object->$_($self);
-            last;
-        }
+    if (!$object->can("app")) {
+        $meta->add_attribute(app => (is => 'rw', default => sub{$self}));
     }
+    $object->app($self);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub result {
-    my ($self, @data) = @_;
-    use Nile::Result;
-    Nile::Result->new(@data);
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-sub is_result {
-    my ($self, $result) = @_;
-    ref($result) eq "Nile::Result";
-}
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 =head2 start()
     
     $app->start;
@@ -185,23 +163,25 @@ sub start {
     #$self->dump({$app->var->vars()});
     #$self->dump({$self->var->vars()});
 
+    my $path = $self->var->get("path");
+
     $arg{lang} ||= "";
     $arg{theme} ||= "default";
-    
-    my $path = $self->var->get("path");
 
     # detect user language
     $arg{lang} = $self->detect_user_language($arg{lang});
+    
+    foreach (qw(api cache cmd config cron data file lib log route temp web)) {
+        $self->var->set($_."_dir" => $file->catdir($path, $_));
+    }
 
     $self->var->set(
-            'lang'                  =>  $arg{lang},
+            'lang'              =>  $arg{lang},
             'theme'             =>  $arg{theme},
             'lang_dir'          =>  $file->catdir($path, "lang", $arg{lang}),
             'theme_dir'         =>  $file->catdir($path, "theme", $arg{theme}),
         );
     
-    #$self->dump({$self->var->vars()});
-
     # load language files
     foreach ($self->config->get("app/lang_file")) {
         $self->lang->load($_);
@@ -230,9 +210,11 @@ sub start {
             themes_url => $self->uri_for("theme/"),
             theme_url => $self->uri_for("theme/$arg{theme}/"),
         );
-
+    
+    # theme folders
     foreach (qw(css icon image js view widget)) {
         $self->var->set($_."_url" => $self->uri_for("theme/$arg{theme}/$_/"));
+        $self->var->set($_."_dir" => $file->catdir($self->var->get("theme_dir"), $_));
     }
     #------------------------------------------------------
     # load plugins set to autoload in the config files
@@ -291,7 +273,6 @@ See L<Nile::Router>.
 
 has 'router' => (
       is      => 'rw',
-      isa    => 'Nile::Router',
       lazy  => 1,
       default => sub {
             shift->app->router(@_);
@@ -306,7 +287,6 @@ See L<Nile::Lang>.
 
 has 'lang' => (
       is      => 'rw',
-      isa    => 'Nile::Lang',
       lazy  => 1,
       default => sub {
             #shift->app->lang(@_);
@@ -394,7 +374,6 @@ Benchmark specific parts of your code. This is a L<Benchmark::Stopwatch> object.
 
 has 'bm' => (
       is      => 'rw',
-      isa    => 'Benchmark::Stopwatch',
       lazy  => 1,
       default => sub{
           #autoload, load CGI, ':all';
@@ -411,11 +390,9 @@ See L<Nile::File>.
 
 has 'file' => (
       is      => 'rw',
-      isa    => 'Nile::File',
       lazy  => 1,
       default => sub {
-            my $self = shift;
-            $self->object("Nile::File", @_);
+          shift->object("Nile::File", @_);
         }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -429,8 +406,7 @@ has 'xml' => (
       is      => 'rw',
       lazy  => 1,
       default => sub {
-            my $self = shift;
-            $self->object("Nile::XML", @_);
+            shift->object("Nile::XML", @_);
         }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -444,9 +420,8 @@ has 'setting' => (
       is      => 'rw',
       lazy  => 1,
       default => sub {
-            my $self = shift;
             load Nile::Setting;
-            $self->object("Nile::Setting", @_);
+            shift->object("Nile::Setting", @_);
         }
   );
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -458,7 +433,6 @@ See L<Nile::MIME>.
 
 has 'mime' => (
       is      => 'rw',
-      isa    => 'Nile::MIME',
       lazy  => 1,
       default => sub {
             load Nile::MIME;
@@ -474,7 +448,6 @@ See L<Nile::Dispatcher>.
 
 has 'dispatcher' => (
       is      => 'rw',
-      isa    => 'Nile::Dispatcher',
       lazy  => 1,
       default => sub {
             shift->object("Nile::Dispatcher", @_);
@@ -729,7 +702,6 @@ sub plugin {
 
 sub plugins {
     my ($self, $plugin) = @_;
-    say "plugin: $plugin";
     if ($plugin !~ /::/) {
         return $self->plugin->$plugin;
     }
@@ -851,7 +823,6 @@ Returns L<URI> object.
 
 has 'uri' => (
       is      => 'rw',
-      isa    => 'URI',
       lazy  => 1,
       default => sub {
           load URI;
@@ -1286,6 +1257,17 @@ sub instance_isa ($$) {
 sub content_type_text {
     my ($self, $content_type) = @_;
     return $content_type =~ /(\bx(?:ht)?ml\b|text|json|javascript)/;
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub result {
+    my ($self, @data) = @_;
+    use Nile::Result;
+    Nile::Result->new(@data);
+}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+sub is_result {
+    my ($self, $result) = @_;
+    ref($result) eq "Nile::Result";
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 =head2 abort()

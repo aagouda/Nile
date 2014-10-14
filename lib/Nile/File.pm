@@ -7,7 +7,7 @@
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 package Nile::File;
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 our $AUTHORITY = 'cpan:MEWSOFT';
 
 =pod
@@ -81,6 +81,7 @@ use File::Temp ();
 use IO::Compress::Gzip qw($GzipError);
 use IO::Uncompress::Gunzip qw($GunzipError) ;
 use Archive::Zip qw(:ERROR_CODES :CONSTANTS);
+use Data::Validate::URI qw(is_uri);
 
 our ($OS, %DS, $DS);
 
@@ -110,14 +111,20 @@ BEGIN {
     $content = $app->file->get("/path/file.txt");
     @lines = $app->file->get("/path/file.txt");
 
+    # read file from URL, file($url)
+    $content = $app->file->get("http://www.domain.com/path/page.html");
+
     $bin = $app->file->get("/path/file.bin", binmode => ':raw');
     $utf = $app->file->get("/path/file.txt", binmode => ':utf8');
 
-Reads file contents into a single variable or an array. This method is a wrapper around L<File::Slurp> read_file method.
+Reads file contents into a single variable or an array. It also supports reading files from URLs. If
+the file name passed to the method is a valid URL, it will connect and return the URL content. 
+This method is a wrapper around L<File::Slurp> read_file method when used for reading files.
 
 =cut
 
 sub get {
+
     #shift if ref ($_[0]) || $_[0] eq __PACKAGE__;
     my $self = shift;
     my $file = shift ;
@@ -130,6 +137,11 @@ sub get {
 
     #my $bin_data = read_file( $bin_file, binmode => ':raw' );
     #my $utf_text = read_file( $bin_file, binmode => ':utf8' ); chomp=>1
+
+    if (is_uri($file)) {
+        return $self->app->ua->get($file)->{content};
+    }
+
     return read_file($file, $opts);
 }
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
